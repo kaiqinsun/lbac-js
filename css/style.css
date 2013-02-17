@@ -1,0 +1,25 @@
+/** CSS for Let's Build a Compiler - JavaScript
+ * Author: Malcom Wu
+ */
+
+body {
+    background-color: #eee;
+    margin: 0;
+    padding: 0;
+    font-family: Georgia, serif;
+}
+
+.content {
+    background-color: #fff;
+    margin: 0 25px;
+    padding: 20px 50px;
+}
+
+h1 { font-size: 1.5em; }
+
+h2 {
+    font-size: 1.1em;
+    margin-top: 1.5em;
+}
+
+
