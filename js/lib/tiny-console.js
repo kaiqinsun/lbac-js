@@ -282,7 +282,7 @@
     }
 
     function adjustCaret($el) {
-        if (caretPosition($el) === 0) {
+        if (caretPosition($el) <= 1) {
             setCaretAt($el, 1);
         }
     }
@@ -382,6 +382,7 @@
                     var consoleData = {
                         target: $this,
                         $entry: $entry,
+                        $prompt: $prompt,
                         $input: $input,
                         $output: $output,
                         
@@ -481,6 +482,14 @@
             });
         },
 
+        option: function (key, value) {
+            var data = this.data('tinyConsole');
+            if (key === 'prompt') {
+                data.$prompt.text(value);
+            }
+            // TODO
+        },
+        
         read: function () {
             var data = this.data('tinyConsole'),
                 result;

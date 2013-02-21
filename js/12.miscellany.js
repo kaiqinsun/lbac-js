@@ -1,11 +1,9 @@
 /**
- * Chapter 11.6 Conclusion
- * Dependencies:
+ * Chapter 12 Miscellany
  */
 
 var LBAC = LBAC || {};
 
-// Program kiss
 LBAC.miscellany = (function () {
     'use strict';
 
@@ -26,7 +24,7 @@ LBAC.miscellany = (function () {
      * In C and Ada, semicolon is a statement TERMINATOR
      * <block> ::= ( <statement> ';' )*
      */
-    dealingWithSemicolons = LBAC.tiny_11.extend({
+    dealingWithSemicolons = LBAC.tiny_11.object.extend({
 
         // Match a semicolon
         semi: function () {

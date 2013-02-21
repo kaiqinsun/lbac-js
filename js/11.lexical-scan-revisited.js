@@ -1,6 +1,5 @@
 /**
  * Chapter 11 Lexical scan revisited
- * Dependencies:
  */
 
 var LBAC = LBAC || {};

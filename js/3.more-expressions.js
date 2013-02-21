@@ -10,7 +10,7 @@ LBAC.moreExpressions = (function () {
     var boundMain = LBAC.cradle.boundMain,
         variables,              // 3.2
         functions,              // 3.3
-        moreOnErrorhandling,    // 3.4
+        moreOnErrorHandling,    // 3.4
         assignmentStatements,   // 3.5
         multiCharacterTokens,   // 3.6
         whiteSpace;             // 3.7
@@ -78,7 +78,7 @@ LBAC.moreExpressions = (function () {
      * 3.4 More on error handling
      * assert that the expression should end with an end-of-line
      */
-    moreOnErrorhandling = functions.extend({
+    moreOnErrorHandling = functions.extend({
 
         // Main function
         main: function () {
@@ -96,7 +96,7 @@ LBAC.moreExpressions = (function () {
      * In BNF:
      * <assignment> ::= <identifier> = <expression>
      */
-    assignmentStatements = moreOnErrorhandling.extend({
+    assignmentStatements = moreOnErrorHandling.extend({
 
         // Parse and translate an assignment statement
         assignment: function () {
@@ -231,7 +231,7 @@ LBAC.moreExpressions = (function () {
         functions: boundMain(functions),
 
         // Assert that the expression should end with an end-of-line
-        moreOnErrorhandling: boundMain(moreOnErrorhandling),
+        moreOnErrorHandling: boundMain(moreOnErrorHandling),
 
         // <identifier> = <expression>
         assignmentStatements: boundMain(assignmentStatements),

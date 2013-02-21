@@ -1,6 +1,5 @@
 /**
  * Chapter 7 Lexical Scanning
- * Dependencies:
  */
 
 var LBAC = LBAC || {};
@@ -12,7 +11,7 @@ LBAC.lexicalScanning = (function () {
         enumerate = LBAC.object.enumerate,
         someExperimentsInScanning,          // 7.4
         whiteSpace,                         // 7.5
-        newLines,                           // 7.7
+        newlines,                           // 7.7
         operators,                          // 7.8
         listsCommasAndCommandLines,         // 7.9
         gettingFancy,                       // 7.10.1
@@ -175,8 +174,9 @@ LBAC.lexicalScanning = (function () {
 
     });
 
-    // 7.6 State machines
     /**
+     * 7.6 State machines
+     *
      * getName() does indeed implement a state machine.
      *
      * Syntax diagram (railroad-track diagram):
@@ -196,9 +196,9 @@ LBAC.lexicalScanning = (function () {
      */
 
     /**
-     * 7.7 Newlines
+     * 7.7 newlines
      */
-    newLines = whiteSpace.extend({
+    newlines = whiteSpace.extend({
 
         // Recognize white space
         isWhite: function (c) {
@@ -222,7 +222,7 @@ LBAC.lexicalScanning = (function () {
     /**
      * 7.8 Operators
      */
-    operators = newLines.extend({
+    operators = newlines.extend({
 
         // Recognize any operator
         isOp: function (c) {
@@ -298,9 +298,8 @@ LBAC.lexicalScanning = (function () {
 
     /**
      * 7.10 Getting fancy
+     * 7.10.1
      */
-
-    // 7.10.1
     gettingFancy = listsCommasAndCommandLines.extend({
 
         // Definition of keywords and token types
@@ -331,7 +330,7 @@ LBAC.lexicalScanning = (function () {
             if (this.isAlpha(this.look)) {
                 this.value = this.getName();
                 this.token = this.keywordType[this.value];
-                if (typeof this.token === 'undefined') {
+                if (this.token === undefined) {
                     this.token = this.symType.identifier;
                 }
             } else if (this.isDigit(this.look)) {
@@ -394,7 +393,7 @@ LBAC.lexicalScanning = (function () {
                 this.getChar();
             }
             this.token = this.keywordType[this.value];  // copy
-            if (typeof this.token === 'undefined') {    // from previous
+            if (this.token === undefined) {    // from previous
                 this.token = this.symType.identifier;   // scan()
             }
         },
@@ -550,7 +549,7 @@ LBAC.lexicalScanning = (function () {
 
         someExperimentsInScanning: boundMain(someExperimentsInScanning),
         whiteSpace: boundMain(whiteSpace),
-        newLines: boundMain(newLines),
+        newlines: boundMain(newlines),
         operators: boundMain(operators),
         listsCommasAndCommandLines: boundMain(listsCommasAndCommandLines),
         gettingFancy: boundMain(gettingFancy),

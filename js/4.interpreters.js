@@ -8,11 +8,11 @@ LBAC.interpreters = (function () {
     'use strict';
 
     var boundMain = LBAC.cradle.boundMain,
-        theInterpreterA,                // 4.2.1
-        theInterpreterB,                // 4.2.2
-        theInterpreterC,                // 4.2.3
+        singleDigits,                   // 4.2.1
+        binaryExpressions,              // 4.2.2
+        generalExpressions,             // 4.2.3
         multiDigitsNumber,              // 4.2.4
-        theInterpreterE,                // 4.2.5
+        parentheses,                    // 4.2.5
         variables,                      // 4.3.1
         assignmentStatements,           // 4.3.2
         multipleStatements,             // 4.3.3
@@ -23,10 +23,10 @@ LBAC.interpreters = (function () {
      */
 
     /**
-     * 4.2.1
+     * 4.2.1 Single digits
      * <expression> ::= <number>
      */
-    theInterpreterA = LBAC.cradle.extend({
+    singleDigits = LBAC.cradle.extend({
 
         // Get a number
         getNum: function () {
@@ -53,10 +53,10 @@ LBAC.interpreters = (function () {
     });
 
     /**
-     * 4.2.2
+     * 4.2.2 Binary expressions
      * <expression> ::= <number> |<addop> <number>|*
      */
-    theInterpreterB = theInterpreterA.extend({
+    binaryExpressions = singleDigits.extend({
 
         // Recognize an addop
         isAddop: function (c) {
@@ -89,11 +89,11 @@ LBAC.interpreters = (function () {
     });
 
     /**
-     * 4.2.3
+     * 4.2.3 General expressions
      * <term> ::= <number> |<mulop> <number>|*
      * <expression> ::= <term> |<addop> <term>|*
      */
-    theInterpreterC = theInterpreterB.extend({
+    generalExpressions = binaryExpressions.extend({
 
         // Parse and translate a math term
         term: function () {
@@ -141,7 +141,7 @@ LBAC.interpreters = (function () {
     /**
      * 4.2.4 Multi-digits number
      */
-    multiDigitsNumber = theInterpreterC.extend({
+    multiDigitsNumber = generalExpressions.extend({
 
         // Get a Number
         getNum: function () {
@@ -159,11 +159,11 @@ LBAC.interpreters = (function () {
     });
 
     /**
-     * 4.2.5
+     * 4.2.5 Parentheses
      * <factor> ::= <number> | (<expression>)
      * <term> ::= <factor> |<mulop> <factor>|*
      */
-    theInterpreterE = multiDigitsNumber.extend({
+    parentheses = multiDigitsNumber.extend({
 
         // Parse and translate a math factor
         factor: function () {
@@ -207,7 +207,7 @@ LBAC.interpreters = (function () {
      * In BNF notation:
      * <factor> ::= <number> | (<expression>) | <variable>
      */
-    variables = theInterpreterE.extend({
+    variables = parentheses.extend({
 
         table: {},
 
@@ -333,21 +333,21 @@ LBAC.interpreters = (function () {
     return {
 
         // <expression> ::= <number>
-        theInterpreterA: boundMain(theInterpreterA),
+        singleDigits: boundMain(singleDigits),
 
         // <expression> ::= <number> |<addop> <number>|*
-        theInterpreterB: boundMain(theInterpreterB),
+        binaryExpressions: boundMain(binaryExpressions),
 
         // <term> ::= <number> |<mulop> <number>|*
         // <expression> ::= <term> |<addop> <term>|*
-        theInterpreterC: boundMain(theInterpreterC),
+        generalExpressions: boundMain(generalExpressions),
 
         // Multi-digits number
         multiDigitsNumber: boundMain(multiDigitsNumber),
 
         // <factor> ::= <number> | (<expression>)
         // <term> ::= <factor> |<mulop> <factor>|*
-        theInterpreterE: boundMain(theInterpreterE),
+        parentheses: boundMain(parentheses),
 
         // <factor> ::= <number> | (<expression>) | <variable>
         variables: boundMain(variables),

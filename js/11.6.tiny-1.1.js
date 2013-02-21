@@ -1,15 +1,19 @@
 /**
- * Chapter 11.6 Conclusion
- * Dependencies:
+ * Chapter Lexical Scan Revisited
+ * 11.6 Conclusion
+ * Tiny v1.1
  */
 
 var LBAC = LBAC || {};
 
-// Program kiss
+// Program Tiny v1.1
 LBAC.tiny_11 = (function () {
     'use strict';
 
-    return LBAC.object.extend({
+    var boundMain = LBAC.object.boundMain,
+        program;
+
+    program = LBAC.object.extend({
 
         // Constant declarations
         TAB: '\t',
@@ -784,5 +788,14 @@ LBAC.tiny_11 = (function () {
         }
 
     });
+
+    // return main functions for executions
+    // and the program itself for chapter 12
+    return {
+
+        run: boundMain(program),
+        object: program
+
+    };
 
 }());

@@ -400,6 +400,7 @@ LBAC.kiss = (function () {
 
     });
 
+    // 7.13.2 Merging scanner and parser
     mergingScannerAndParser = judiciousCopying.extend({
 
         // Variable declarations

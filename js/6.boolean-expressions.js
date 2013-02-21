@@ -1,6 +1,5 @@
 /**
  * Chapter 6 Boolean Expressions
- * Dependencies: the cradle defined in ch. 1.2, ch.2, ch.3
  */
 
 var LBAC = LBAC || {};
@@ -14,7 +13,7 @@ LBAC.booleanExpressions = (function ($) {
         generalExpressions,             // 6.6.3
         andOperation,                   // 6.6.4
         notOperation,                   // 6.6.5
-        expandBoolFactor,               // 6.6.6
+        expandTheFactor,               // 6.6.6
         fullBlownRelation,              // 6.6.7
         mergingWithExpressions,         // 6.6.8
         changeToLatestExpressionSyntax, // 6.6.9
@@ -84,7 +83,7 @@ LBAC.booleanExpressions = (function ($) {
      * 6.6 The parser
      */
 
-    // 6.6.1
+    // 6.6.1 The parser
     theParser = LBAC.cradle.extend({
 
         // Recognize a boolean literal
@@ -270,7 +269,7 @@ LBAC.booleanExpressions = (function ($) {
      * In BNF:
      * <b-factor> ::= <b-literal> | <relation>
      */
-    expandBoolFactor = notOperation.extend({
+    expandTheFactor = notOperation.extend({
 
         // Parse and translate a relation
         // This version is a dummy
@@ -297,7 +296,7 @@ LBAC.booleanExpressions = (function ($) {
      * 6.6.7 Full-blown relation
      * <relation> ::= <expression> [<relop> <expression>]
      */
-    fullBlownRelation = expandBoolFactor.extend({
+    fullBlownRelation = expandTheFactor.extend({
 
         // Recognize a relop
         isRelop: function (c) {
@@ -573,7 +572,7 @@ LBAC.booleanExpressions = (function ($) {
         notOperation: boundMain(notOperation),
 
         // <b-factor> ::= <b-literal> | <relation>
-        expandBoolFactor: boundMain(expandBoolFactor),
+        expandTheFactor: boundMain(expandTheFactor),
 
         // <relation> ::= <expression> [<relop> <expression>]
         fullBlownRelation: boundMain(fullBlownRelation),

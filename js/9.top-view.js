@@ -1,12 +1,11 @@
 /**
- * Chapter 9 Top View
- * Dependencies:
+ * Chapter 9 A Top View
  */
 
 var LBAC = LBAC || {};
 
 // Program kiss
-LBAC.topView = (function () {
+LBAC.aTopView = (function () {
     'use strict';
 
     var boundMain = LBAC.object.boundMain,

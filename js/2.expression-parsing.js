@@ -17,6 +17,11 @@ LBAC.expressionParsing = (function () {
         unitaryMinus;               // 2.8
 
     /**
+     * 2.1 Getting started
+     * x = 2 * y + 3 / (4 * z)
+     */
+    
+    /**
      * 2.2 Single digits
      */
     singleDigits = LBAC.cradle.extend({

@@ -1,2 +1,4 @@
 # old files before employing git
 old/
+# pdf doc
+*.pdf*

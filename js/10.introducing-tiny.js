@@ -1,6 +1,5 @@
 /**
- * Chapter 10 Introducing Tiny
- * Dependencies:
+ * Chapter 10 Introducing "Tiny"
  */
 
 var LBAC = LBAC || {};
@@ -588,7 +587,7 @@ LBAC.introducingTiny = (function () {
     });
 
     /**
-     * 10.8.2
+     * 10.8.2 Boolean expressions
      * BNF for the boolean expressions:
      * <bool-expr> ::= <bool-term> ( <orop> <bool-term> )*
      * <bool-term> ::= <not-factor> ( <andop> <not-factor> )*
