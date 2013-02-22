@@ -1,4 +1,3 @@
-# old files before employing git
-old/
-# pdf doc
-*.pdf*
+/old/
+/*.pdf*
+/node_modules/
