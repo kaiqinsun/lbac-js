@@ -18,6 +18,8 @@
 
 // Uses AMD or browser globals to create a jQuery plugin.
 (function (factory) {
+    'use strict';
+
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define(['jquery'], factory);
@@ -37,7 +39,7 @@
     function htmlEncode(text) {
         var replacements = [
             //[/&/g, "&amp;"], [/"/g, "&quot;"],
-            [/</g, "&lt;"], [/>/g, "&gt;"]
+            [/</g, '&lt;'], [/>/g, '&gt;']
         ];
         $.each(replacements, function (i, replace) {
             text = text.replace(replace[0], replace[1]);
@@ -166,8 +168,8 @@
                 /\bEND\b/, /\bMOVE\b/, /\bADD\w?\b/, /\bSUB\w?\b/, /\bNEG\b/,
                 /\bEXG\b/,
                 /\bMUL\w?\b/, /\bDIV\w?\b/, /\bBSR\b/, /\bLEA\b/, /\bCMP\b/,
-                /\bCLR\b/, /\b.?OR\b/, /\bAND\b/,
-                /\bSEQ\b/, /\bSNE\b/, /\bSGE\b/, /\bSLE\b/, /\bTST\b/,
+                /\bCLR\b/, /\b\w?OR\b/, /\bAND\b/,
+                /\bSEQ\b/, /\bSNE\b/, /\bSGE\b/, /\bSLE\b/, /\bTST\b/
             ],
             branchPatterns = [/\bBEQ\b/, /\b\w?BRA\b/, /\bBGT\b/],
             keywordClass = 'm68k-keyword',
@@ -177,7 +179,7 @@
                 'class': 'm68k-label'
             },
             errorRule = {
-                pattern: /Error:(.*?)\n/,
+                pattern: /Error:([\w\W]*?)\n/,
                 'class': 'm68k-error'
             };
 
@@ -323,8 +325,8 @@
                     
                 $runButton.click(function () {
                     var data =  $console.data('tinyConsole');
-                    data.$input.text(' \n' + $editor.val())
-                    data.stream.update(' '+ $editor.val());
+                    data.$input.text(' \n' + $editor.val());
+                    data.stream.update(' ' + $editor.val());
                     data.history.update();
                     try {
                         data.execute();
@@ -507,7 +509,7 @@
                 result;
             try {
                 result = data.stream.read();
-            } catch(err) {
+            } catch (err) {
                 methods.writeLn.call(this, 'Error: End of Input Stream.');
             }
             return result;

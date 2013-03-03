@@ -47,8 +47,8 @@ require(['jquery', 'io', 'lbac', 'bootstrap', 'jqueryui', 'tiny-console'], funct
 
         $('#accordion').accordion({
             icons: {
-                header: "ui-icon-circle-arrow-e",
-                activeHeader: "ui-icon-circle-arrow-s"
+                header: 'ui-icon-circle-arrow-e',
+                activeHeader: 'ui-icon-circle-arrow-s'
             },
             heightStyle: 'content',
             active: 1

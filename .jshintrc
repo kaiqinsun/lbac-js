@@ -1,6 +1,11 @@
 {
     "node": true,
     "browser": true,
+    "jquery": true,
+    "predef": [
+        "define"
+    ],
+
     "es5": true,
     "esnext": true,
     "bitwise": true,

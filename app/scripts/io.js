@@ -1,4 +1,4 @@
-define(function (t) {
+define(function () {
     'use strict';
 
     var io;
