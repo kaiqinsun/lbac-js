@@ -2,7 +2,10 @@
  * Chapter 6 Boolean Expressions
  */
 
-define(['./1.2-cradle', './3-more-expressions', './5-control-constructs', 'jquery', 'io'], function (cradle, moreExpressions, controlConstructs, $, io) {
+define([
+    './1.2-cradle', './3-more-expressions', './5-control-constructs',
+    'jquery', 'io'
+], function (cradle, moreExpressions, controlConstructs, $, io) {
     'use strict';
 
     var boundMain = cradle.boundMain,
@@ -471,20 +474,23 @@ define(['./1.2-cradle', './3-more-expressions', './5-control-constructs', 'jquer
      * <block> ::= [<statement>]*
      * <statement> ::= <control-statement> | <b-expression>
      */
-    mergingWithControlConstructs = $.extend(true, {},
-            // 6.6.9
-            changeToLatestExpressionSyntax,
+    mergingWithControlConstructs = $.extend(
+        true,
+        {},
 
-            // 5.10
-            controlConstructs.theBreakStatementObject,
+        // 6.6.9
+        changeToLatestExpressionSyntax,
 
-            // 6.6.9
-            {
-                condition: changeToLatestExpressionSyntax.boolExpression,
-                expression: changeToLatestExpressionSyntax.expression,
-                other: changeToLatestExpressionSyntax.boolExpression
-            }
-        );
+        // 5.10
+        controlConstructs.theBreakStatementObject,
+
+        // 6.6.9
+        {
+            condition: changeToLatestExpressionSyntax.boolExpression,
+            expression: changeToLatestExpressionSyntax.expression,
+            other: changeToLatestExpressionSyntax.boolExpression
+        }
+    );
 
     /**
      * 6.8 Adding assignments

@@ -27,15 +27,12 @@
         // Browser globals
         factory(jQuery);
     }
+
 }(function ($) {
     'use strict';
 
     var LF = '\n';
 
-    // function htmlEncode(value) {
-        // return $('<div/>').text(value).html();
-    // }
-    
     function htmlEncode(text) {
         var replacements = [
             //[/&/g, "&amp;"], [/"/g, "&quot;"],
@@ -301,7 +298,7 @@
         }
     }
 
-    function consoleClick(e) {
+    function consoleClick() {
         var data = $(this).data('tinyConsole');
         data.$input.focus();
         adjustCaret(data.$input);
@@ -316,13 +313,13 @@
             var settings = $.extend({
                 prompt: '>>>'
             }, options);
-            
+
             function addEditor($console) {
                 var $runButton = $('<button/>').text('Run'),
                     $editor = $('<textarea/>');
 
                 $console.after($editor, $runButton);
-                    
+
                 $runButton.click(function () {
                     var data =  $console.data('tinyConsole');
                     data.$input.text(' \n' + $editor.val());
@@ -344,11 +341,11 @@
 
                 // If the plugin hasn't been initialized yet
                 if (!data) {
-                
-                    if ('width' in settings) {
+
+                    if (settings.width) {
                         $this.width(settings.width);
                     }
-                    if ('height' in settings) {
+                    if (settings.height) {
                         $this.height(settings.height);
                     }
                     $this.addClass('tiny-console');
@@ -399,7 +396,7 @@
                         $prompt: $prompt,
                         $input: $input,
                         $output: $output,
-                        
+
                         stream: {
                             content: '',
                             offset: 1,
@@ -417,14 +414,14 @@
                                 this.offset += 1;
                                 return this.content.charAt(offset);
                             },
-                            
+
                             readLn: function () {
                                 this.offset = 1;
                                 return this.content.substring(1,
                                         this.content.length - 1);
                             }
                         },
-                        
+
                         history: {
                             content: [],
                             position: -1,
@@ -481,15 +478,15 @@
 
                     // exprimental
                     addEditor($this);
-                
+
                 }
             });
         },
 
         destroy: function () {
             return this.each(function () {
-                var $this = $(this),
-                    data = $this.data('tinyConsole');
+                var $this = $(this);
+                    // data = $this.data('tinyConsole');
                 // Namespacing FTW
                 $(window).unbind('.tinyConsole');
                 $this.removeData('tinyConsole');
@@ -503,7 +500,7 @@
             }
             // TODO
         },
-        
+
         read: function () {
             var data = this.data('tinyConsole'),
                 result;
@@ -514,7 +511,7 @@
             }
             return result;
         },
-        
+
         readLn: function () {
             var data = this.data('tinyConsole');
             return data.stream.readLn();

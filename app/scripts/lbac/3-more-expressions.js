@@ -2,7 +2,9 @@
  * Chapter 3 More Expressions
  */
 
-define(['./object', './2-expression-parsing'], function (object, expressionParsing) {
+define([
+    './object', './2-expression-parsing'
+], function (object, expressionParsing) {
     'use strict';
 
     var boundMain = object.boundMain,

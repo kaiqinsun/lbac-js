@@ -18,7 +18,10 @@ require.config({
     packages: ['lbac']
 });
 
-require(['jquery', 'io', 'lbac', 'bootstrap', 'jqueryui', 'tiny-console'], function ($, io, lbac) {
+require([
+    'jquery', 'io', 'lbac',
+    'bootstrap', 'jqueryui', 'tiny-console'
+], function ($, io, lbac) {
 
     'use strict';
 

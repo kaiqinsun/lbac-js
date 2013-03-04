@@ -171,7 +171,7 @@ define(['./1.2-cradle'], function (cradle) {
             this.match('/');
             this.factor();
             this.emitLn('MOVE (SP)+, D1');
-            this.emitLn('EXG  D0, D1');  // Exchange D0 and D1, or swap(D0, D1), more details: http://stackoverflow.com/questions/8882775/divide-divs-not-working-on-jack-crenshaws-lets-build-a-compiler
+            this.emitLn('EXG  D0, D1');  // exchange, swap(D0, D1)
             this.emitLn('DIVS D1, D0');
         },
 

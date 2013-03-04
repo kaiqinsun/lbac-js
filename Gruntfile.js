@@ -1,4 +1,5 @@
 'use strict';
+
 var lrSnippet = require('grunt-contrib-livereload/lib/utils').livereloadSnippet;
 var mountFolder = function (connect, dir) {
     return connect.static(require('path').resolve(dir));
@@ -89,7 +90,8 @@ module.exports = function (grunt) {
             },
             all: [
                 'Gruntfile.js',
-                '<%= yeoman.app %>/scripts/**/*.js',
+                '<%= yeoman.app %>/scripts/*.js',
+                '<%= yeoman.app %>/scripts/lbac/*.js',
                 'test/spec/*.js'
             ]
         },
@@ -271,7 +273,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('build', [
         'clean:dist',
-        // 'jshint',
+        'jshint',
         'test',
         'coffee',
         'compass:dist',
