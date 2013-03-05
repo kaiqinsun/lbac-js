@@ -48,7 +48,7 @@ require([
         });
         // $c.tinyConsole('execute', LBAC.miscellany.dealingWithSemicolons);
 
-        $('#accordion').accordion({
+        $('#accordion').show().accordion({
             icons: {
                 header: 'ui-icon-circle-arrow-e',
                 activeHeader: 'ui-icon-circle-arrow-s'
