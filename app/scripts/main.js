@@ -31,12 +31,6 @@ require([
             highlight: 'output' // 'both'
             //tabSize: 4
         });
-        
-        // $('#accordion2 .accordion-toggle').addClass('btn');
-        
-        
-        
-
 
         io.set({
             read: $c.tinyConsole('function', 'read'),
@@ -47,7 +41,7 @@ require([
         });
         // $c.tinyConsole('execute', LBAC.miscellany.dealingWithSemicolons);
 
-        
+
 
         // click event handler on accordion menu
         $('#accordion2 li').click(function () {
