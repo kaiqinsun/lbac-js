@@ -1,4 +1,9 @@
 @import 'sass-bootstrap/lib/bootstrap';
+@import 'sass-bootstrap/lib/responsive-utilities';
+@import 'sass-bootstrap/lib/responsive-navbar';
+@import 'sass-bootstrap/lib/responsive-1200px-min';
+@import 'sass-bootstrap/lib/responsive-768px-979px';
+@import 'sass-bootstrap/lib/responsive-767px-max';
 @import 'tiny-console';
 
 /* .hero-unit {
@@ -7,7 +12,7 @@
 } */
 
 body {
-    padding-top: 0px;
+    padding-top: 60px;
     padding-bottom: 40px;
     font-family: Georgia, serif;
 }

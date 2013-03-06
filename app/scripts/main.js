@@ -2,15 +2,10 @@ require.config({
     paths: {
         jquery: '../components/jquery/jquery',
         bootstrap: 'vendor/bootstrap',
-        jqueryui: '../components/jquery-ui/ui/jquery-ui.custom',
         io: './io'
     },
     shim: {
         bootstrap: {
-            deps: ['jquery'],
-            exports: 'jquery'
-        },
-        jqueryui: {
             deps: ['jquery'],
             exports: 'jquery'
         }
@@ -20,7 +15,7 @@ require.config({
 
 require([
     'jquery', 'io', 'lbac',
-    'bootstrap', 'jqueryui', 'tiny-console'
+    'bootstrap', 'tiny-console'
 ], function ($, io, lbac) {
 
     'use strict';
@@ -35,9 +30,13 @@ require([
             //prompt: 'hi there>',
             highlight: 'output' // 'both'
             //tabSize: 4
-        }).resizable({
-            handles: 's'
         });
+        
+        // $('#accordion2 .accordion-toggle').addClass('btn');
+        
+        
+        
+
 
         io.set({
             read: $c.tinyConsole('function', 'read'),
@@ -48,20 +47,13 @@ require([
         });
         // $c.tinyConsole('execute', LBAC.miscellany.dealingWithSemicolons);
 
-        $('#accordion').show().accordion({
-            icons: {
-                header: 'ui-icon-circle-arrow-e',
-                activeHeader: 'ui-icon-circle-arrow-s'
-            },
-            heightStyle: 'content',
-            active: 1
-        });
+        
 
         // click event handler on accordion menu
-        $('#accordion li').click(function () {
+        $('#accordion2 li').click(function () {
             var $el = $(this),
                 sectionTitle = $el.text().trim(),
-                chapterTitle = $el.parent().prev().text(),
+                chapterTitle = $el.parent().parent().prev().text().trim(),
                 ch,
                 sec;
 
