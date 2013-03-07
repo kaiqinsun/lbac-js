@@ -44,12 +44,14 @@ require([
 
 
         // click event handler on accordion menu
-        $('#accordion2 li').click(function () {
+        $('#accordion2 li').click(function (evt) {
             var $el = $(this),
                 sectionTitle = $el.text().trim(),
                 chapterTitle = $el.parent().parent().prev().text().trim(),
                 ch,
                 sec;
+                
+            evt.preventDefault();
 
             // Convert a chapter/section title to an identifier
             function titleToIdent(title) {
@@ -91,6 +93,7 @@ require([
             specialCase();
 
             if (lbac[ch] && lbac[ch][sec]) {
+                $('html,body').animate({scrollTop: $c.offset().top},'slow');
                 $c.tinyConsole('execute', lbac[ch][sec]);
                 $c.tinyConsole('option', 'prompt', sectionTitle + '>');
                 console.log('Method: "lbac.' + ch + '.' + sec + '".');
