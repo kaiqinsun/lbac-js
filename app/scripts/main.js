@@ -32,6 +32,7 @@ require([
             //tabSize: 4
         });
 
+        // setup io routines for the lbac package
         io.set({
             read: $c.tinyConsole('function', 'read'),
             readLn: $c.tinyConsole('function', 'readLn'),
@@ -39,9 +40,6 @@ require([
             writeLn: $c.tinyConsole('function', 'writeLn'),
             halt: $c.tinyConsole('function', 'halt')
         });
-        // $c.tinyConsole('execute', LBAC.miscellany.dealingWithSemicolons);
-
-
 
         // click event handler on accordion menu
         $('#accordion2 li').click(function (evt) {
@@ -73,6 +71,7 @@ require([
                 return words.join('');
             }
 
+            // Deal with modules with secial names
             function specialCase() {
 
                 // 7.13 Merging scanner and parser
@@ -93,7 +92,9 @@ require([
             specialCase();
 
             if (lbac[ch] && lbac[ch][sec]) {
-                $('html,body').animate({scrollTop: $c.offset().top},'slow');
+                $('html, body').animate({
+                    scrollTop: $c.offset().top
+                },'slow');
                 $c.tinyConsole('execute', lbac[ch][sec]);
                 $c.tinyConsole('option', 'prompt', sectionTitle + '>');
                 console.log('Method: "lbac.' + ch + '.' + sec + '".');
