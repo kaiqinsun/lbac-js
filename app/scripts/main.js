@@ -48,7 +48,7 @@ require([
                 chapterTitle = $el.parent().parent().prev().text().trim(),
                 ch,
                 sec;
-                
+
             evt.preventDefault();
 
             // Convert a chapter/section title to an identifier
@@ -93,8 +93,8 @@ require([
 
             if (lbac[ch] && lbac[ch][sec]) {
                 $('html, body').animate({
-                    scrollTop: $c.offset().top
-                },'slow');
+                    scrollTop: $('#main-container').offset().top
+                }, 'slow');
                 $c.tinyConsole('execute', lbac[ch][sec]);
                 $c.tinyConsole('option', 'prompt', sectionTitle + '>');
                 console.log('Method: "lbac.' + ch + '.' + sec + '".');

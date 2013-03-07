@@ -1,6 +1,7 @@
 @import 'sass-bootstrap/lib/bootstrap';
+/* Responsive */
 @import 'sass-bootstrap/lib/responsive-utilities';
-@import 'sass-bootstrap/lib/responsive-navbar';
+// @import 'sass-bootstrap/lib/responsive-navbar';
 @import 'sass-bootstrap/lib/responsive-1200px-min';
 @import 'sass-bootstrap/lib/responsive-768px-979px';
 @import 'sass-bootstrap/lib/responsive-767px-max';
@@ -15,8 +16,15 @@
     }
 }
 
-.hero-unit h1 {
-    font-size: 2em;
+.hero-unit {
+    margin-bottom: 10px;
+    h1 {
+        font-size: 2em;
+    }
+}
+
+#main-container {
+    padding-top: 20px;
 }
 
 // Add disabled state for items in accordion menu
