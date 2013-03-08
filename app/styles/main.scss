@@ -1,7 +1,7 @@
 @import 'sass-bootstrap/lib/bootstrap';
 /* Responsive */
 @import 'sass-bootstrap/lib/responsive-utilities';
-// @import 'sass-bootstrap/lib/responsive-navbar';
+@import 'sass-bootstrap/lib/responsive-navbar';
 @import 'sass-bootstrap/lib/responsive-1200px-min';
 @import 'sass-bootstrap/lib/responsive-768px-979px';
 @import 'sass-bootstrap/lib/responsive-767px-max';
@@ -16,19 +16,20 @@
     }
 }
 
-.hero-unit {
-    margin-bottom: 10px;
-    h1 {
-        font-size: 2em;
-    }
-}
-
-#main-container {
-    padding-top: 20px;
+.hero-unit h1 {
+    font-size: 2em;
 }
 
 // Add disabled state for items in accordion menu
-.accordion .disabled a {
-    pointer-events: none;
-    color: #aaa;
+.accordion {
+    .disabled {
+        pointer-events: none;
+    }
+    .accordion-toggle {
+        text-align: left;
+    }
+    .accordion-inner {
+        margin: 0;
+        padding: 0;
+    }
 }

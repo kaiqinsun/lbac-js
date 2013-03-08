@@ -93,7 +93,7 @@ require([
 
             if (lbac[ch] && lbac[ch][sec]) {
                 $('html, body').animate({
-                    scrollTop: $('#main-container').offset().top
+                    scrollTop: $c.offset().top
                 }, 'slow');
                 $c.tinyConsole('execute', lbac[ch][sec]);
                 $c.tinyConsole('option', 'prompt', sectionTitle + '>');
