@@ -1,14 +1,18 @@
+$lightGreen: #E9FBF2;
+$darkGreen: darken($lightGreen, 80%);
+
+$heroUnitBackground: $lightGreen; 
+$heroUnitHeadingColor: $darkGreen;
+$heroUnitLeadColor: $darkGreen;
+$iconSpritePath: "../images/glyphicons-halflings.png";
+$iconWhiteSpritePath: "../images/glyphicons-halflings-white.png";
+
 @import 'sass-bootstrap/lib/bootstrap';
-/* Responsive */
-@import 'sass-bootstrap/lib/responsive-utilities';
-@import 'sass-bootstrap/lib/responsive-navbar';
-@import 'sass-bootstrap/lib/responsive-1200px-min';
-@import 'sass-bootstrap/lib/responsive-768px-979px';
-@import 'sass-bootstrap/lib/responsive-767px-max';
+@import 'sass-bootstrap/lib/responsive';
 @import 'tiny-console';
 
 @media (max-width: 980px) {
-    /* Enable use of floated navbar text */
+    // Enable use of floated navbar text
     .navbar-text.pull-right {
         float: none;
         padding-left: 5px;
@@ -16,14 +20,20 @@
     }
 }
 
-.hero-unit h1 {
-    font-size: 2em;
+.hero-unit {
+    // background-color: $lightGreen;
+    h1 {
+        font-size: 2em;
+    }
 }
 
-// Add disabled state for items in accordion menu
 .accordion {
+    // Add disabled state for items in accordion menu
     .disabled {
         pointer-events: none;
+    }
+    .accordion-group {
+        margin-bottom: 0;
     }
     .accordion-toggle {
         text-align: left;
@@ -32,4 +42,13 @@
         margin: 0;
         padding: 0;
     }
+}
+
+.footer {
+    color: $darkGreen;
+    background-color: $lightGreen;
+    border-top: 1px solid darken($lightGreen, 10%);
+    margin-top: 10px;
+    padding: 30px 0;
+    text-align: center;
 }

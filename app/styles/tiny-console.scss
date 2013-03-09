@@ -1,34 +1,42 @@
-/** CSS for Tiny console, a jQuery plugin
+/**
+ * Stylesheet for Tiny console, a jQuery plugin
  * Author: Malcom Wu
  */
+ 
+$consoleBackground:  #eee; // gray
+$consoleBorder:  #a0e8a6; // green
+$consolePromptColor: darken($consoleBorder, 55%);
 
-.tiny-console {
-    background-color: #eee;
-    height: 500px;
-    border: 2px solid #a0e8a6;
-    padding: 15px 20px;
-    /* margin-top: 0.7em; */
-    border-radius: 5px;
-    box-shadow: 0px 0px 9px #a0e8a6;
-    overflow: auto;
-}
-
-.entry-prompt, .entry-input, .entry-output {
-    /* font-family: "Courier New", Courier, monospace; */
-    font-size: 1em;
-    display: inline;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    outline: 0;
+// The pre-wrap is not used for this version
+@mixin pre-wrap {
     white-space: pre-wrap;
     white-space: -moz-pre-wrap;
     white-space: -o-pre-wrap;
     word-wrap: break-word;
 }
 
+.tiny-console {
+    background-color: $consoleBackground;
+    height: 500px;
+    border: 2px solid $consoleBorder;
+    padding: 15px 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 9px $consoleBorder;
+    overflow: auto;
+}
+
+.entry-prompt, .entry-input, .entry-output {
+    font-size: 1em;
+    background-color: $consoleBackground;
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+}
+
 .entry-prompt {
-    color: #248F24;
+    color: $consolePromptColor;
 }
 
 .entry-input {
