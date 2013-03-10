@@ -2,10 +2,15 @@ require.config({
     paths: {
         jquery: '../components/jquery/jquery',
         bootstrap: 'vendor/bootstrap',
+        cookie: '../components/jquery.cookie/jquery.cookie',
         io: './io'
     },
     shim: {
         bootstrap: {
+            deps: ['jquery'],
+            exports: 'jquery'
+        },
+        cookie: {
             deps: ['jquery'],
             exports: 'jquery'
         }
@@ -15,51 +20,30 @@ require.config({
 
 require([
     'jquery', 'io', 'lbac',
-    'bootstrap', 'tiny-console'
+    'bootstrap', 'cookie', 'tiny-console'
 ], function ($, io, lbac) {
-
     'use strict';
 
     $(document).ready(function () {
 
         var $c = $('#console');
 
-        $c.tinyConsole({
-            //width: '80%',
-            height: 350,
-            //prompt: 'hi there>',
-            highlight: 'output' // 'both'
-            //tabSize: 4
-        });
+        // Update console prompt and execution method
+        function updateConsole(chapterTitle, sectionTitle) {
+            var ch, sec;
 
-        // setup io routines for the lbac package
-        io.set({
-            read: $c.tinyConsole('function', 'read'),
-            readLn: $c.tinyConsole('function', 'readLn'),
-            write: $c.tinyConsole('function', 'write'),
-            writeLn: $c.tinyConsole('function', 'writeLn'),
-            halt: $c.tinyConsole('function', 'halt')
-        });
-
-        // click event handler on accordion menu
-        $('#accordion2 li').click(function (evt) {
-            var $el = $(this),
-                sectionTitle = $el.text().trim(),
-                chapterTitle = $el.parent().parent().prev().text().trim(),
-                ch,
-                sec;
-
-            evt.preventDefault();
-
-            // Convert a chapter/section title to an identifier
+            // Convert a chapter/section title to a camelcase identifier
             function titleToIdent(title) {
                 var words;
 
+                // Filter out unnecessory characters
                 title = title.replace(/Chapter\s*\d*\s*/, '');
                 title = title.replace(/\d+\.\d+\.?\d?\s*/, '');
                 title = title.replace(/-/g, ' ');
                 title = title.replace(/[,\/"]/g, '');
                 words = title.split(' ');
+
+                // convert title words to a camelcase identifier
                 $.each(words, function (i, word) {
                     if (i === 0) {
                         words[0] = word.toLowerCase();
@@ -92,17 +76,91 @@ require([
             specialCase();
 
             if (lbac[ch] && lbac[ch][sec]) {
-                $('html, body').animate({
-                    scrollTop: $c.offset().top - 20
-                }, 'slow');
                 $c.tinyConsole('execute', lbac[ch][sec]);
                 $c.tinyConsole('option', 'prompt', sectionTitle + '>');
-                console.log('Method: "lbac.' + ch + '.' + sec + '".');
-            } else {
-                console.log('No such method: "lbac.' + ch + '.' + sec + '".');
+                $c.data('tinyConsole').$input.focus();
+                return true;
             }
-            $c.data('tinyConsole').$input.focus();
-        });
+        }
+
+        function initConsole() {
+            $c.tinyConsole({
+                // width: '80%',
+                height: 350,
+                // prompt: 'hi there>',
+                highlight: 'output' // input, output or both
+                // tabSize: 4   // browser default: 8
+            });
+
+            // setup io routines for the lbac package
+            io.set({
+                read: $c.tinyConsole('function', 'read'),
+                readLn: $c.tinyConsole('function', 'readLn'),
+                write: $c.tinyConsole('function', 'write'),
+                writeLn: $c.tinyConsole('function', 'writeLn'),
+                halt: $c.tinyConsole('function', 'halt')
+            });
+        }
+
+        // click event handler on accordion menu
+        function attachMenuClickHandler() {
+            $('#accordion2 li').click(function (evt) {
+                var $el = $(this),
+                    sectionTitle = $el.text().trim(),
+                    chapterTitle = $el.parent().parent().prev().text().trim(),
+                    success;
+
+                evt.preventDefault();
+
+                success = updateConsole(chapterTitle, sectionTitle);
+                if (success) {
+
+                    // scroll to the top of console
+                    $('html, body').animate({
+                        scrollTop: $c.offset().top - 20
+                    }, 'slow');
+
+                    // save the menu state with cookie
+                    $.cookie('chapterTitle', chapterTitle, { expires: 60 });
+                    $.cookie('sectionTitle', sectionTitle, { expires: 60 });
+                }
+            });
+        }
+
+        // restore the page state using cookie
+        function restorePageState() {
+            var chapterTitle = $.cookie('chapterTitle'),
+                sectionTitle = $.cookie('sectionTitle'),
+                chapterId;
+
+            function getChapterNumber(title) {
+                return title.match(/\d+/g)[0];
+            }
+
+            if (chapterTitle && sectionTitle) {
+                chapterId = '#ch' + getChapterNumber(chapterTitle);
+                $(chapterId).collapse('show');
+                $('li', chapterId).each(function (i, el) {
+                    if ($(el).text() === sectionTitle) {
+                        updateConsole(chapterTitle, sectionTitle);
+                        return false;   // break
+                    }
+                });
+            } else {
+
+                // First time at section 2.2
+                $('#ch2').collapse('show');
+                updateConsole('expression parsing', 'single digits');
+            }
+        }
+
+        function init() {
+            initConsole();
+            attachMenuClickHandler();
+            restorePageState();
+        }
+
+        init();
 
     });
 
