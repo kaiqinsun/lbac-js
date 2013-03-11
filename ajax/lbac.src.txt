@@ -1,0 +1,6340 @@
+/**
+ * Chapter 1 Introduction
+ */
+
+/**
+ * 1.2 The cradle
+ */
+
+define(['./object', 'io'], function (object, io) {
+    'use strict';
+
+   /**
+    * const: TAB, CR, LF
+    * variable: look
+    * function: getChar, error, abort, expected,
+    *           match, isAlpha, isDigit, getName, getNum
+    *           emit, emitLn, init, main
+    */
+    return object.extend({
+
+        // Constant declarations
+        TAB: '\t',
+        CR: '\r',
+        LF: '\n',
+
+        // Variable declarations
+        look: '',   // lookahead character
+
+        // Read new character from input
+        getChar: function () {
+            this.look = io.read();
+        },
+
+        // Report an error
+        error: function (str) {
+            io.writeLn('Error: ', str, '.');
+        },
+
+        // Report error and halt
+        abort: function (str) {
+            this.error(str);
+            io.halt();
+        },
+
+        // Report what was expected
+        expected: function (str) {
+            this.abort(str + ' Expected');
+        },
+
+        // Match a specific input character
+        match: function (x) {
+            if (this.look === x) {
+                this.getChar();
+            } else {
+                this.expected('"' + x + '"');
+            }
+        },
+
+        // Recognize an alpha character
+        isAlpha: function (c) {
+            return (/[A-Z]/i).test(c);
+        },
+
+        // Recognize a decimal digit
+        isDigit: function (c) {
+            return (/\d/).test(c);
+        },
+
+        // Get an identifier
+        getName: function () {
+            var name;
+            if (!this.isAlpha(this.look)) {
+                this.expected('Name');
+            }
+            name = this.look.toUpperCase();
+            this.getChar();
+            return name;
+        },
+
+        // Get a number
+        getNum: function () {
+            var num;
+            if (!this.isDigit(this.look)) {
+                this.expected('Integer');
+            }
+            num = this.look;
+            this.getChar();
+            return num;
+        },
+
+        // Output a string with tab
+        emit: function (str) {
+            io.write(this.TAB, str);
+        },
+
+        // Output a string with tab and newline
+        emitLn: function (str) {
+            this.emit(str);
+            io.writeLn();
+        },
+
+        // Initialize
+        init: function () {
+            this.getChar();
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+        }
+
+    });
+
+});
+/**
+ * Chapter 10 Introducing "Tiny"
+ */
+
+define(['./1.2-cradle', 'io'], function (cradle, io) {
+    'use strict';
+
+    var boundMain = cradle.boundMain,
+        gettingStarted,                 // 10.2.1
+        theMainProgram,                 // 10.2.2
+        declarations,                   // 10.3
+        declarationsAndSymbols,         // 10.4.1
+        variableList,                   // 10.4.2
+        initializers,                   // 10.5.1
+        multiDigitInteger,              // 10.5.2
+        theSymbolTable,                 // 10.6
+        executableStatements,           // 10.7.1
+        codeGenerationRoutines,         // 10.7.2
+        assignmentStatement,            // 10.7.3
+        moreCodeGenerationRoutines,     // 10.8.1
+        booleanExpressions,             // 10.8.2
+        controlStructures,              // 10.9
+        lexicalScanning,                // 10.10
+        moreRelops,                     // 10.12
+        inputOutput;                    // 10.13
+
+    // 10.1 Introduction
+
+    /**
+     * 10.2 Getting started
+     * Top-level definition for TINY (similar to Pascal):
+     * <program> ::= PROGRAM <top-level decl> <main> '.'
+     */
+
+    /**
+     * 10.2.1
+     * <program> ::= PROGRAM .
+     * only accepted code: p.
+     */
+    gettingStarted = cradle.extend({
+
+        // Parse and translate a program
+        prog: function () {
+            this.match('p');
+            this.header();
+            this.prolog();
+            this.match('.');
+            this.epilog();
+        },
+
+        // Write header info
+        header: function () {
+            io.writeLn('WARMST', this.TAB, 'EQU $A01E');
+        },
+
+        // Write the prolog
+        prolog: function () {
+            this.postLabel('MAIN');
+        },
+
+        // Post a label to output (ch 5.3)
+        postLabel: function (label) {
+            io.writeLn(label + ':');
+        },
+
+        // Write the epilog
+        epilog: function () {
+            this.emitLn('DC WARMST');
+            this.emitLn('END MAIN');
+        },
+
+        // Main program
+        main: function () {
+            this.init();
+            this.prog();
+            if (this.look !== this.LF) {
+                this.abort('Unexpected data after "."');
+            }
+        }
+
+    });
+
+    /**
+     * 10.2.2 The main program
+     * <program> ::= PROGRAM BEGIN END '.'
+     * only accepted code: pbe.
+     */
+    theMainProgram = gettingStarted.extend({
+
+        // Parse and translate a program
+        prog: function () {
+            this.match('p');
+            this.header();
+            this.doMain();
+            this.match('.');
+        },
+
+        // Main program
+        doMain: function () {
+            this.match('b');
+            this.prolog();
+            this.match('e');
+            this.epilog();
+        }
+
+    });
+
+    /**
+     * 10.3 Declarations
+     * <program> ::= PROGRAM <top-level decls> BEGIN END '.'
+     * <top-level decls> ::= ( <data declaration> )*
+     * <data declaration> ::= VAR <var-list>
+     *
+     * code example: pbe. or pvabe.
+     */
+    declarations = theMainProgram.extend({
+
+        // Process a data declaration
+        decl: function () {
+            this.match('v');
+            this.getChar();
+        },
+
+        // Parse and translate global declarations
+        topDecls: function () {
+            while (this.look !== 'b') {
+                switch (this.look) {
+                case 'v':
+                    this.decl();
+                    break;
+                default:
+                    this.abort('Unrecognized Keyword "' + this.look + '"');
+                }
+            }
+        },
+
+        // Parse and translate a program
+        prog: function () {
+            this.match('p');
+            this.header();
+            this.topDecls();
+            this.doMain();
+            this.match('.');
+        }
+
+    });
+
+    /**
+     * 10.4 Declarations and symbols
+     * <data declaration> ::= VAR <var-list>
+     * <var-list> ::= <ident>
+     * code example: pvxvyvzbe.
+     */
+    declarationsAndSymbols = declarations.extend({
+
+        // Parse and translate a data declaration
+        decl: function () {
+            this.match('v');
+            this.alloc(this.getName());
+        },
+
+        // Allocate storage for a variable
+        alloc: function (name) {
+            io.writeLn(name, ':', this.TAB, 'DC 0');
+        }
+
+    });
+
+    /**
+     * 10.4.2 Variable list
+     * <var-list> ::= <indent> (, <ident>)*
+     * code example: pvx,y,zbe.
+     */
+    variableList = declarationsAndSymbols.extend({
+
+        // Parse and translate a data declaration
+        decl: function () {
+            this.match('v');
+            this.alloc(this.getName());
+            while (this.look === ',') {     // <--
+                this.getChar();
+                this.alloc(this.getName());
+            }
+        }
+
+    });
+
+    /**
+     * 10.5 Initializers
+     * <var-list> ::= <var> (, <var>)*
+     * <var> ::= <ident> [ = <integer> ]
+     */
+
+    // 10.5.1
+    // code example: pvx=5,y,z=3be.
+    initializers = variableList.extend({
+
+        // Allocate storage for a variable
+        alloc: function (name) {
+            io.write(name, ':', this.TAB, 'DC ');
+            if (this.look === '=') {
+                this.match('=');
+                io.writeLn(this.getNum());
+            } else {
+                io.writeLn('0');
+            }
+        }
+
+    });
+
+    // 10.5.2 Multi-digit integer
+    // code example: pvx=15,y,z=-23be.
+    multiDigitInteger = initializers.extend({
+
+        // Get a Number
+        getNum: function () {
+            var value = 0;
+            if (!this.isDigit(this.look)) {
+                this.expected('Integer');
+            }
+            while (this.isDigit(this.look)) {
+                value = +this.look + 10 * value;
+                this.getChar();
+            }
+            return value;
+        },
+
+        // Allocate storage for a variable
+        alloc: function (name) {
+            io.write(name, ':', this.TAB, 'DC ');
+            if (this.look === '=') {
+                this.match('=');
+                if (this.look === '-') {
+                    io.write('-');
+                    this.match('-');
+                }
+                io.writeLn(this.getNum());
+            } else {
+                io.writeLn('0');
+            }
+        }
+
+    });
+
+    /**
+     * 10.6 The symbol table
+     */
+    theSymbolTable = multiDigitInteger.extend({
+
+        symbolTable: null,
+
+        // look for symbol in table
+        inTable: function (name) {
+            return !!this.symbolTable[name];
+        },
+
+        // Allocate storage for a variable
+        alloc: function (name) {
+            if (this.inTable(name)) {   // <-...
+                this.abort('Duplicate Variable Name ' + name);
+            }
+            this.symbolTable[name] = 'v';   // <--
+
+            io.write(name, ':', this.TAB, 'DC ');
+            if (this.look === '=') {
+                this.match('=');
+                if (this.look === '-') {
+                    io.write('-');
+                    this.match('-');
+                }
+                io.writeLn(this.getNum());
+            } else {
+                io.writeLn('0');
+            }
+        },
+
+        // Initialize
+        init: function () {
+            this.symbolTable = {};  // <--
+            this.getChar();
+        }
+
+    });
+
+    /**
+     * 10.7 Executable statements
+     * <main> ::= BEGIN <block> END
+     * <block> ::= (<assignment>)*
+     */
+
+    // 10.7.1
+    executableStatements = theSymbolTable.extend({
+
+        // Parse and translate an assignment statement
+        assignment: function () {
+            this.getChar();
+        },
+
+        // Parse and translate a block of statement
+        block: function () {
+            while (this.look !== 'e') {
+                this.assignment();
+            }
+        },
+
+        // Main program
+        doMain: function () {
+            this.match('b');
+            this.prolog();
+            this.block();   // <--
+            this.match('e');
+            this.epilog();
+        }
+
+    });
+
+    // 10.7.2 Code generation routines
+    codeGenerationRoutines = executableStatements.extend({
+
+        // Clear the primary register
+        clear: function () {
+            this.emitLn('CLR D0');
+        },
+
+        // Negate the primary register
+        negate: function () {
+            this.emitLn('NEG D0');
+        },
+
+        // Load a constant value to primary register
+        loadConst: function (number) {
+            this.emitLn('MOVE #' + number + ', D0');
+        },
+
+        // Load a variable to primary register
+        loadVar: function (name) {
+            if (!this.inTable(name)) {
+                this.undefinedd(name);
+            }
+            this.emitLn('MOVE ' + name + '(PC), D0');
+        },
+
+        // Push primary onto stack
+        push: function () {
+            this.emitLn('MOVE D0, -(SP)');
+        },
+
+        // Add top of stack to primary
+        popAdd: function () {
+            this.emitLn('ADD (SP)+, D0');
+        },
+
+        // Subtract primary from top of stack
+        popSub: function () {
+            this.emitLn('SUB (SP)+, D0');
+            this.emitLn('NEG D0');
+        },
+
+        // Multiply top of stack to primary
+        popMul: function () {
+            this.emitLn('MULS (SP)+, D0');
+        },
+
+        // Divide top of stack by primary
+        popDiv: function () {
+            this.emitLn('MOVE (SP)+, D1');
+            this.emitLn('EXG  D0, D1');
+            this.emitLn('DIVS D1, D0');
+        },
+
+        // Store primary to variable
+        store: function (name) {
+            if (!this.inTable(name)) {
+                this.undefinedd(name);
+            }
+            this.emitLn('LEA ' + name + '(PC), A0');
+            this.emitLn('MOVE D0, (A0)');
+        },
+
+        // Report an undefined identifier
+        undefinedd: function (name) {
+            this.abort('Undefined Identifier ' + name);
+        }
+
+    });
+
+    /**
+     * 10.7.3 Assignment statement
+     * <assignment> ::= <ident> = <expression>
+     * <expression> ::= <first term> ( <addop> <term> )*
+     * <first term> ::= <first factor> <rest>
+     * <term> ::= <factor> <rest>
+     * <rest> ::= ( <mulop> <factor> )*
+     * <first factor> ::= [ <addop> ] <factor>
+     * <factor> ::= <var> | <number> | ( <expression> )
+     */
+    assignmentStatement = codeGenerationRoutines.extend({
+
+        // Parse and translate a math factor
+        factor: function () {
+            if (this.look === '(') {
+                this.match('(');
+                this.expression();
+                this.match(')');
+            } else if (this.isAlpha(this.look)) {
+                this.loadVar(this.getName());
+            } else {
+                this.loadConst(this.getNum());
+            }
+        },
+
+        // Parse and translate a negative factor
+        negFactor: function () {
+            this.match('-');
+            if (this.isDigit(this.look)) {
+                this.loadConst(-this.getNum());
+            } else {
+                this.factor();
+                this.negate();
+            }
+        },
+
+        // Parse and translate a leading factor
+        firstFactor: function () {
+            switch (this.look) {
+            case '+':
+                this.match('+');
+                this.factor();
+                break;
+            case '-':
+                this.negFactor();
+                break;
+            default:
+                this.factor();
+            }
+        },
+
+        // Recognize and translate a multiply
+        multiply: function () {
+            this.match('*');
+            this.factor();
+            this.popMul();
+        },
+
+        // Recognize and translate a divide
+        divide: function () {
+            this.match('/');
+            this.factor();
+            this.popDiv();
+        },
+
+        // Recognize an addop
+        isMulop: function (c) {
+            return c === '*' || c === '/';
+        },
+
+        // Common code used by term() and firstTerm()
+        term1: function () {
+            while (this.isMulop(this.look)) {
+                this.push();
+                switch (this.look) {
+                case '*':
+                    this.multiply();
+                    break;
+                case '/':
+                    this.divide();
+                    break;
+                }
+            }
+        },
+
+        // Parse and translate a math term
+        term: function () {
+            this.factor();
+            this.term1();
+        },
+
+        // Parse and translate a math term with possible leading sing
+        firstTerm: function () {
+            this.firstFactor();
+            this.term1();
+        },
+
+        // Recognize and translate an add
+        add: function () {
+            this.match('+');
+            this.term();
+            this.popAdd();
+        },
+
+        // Recognize and translate a subtract
+        subtract: function () {
+            this.match('-');
+            this.term();
+            this.popSub();
+        },
+
+        // Recognize an addop
+        isAddop: function (c) {
+            return c === '+' || c === '-';
+        },
+
+        // parse and translate an expression
+        expression: function () {
+            this.firstTerm();
+            while (this.isAddop(this.look)) {
+                this.push();
+                switch (this.look) {
+                case '+':
+                    this.add();
+                    break;
+                case '-':
+                    this.subtract();
+                    break;
+                }
+            }
+        },
+
+        // Parse and translate an assignment statement
+        assignment: function () {
+            var name = this.getName();
+            this.match('=');
+            this.expression();
+            this.store(name);
+        }
+
+    });
+
+    /**
+     * 10.8 Booleans
+     */
+
+    // 10.8.1 More code generation routines
+    moreCodeGenerationRoutines = assignmentStatement.extend({
+
+        // Complement the primary register
+        notIt: function () {
+            this.emitLn('NOT D0');
+        },
+
+        // AND top of stack with primary
+        popAnd: function () {
+            this.emitLn('AND (SP)+, D0');
+        },
+
+        // OR top of stack with primary
+        popOr: function () {
+            this.emitLn('OR (SP)+, D0');
+        },
+
+        // XOR top of stack with primary
+        popXor: function () {
+            this.emitLn('EOR (SP)+, D0');
+        },
+
+        // Compare top of stack with primary
+        popCompare: function () {
+            this.emitLn('CMP (SP)+, D0');
+        },
+
+        // Set D0 If compare was =
+        setEqual: function () {
+            this.emitLn('SEQ D0');
+            this.emitLn('EXT D0');
+        },
+
+        // Set D0 If compare was !=
+        setNEqual: function () {
+            this.emitLn('SNE D0');
+            this.emitLn('EXT D0');
+        },
+
+        // Set D0 If compare was >
+        setGreater: function () {
+            this.emitLn('SLT D0');
+            this.emitLn('EXT D0');
+        },
+
+        // Set D0 If compare was <
+        setLess: function () {
+            this.emitLn('SGT D0');
+            this.emitLn('EXT D0');
+        }
+
+    });
+
+    /**
+     * 10.8.2 Boolean expressions
+     * BNF for the boolean expressions:
+     * <bool-expr> ::= <bool-term> ( <orop> <bool-term> )*
+     * <bool-term> ::= <not-factor> ( <andop> <not-factor> )*
+     * <not-factor> ::= [ '!' ] <relation>
+     * <relation> ::= <expression> [ <relop> <expression> ]
+     *
+     * code example: pvx,y,zbx=z>ye.
+     * which stands for:
+     * -----
+     * PROGRAM
+     * VAR X, Y, Z
+     * BEGIN
+     * X = Z > Y
+     * END.
+     * -----
+     */
+    booleanExpressions = moreCodeGenerationRoutines.extend({
+
+        // Recognize a boolean orop
+        isOrop: function (c) {
+            return c === '|' || c === '~';
+        },
+
+        // Recognize a relop
+        isRelop: function (c) {
+            return c === '=' || c === '#' || c === '<' || c === '>';
+        },
+
+        // Recognize and translate a relational "equals"
+        equals: function () {
+            this.match('=');
+            this.expression();
+            this.popCompare();
+            this.setEqual();
+        },
+
+        // Recognize and translate a relational "not equals"
+        notEquals: function () {
+            this.match('#');
+            this.expression();
+            this.popCompare();
+            this.setNEqual();
+        },
+
+        // Recognize and translate a relational "less than"
+        less: function () {
+            this.match('<');
+            this.expression();
+            this.popCompare();
+            this.setLess();
+        },
+
+        // Recognize and translate a relational "greater than"
+        greater: function () {
+            this.match('>');
+            this.expression();
+            this.popCompare();
+            this.setGreater();
+        },
+
+        // Parse and translate a relation
+        relation: function () {
+            this.expression();
+            if (this.isRelop(this.look)) {
+                this.push();
+                switch (this.look) {
+                case '=':
+                    this.equals();
+                    break;
+                case '#':
+                    this.notEquals();
+                    break;
+                case '<':
+                    this.less();
+                    break;
+                case '>':
+                    this.greater();
+                    break;
+                }
+            }
+        },
+
+        // Parse and translate a boolean factor with leading NOT
+        notFactor: function () {
+            if (this.look === '!') {
+                this.match('!');
+                this.relation();
+                this.notIt();
+            } else {
+                this.relation();
+            }
+        },
+
+        // Parse and translate a boolean term
+        boolTerm: function () {
+            this.notFactor();
+            while (this.look === '&') {
+                this.push();
+                this.match('&');
+                this.notFactor();
+                this.popAnd();
+            }
+        },
+
+        // Recognize and translate a boolean OR
+        boolOr: function () {
+            this.match('|');
+            this.boolTerm();
+            this.popOr();
+        },
+
+        // Recognize and translate an exclusive or (XOR)
+        boolXor: function () {
+            this.match('~');
+            this.boolTerm();
+            this.popXor();
+        },
+
+        // Parse and translate a boolean expression
+        boolExpression: function () {
+            this.boolTerm();
+            while (this.isOrop(this.look)) {
+                this.push();
+                switch (this.look) {
+                case '|':
+                    this.boolOr();
+                    break;
+                case '~':
+                    this.boolXor();
+                    break;
+                }
+            }
+        },
+
+        // Parse and translate a math factor
+        factor: function () {
+            if (this.look === '(') {
+                this.match('(');
+                this.boolExpression();  // <--
+                this.match(')');
+            } else if (this.isAlpha(this.look)) {
+                this.loadVar(this.getName());
+            } else {
+                this.loadConst(this.getNum());
+            }
+        },
+
+        // Parse and translate an assignment statement
+        assignment: function () {
+            var name = this.getName();
+            this.match('=');
+            this.boolExpression();  // <--
+            this.store(name);
+        }
+
+    });
+
+    /**
+     * 10.9 Control structures
+     * <block> ::= ( <statement> )*
+     * <statement> ::= <if> | <while> | <assignment>
+     * <if> ::= IF <bool-expression> <block> [ ELSE <block> ] ENDIF
+     * <while> ::= WHILE <bool-expression> <block> ENDWHILE
+     *
+     * So far: TINY version 0.1
+     */
+    controlStructures = booleanExpressions.extend({
+
+        // Branch uncoditional
+        branch: function (label) {
+            this.emitLn('BRA ' + label);
+        },
+
+        // Branch false
+        branchFalse: function (label) {
+            this.emitLn('TST D0');
+            this.emitLn('BEQ ' + label);
+        },
+
+        // Generate a unique lable
+        newLabel: function () {
+            var label = 'L' + this.lCount;
+            this.lCount += 1;
+            return label;
+        },
+
+        // Recognize and translate an IF constructor
+        doIf: function () {
+            var label_1, label_2;
+
+            this.match('i');
+            this.boolExpression();
+            label_1 = this.newLabel();
+            label_2 = label_1;
+            this.branchFalse(label_1);
+            this.block();
+
+            if (this.look === 'l') {
+                this.match('l');
+                label_2 = this.newLabel();
+                this.branch(label_2);
+                this.postLabel(label_1);
+                this.block();
+            }
+
+            this.postLabel(label_2);
+            this.match('e');
+        },
+
+        // Parse and translate a WHILE statement
+        doWhile: function () {
+            var label_1, label_2;
+            this.match('w');
+            label_1 = this.newLabel();
+            label_2 = this.newLabel();
+            this.postLabel(label_1);
+            this.boolExpression();
+            this.branchFalse(label_2);
+            this.block();
+            this.match('e');
+            this.branch(label_1);
+            this.postLabel(label_2);
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            while (this.look !== 'e' && this.look !== 'l') {
+                switch (this.look) {
+                case 'i':
+                    this.doIf();
+                    break;
+                case 'w':
+                    this.doWhile();
+                    break;
+                default:
+                    this.assignment();
+                }
+            }
+        },
+
+        // Initialize
+        init: function () {
+            this.symbolTable = {};
+            this.lCount = 0;
+            this.getChar();
+        }
+
+    });
+
+    /**
+     * 10.10 Lexical scanning
+     */
+    lexicalScanning = controlStructures.extend({
+
+        // Variable declarations
+        token: '',      // encoded token
+        value: '',      // unencoded token
+
+        keywordCodeTable: {
+            IF: 'i',
+            ELSE: 'l',
+            ENDIF: 'e',
+            WHILE: 'w',
+            ENDWHILE: 'e',
+            VAR: 'v',
+            BEGIN: 'b',
+            END: 'e',
+            PROGRAM: 'p'
+        },
+
+        keywordCode: function (val) {
+            return this.keywordCodeTable[val] || 'x';
+        },
+
+        // Get an identifier and scan it for keywords
+        scan: function () {
+            this.getName();
+            this.token = this.keywordCode(this.value);
+        },
+
+        // Recognize an alphanumeric character
+        isAlNum: function (c) {
+            return this.isAlpha(c) || this.isDigit(c);
+        },
+
+        // Recognize white space
+        isWhite: function (c) {
+            return c === ' ' || c === this.TAB;
+        },
+
+        // Skip over leading white space
+        skipWhite: function () {
+            while (this.isWhite(this.look)) {
+                this.getChar();
+            }
+        },
+
+        // Skip over an end-of-line
+        newLine: function () {
+            while (this.look === this.CR || this.look === this.LF) {
+                this.getChar();
+                this.skipWhite();
+            }
+        },
+
+        // Match a specific input character
+        match: function (x) {
+            this.newLine();     // <--
+            if (this.look !== x) {
+                this.expected('"' + x + '"');
+            }
+            this.getChar();
+            this.skipWhite();   // <--
+        },
+
+        // Match a specific input string
+        matchString: function (str) {
+            if (this.value !== str) {
+                this.expected('"' + str + '"');
+            }
+        },
+
+        // Get an identifier
+        getName: function () {
+            this.newLine();     // <--
+            if (!this.isAlpha(this.look)) {
+                this.expected('Name');
+            }
+            this.value = '';
+            while (this.isAlNum(this.look)) {
+                this.value += this.look.toUpperCase();
+                this.getChar();
+            }
+            this.skipWhite();   // <--
+        },
+
+        // Get a Number
+        getNum: function () {
+            var value = 0;
+            this.newLine();     // <--
+            if (!this.isDigit(this.look)) {
+                this.expected('Integer');
+            }
+            while (this.isDigit(this.look)) {
+                value = +this.look + 10 * value;
+                this.getChar();
+            }
+            this.skipWhite();   // <--
+            return value;
+        },
+
+        // Parse and translate a math factor
+        factor: function () {
+            if (this.look === '(') {
+                this.match('(');
+                this.boolExpression();
+                this.match(')');
+            } else if (this.isAlpha(this.look)) {
+                this.getName();
+                this.loadVar(this.value);
+            } else {
+                this.loadConst(this.getNum());
+            }
+        },
+
+        // Parse and translate a data declaration
+        decl: function () {
+            this.getName();
+            this.alloc(this.value);
+            while (this.look === ',') {     // <--
+                this.match(',');
+                this.getName();
+                this.alloc(this.value);
+            }
+        },
+
+        // Parse and translate an assignment statement
+        assignment: function () {
+            var name = this.value;
+            this.match('=');
+            this.boolExpression();
+            this.store(name);
+        },
+
+        // Recognize and translate an IF constructor
+        doIf: function () {
+            var label_1, label_2;
+
+            this.boolExpression();
+            label_1 = this.newLabel();
+            label_2 = label_1;
+            this.branchFalse(label_1);
+            this.block();
+
+            if (this.token === 'l') {
+                label_2 = this.newLabel();
+                this.branch(label_2);
+                this.postLabel(label_1);
+                this.block();
+            }
+
+            this.postLabel(label_2);
+            this.matchString('ENDIF');
+        },
+
+        // Parse and translate a WHILE statement
+        doWhile: function () {
+            var label_1 = this.newLabel(),
+                label_2 = this.newLabel();
+
+            this.postLabel(label_1);
+            this.boolExpression();
+            this.branchFalse(label_2);
+            this.block();
+            this.matchString('ENDWHILE');
+            this.branch(label_1);
+            this.postLabel(label_2);
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            this.scan();
+            while (this.token !== 'e' && this.token !== 'l') {
+                switch (this.token) {
+                case 'i':
+                    this.doIf();
+                    break;
+                case 'w':
+                    this.doWhile();
+                    break;
+                default:
+                    this.assignment();
+                }
+                this.scan();
+            }
+        },
+
+        // Parse and translate global declarations
+        topDecls: function () {
+            this.scan();
+            while (this.token !== 'b') {
+                switch (this.token) {
+                case 'v':
+                    this.decl();
+                    break;
+                default:
+                    this.abort('Unrecognized Keyword "' + this.value + '"');
+                }
+                this.scan();
+            }
+        },
+
+        // Main program
+        doMain: function () {
+            this.matchString('BEGIN');
+            this.prolog();
+            this.block();
+            this.matchString('END');
+            this.epilog();
+        },
+
+        // Parse and translate a program
+        prog: function () {
+            this.matchString('PROGRAM');
+            this.header();
+            this.topDecls();
+            this.doMain();
+            this.match('.');
+        },
+
+        // Initialize
+        init: function () {
+            this.symbolTable = {};
+            this.lCount = 0;
+            this.getChar();
+            this.scan();
+        }
+
+    });
+
+    // 10.11 Multi-character variable names
+
+    /**
+     * 10.12 More relops
+     * <, <= , =, <>, #, >, >=
+     */
+    moreRelops = lexicalScanning.extend({
+
+        // TODO: double check the Scc command!
+
+        // Set D0 if compare was <=
+        setLessOrEqual: function () {
+            this.emitLn('SGE D0');
+            this.emitLn('EXT D0');
+        },
+
+        // Set D0 if compare was >=
+        setGreaterOrEqual: function () {
+            this.emitLn('SLE D0');
+            this.emitLn('EXT D0');
+        },
+
+        // Recognize and translate a relational "less than or equal"
+        lessOrEqual: function () {
+            this.match('=');
+            this.expression();
+            this.popCompare();
+            this.setLessOrEqual();
+        },
+
+        // Recognize and translate a relational "not equals"
+        notEqual: function () {
+            this.match('>');
+            this.expression();
+            this.popCompare();
+            this.setNEqual();
+        },
+
+        // Recognize and translate a relational "less than"
+        less: function () {
+            this.match('<');
+            switch (this.look) {
+            case '=':   // <=  less or equal
+                this.lessOrEqual();
+                break;
+            case '>':   // <>  not equal
+                this.notEqual();
+                break;
+            default:    // <  less
+                this.expression();
+                this.popCompare();
+                this.setLess();
+            }
+        },
+
+        // Recognize and translate a relational "greater than"
+        greater: function () {
+            this.match('>');
+            if (this.look === '=') {   // >=  greater or equal
+                this.match('=');
+                this.expression();
+                this.popCompare();
+                this.setGreaterOrEqual();
+            } else {        // >  greater
+                this.expression();
+                this.popCompare();
+                this.setGreater();
+            }
+        }
+
+    });
+
+    /**
+     * 10.13 Input / Output
+     * Assuming a library call TINYLIB.LIB exists
+     */
+    inputOutput = moreRelops.extend({
+
+        keywordCodeTable: {
+            IF: 'i',
+            ELSE: 'l',
+            ENDIF: 'e',
+            WHILE: 'w',
+            ENDWHILE: 'e',
+            READ: 'R',      // <--
+            WRITE: 'W',     // <--
+            VAR: 'v',
+            BEGIN: 'b',
+            END: 'e',
+            PROGRAM: 'p'
+        },
+
+        // Write header info
+        header: function () {
+            io.writeLn('WARMST', this.TAB, 'EQU $A01E');
+            this.emitLn('LIB TINYLIB');
+        },
+
+        // Read variable to primary register
+        readVar: function () {
+            this.emitLn('BSR READ');
+            this.store(this.value);
+        },
+
+        // Write variable from primary register
+        writeVar: function () {
+            this.emitLn('BSR WRITE');
+        },
+
+        // Process a read statement
+        doRead: function () {
+            this.match('(');
+            this.getName();
+            this.readVar();
+            while (this.look === ',') {
+                this.match(',');
+                this.getName();
+                this.readVar();
+            }
+            this.match(')');
+        },
+
+        // Process a write statement
+        doWrite: function () {
+            this.match('(');
+            this.expression();
+            this.writeVar();
+            while (this.look === ',') {
+                this.match(',');
+                this.expression();
+                this.writeVar();
+            }
+            this.match(')');
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            this.scan();
+            while (this.token !== 'e' && this.token !== 'l') {
+                switch (this.token) {
+                case 'i':
+                    this.doIf();
+                    break;
+                case 'w':
+                    this.doWhile();
+                    break;
+                case 'R':   // <--
+                    this.doRead();
+                    break;
+                case 'W':   // <--
+                    this.doWrite();
+                    break;
+                default:
+                    this.assignment();
+                }
+                this.scan();
+            }
+        }
+
+    });
+
+    // 10.14 Conclusion
+    // TINY Version 1.0
+
+
+    // return main functions for executions
+    return {
+
+        // 10.2.1
+        gettingStarted: boundMain(gettingStarted),
+        // 10.2.2
+        theMainProgram: boundMain(theMainProgram),
+        // 10.3
+        declarations: boundMain(declarations),
+        // 10.4.1
+        declarationsAndSymbols: boundMain(declarationsAndSymbols),
+        // 10.4.2
+        variableList: boundMain(variableList),
+        // 10.5.1
+        initializers: boundMain(initializers),
+        // 10.5.2
+        multiDigitInteger: boundMain(multiDigitInteger),
+        // 10.6
+        theSymbolTable: boundMain(theSymbolTable),
+        // 10.7.1
+        executableStatements: boundMain(executableStatements),
+        // 10.7.3
+        assignmentStatement: boundMain(assignmentStatement),
+        // 10.8.2
+        booleanExpressions: boundMain(booleanExpressions),
+        // 10.9
+        controlStructures: boundMain(controlStructures),
+        //10.10
+        lexicalScanning: boundMain(lexicalScanning),
+        // 10.12
+        moreRelops: boundMain(moreRelops),
+        // 10.13
+        inputOutput: boundMain(inputOutput)
+
+    };
+
+});
+/**
+ * Chapter 11 Lexical Scan Revisited - 11.6 Conclusion
+ * Program Tiny v1.1
+ */
+
+define(['./object', 'io'], function (object, io) {
+    'use strict';
+
+    var boundMain = object.boundMain,
+        program;
+
+    program = object.extend({
+
+        // Constant declarations
+        TAB: '\t',
+        CR: '\r',
+        LF: '\n',
+
+        // Variable declarations
+        look: '',   // lookahead character
+        lCount: 0,  // label counter
+        token: '',      // encoded token
+        value: '',      // unencoded token
+        symbolTable: null,
+
+        keywordCodeTable: {
+            IF: 'i',
+            ELSE: 'l',
+            ENDIF: 'e',
+            WHILE: 'w',
+            ENDWHILE: 'e',
+            READ: 'R',
+            WRITE: 'W',
+            VAR: 'v',
+            BEGIN: 'b',
+            END: 'e',
+            PROGRAM: 'p'
+        },
+
+        keywordCode: function (val) {
+            return this.keywordCodeTable[val] || 'x';
+        },
+
+        // Read new character from input
+        getChar: function () {
+            this.look = io.read();
+        },
+
+        // Report an error
+        error: function (str) {
+            io.writeLn('Error: ', str, '.');
+        },
+
+        // Report error and halt
+        abort: function (str) {
+            this.error(str);
+            io.halt();
+        },
+
+        // Report what was expected
+        expected: function (str) {
+            this.abort(str + ' Expected');
+        },
+
+        // Report an undefined identifier
+        undef: function (name) {
+            this.abort('Undefined Identifier ' + name);
+        },
+
+        // Report a duplicate identifier
+        duplicate: function (name) {
+            this.abort('Duplicate Identifier ' + name);
+        },
+
+        // Check to make sure the current token is an identifier
+        checkIdent: function () {
+            if (this.token !== 'x') {
+                this.expected('Identifier');
+            }
+        },
+
+        // Recognize an alpha character
+        isAlpha: function (c) {
+            return (/[A-Z]/i).test(c);
+        },
+
+        // Recognize a decimal digit
+        isDigit: function (c) {
+            return (/\d/).test(c);
+        },
+
+        // Recognize an alphanumeric character
+        isAlNum: function (c) {
+            return this.isAlpha(c) || this.isDigit(c);
+        },
+
+        // Recognize an addop
+        isAddop: function (c) {
+            return c === '+' || c === '-';
+        },
+
+        // Recognize a mulop
+        isMulop: function (c) {
+            return c === '*' || c === '/';
+        },
+
+        // Recognize a boolean orop
+        isOrop: function (c) {
+            return c === '|' || c === '~';
+        },
+
+        // Recognize a relop
+        isRelop: function (c) {
+            return c === '=' || c === '#' || c === '<' || c === '>';
+        },
+
+        // Recognize white space
+        isWhite: function (c) {
+            return c === ' ' || c === this.TAB ||
+                   c === this.CR || c === this.LF;
+        },
+
+        // Skip over leading white space
+        skipWhite: function () {
+            while (this.isWhite(this.look)) {
+                this.getChar();
+            }
+        },
+
+        // Look for symbol in table
+        inTable: function (name) {
+            return !!this.symbolTable[name];
+        },
+
+        // Check to see if an identifier is in the symbol table
+        // Report an error if it's not.
+        checkTable: function (name) {
+            if (!this.inTable(name)) {
+                this.undef(name);
+            }
+        },
+
+        // Check the symbol table for a duplicate identifier
+        // Report an error if identifier is already in table.
+        checkDup: function (name) {
+            if (this.inTable(name)) {
+                this.duplicate(name);
+            }
+        },
+
+        // Add a new entry to symbol table
+        addEntry: function (name, type) {
+            this.checkDup(name);
+            this.symbolTable[name] = type;
+        },
+
+        // Get an identifier
+        getName: function () {
+            this.skipWhite();
+            if (!this.isAlpha(this.look)) {
+                this.expected('Identifier');
+            }
+            this.token = 'x';
+            this.value = '';
+            do {
+                this.value += this.look.toUpperCase();
+                this.getChar();
+            } while (this.isAlNum(this.look));
+        },
+
+        // Get a Number
+        getNum: function () {
+            this.skipWhite();
+            if (!this.isDigit(this.look)) {
+                this.expected('Number');
+            }
+            this.token = '#';
+            this.value = '';
+            do {
+                this.value += this.look;
+                this.getChar();
+            } while (this.isDigit(this.look));
+        },
+
+        // Get an operator
+        getOp: function () {
+            this.token = this.look;
+            this.value = this.look;
+            this.getChar();
+        },
+
+        // Get the next input token
+        next: function () {
+            this.skipWhite();
+            if (this.isAlpha(this.look)) {
+                this.getName();
+            } else if (this.isDigit(this.look)) {
+                this.getNum();
+            } else {
+                this.getOp();
+            }
+        },
+
+        // Scan the current identifier for keywords
+        scan: function () {
+            if (this.token === 'x') {
+                this.token = this.keywordCode(this.value);
+            }
+        },
+
+        // Match a specific input string
+        matchString: function (str) {
+            if (this.value !== str) {
+                this.expected('"' + str + '"');
+            }
+            this.next();
+        },
+
+         // Output a string with tab
+        emit: function (str) {
+            io.write(this.TAB + str);
+        },
+
+        // Output a string with tab and newline
+        emitLn: function (str) {
+            this.emit(str);
+            io.writeLn();
+        },
+
+        // Generate a unique lable
+        newLabel: function () {
+            var label = 'L' + this.lCount;
+            this.lCount += 1;
+            return label;
+        },
+
+        // Post a label to output
+        postLabel: function (label) {
+            io.writeLn(label + ':');
+        },
+
+        /**
+         * Code generation routines
+         */
+
+         // Clear the primary register
+        clear: function () {
+            this.emitLn('CLR D0');
+        },
+
+        // Negate the primary register
+        negate: function () {
+            this.emitLn('NEG D0');
+        },
+
+        // Complement the primary register
+        notIt: function () {
+            this.emitLn('NOT D0');
+        },
+
+        // Load a constant value to primary register
+        loadConst: function (number) {
+            this.emitLn('MOVE #' + number + ', D0');
+        },
+
+        // Load a variable to primary register
+        loadVar: function (name) {
+            if (!this.inTable(name)) {
+                this.undef(name);
+            }
+            this.emitLn('MOVE ' + name + '(PC), D0');
+        },
+
+        // Push primary onto stack
+        push: function () {
+            this.emitLn('MOVE D0, -(SP)');
+        },
+
+        // Add top of stack to primary
+        popAdd: function () {
+            this.emitLn('ADD (SP)+, D0');
+        },
+
+        // Subtract primary from top of stack
+        popSub: function () {
+            this.emitLn('SUB (SP)+, D0');
+            this.emitLn('NEG D0');
+        },
+
+        // Multiply top of stack to primary
+        popMul: function () {
+            this.emitLn('MULS (SP)+, D0');
+        },
+
+        // Divide top of stack by primary
+        popDiv: function () {
+            this.emitLn('MOVE (SP)+, D1');
+            this.emitLn('EXG  D0, D1');
+            this.emitLn('DIVS D1, D0');
+        },
+
+        // AND top of stack with primary
+        popAnd: function () {
+            this.emitLn('AND (SP)+, D0');
+        },
+
+        // OR top of stack with primary
+        popOr: function () {
+            this.emitLn('OR (SP)+, D0');
+        },
+
+        // XOR top of stack with primary
+        popXor: function () {
+            this.emitLn('EOR (SP)+, D0');
+        },
+
+        // Compare top of stack with primary
+        popCompare: function () {
+            this.emitLn('CMP (SP)+, D0');
+        },
+
+        // Set D0 If compare was =
+        setEqual: function () {
+            this.emitLn('SEQ D0');
+            this.emitLn('EXT D0');
+        },
+
+        // Set D0 If compare was !=
+        setNEqual: function () {
+            this.emitLn('SNE D0');
+            this.emitLn('EXT D0');
+        },
+
+        // Set D0 If compare was >
+        setGreater: function () {
+            this.emitLn('SLT D0');
+            this.emitLn('EXT D0');
+        },
+
+        // Set D0 If compare was <
+        setLess: function () {
+            this.emitLn('SGT D0');
+            this.emitLn('EXT D0');
+        },
+
+        // Set D0 if compare was <=
+        setLessOrEqual: function () {
+            this.emitLn('SGE D0');
+            this.emitLn('EXT D0');
+        },
+
+        // Set D0 if compare was >=
+        setGreaterOrEqual: function () {
+            this.emitLn('SLE D0');
+            this.emitLn('EXT D0');
+        },
+
+        // Store primary to variable
+        store: function (name) {
+            this.emitLn('LEA ' + name + '(PC), A0');
+            this.emitLn('MOVE D0, (A0)');
+        },
+
+        // Branch uncoditional
+        branch: function (label) {
+            this.emitLn('BRA ' + label);
+        },
+
+        // Branch false
+        branchFalse: function (label) {
+            this.emitLn('TST D0');
+            this.emitLn('BEQ ' + label);
+        },
+
+        // Read variable to primary register
+        readIt: function () {
+            this.emitLn('BSR READ');
+            this.store(this.value);
+        },
+
+        // Write variable from primary register
+        writeIt: function () {
+            this.emitLn('BSR WRITE');
+        },
+
+        /**
+         * TODO: provide BNF
+         */
+
+        // Write header info
+        header: function () {
+            io.writeLn('WARMST', this.TAB, 'EQU $A01E');
+        },
+
+        // Write the prolog
+        prolog: function () {
+            this.postLabel('MAIN');
+        },
+
+        // Write the epilog
+        epilog: function () {
+            this.emitLn('DC WARMST');
+            this.emitLn('END MAIN');
+        },
+
+        // Allocate storage for a static variable
+        allocate: function (name, value) {
+            io.writeLn(name, ':', this.TAB, 'DC ', value);
+        },
+
+        /**
+         * <expression> ::= <term> [<addop> <term>]*
+         * <term> ::= <factor> [<mulop> <factor>]*
+         * <factor> ::= <number> | (<b-expression>) | <variable>
+         */
+
+        // Parse and translate a math factor
+        factor: function () {
+            if (this.token === '(') {
+                this.next();
+                this.boolExpression();
+                this.matchString(')');
+            } else {
+                if (this.token === 'x') {
+                    this.loadVar(this.value);
+                } else if (this.token === '#') {
+                    this.loadConst(this.value);
+                } else {
+                    this.expected('Math Factor');
+                }
+                this.next();
+            }
+        },
+
+        // Recognize and translate a multiply
+        multiply: function () {
+            this.next();
+            this.factor();
+            this.popMul();
+        },
+
+        // Recognize and translate a divide
+        divide: function () {
+            this.next();
+            this.factor();
+            this.popDiv();
+        },
+
+        // Parse and translate a math term
+        term: function () {
+            this.factor();
+            while (this.isMulop(this.token)) {
+                this.push();
+                switch (this.token) {
+                case '*':
+                    this.multiply();
+                    break;
+                case '/':
+                    this.divide();
+                    break;
+                }
+            }
+        },
+
+        // Recognize and translate an add
+        add: function () {
+            this.next();
+            this.term();
+            this.popAdd();
+        },
+
+        // Recognize and translate a subtract
+        subtract: function () {
+            this.next();
+            this.term();
+            this.popSub();
+        },
+
+        // parse and translate an expression
+        expression: function () {
+            if (this.isAddop(this.token)) {
+                this.clear();
+            } else {
+                this.term();
+            }
+            while (this.isAddop(this.token)) {
+                this.push();
+                switch (this.token) {
+                case '+':
+                    this.add();
+                    break;
+                case '-':
+                    this.subtract();
+                    break;
+                }
+            }
+        },
+
+        // Get another expression and compare
+        compareExpression: function () {
+            this.expression();
+            this.popCompare();
+        },
+
+        // Get the next expression and compare
+        nextExpression: function () {
+            this.next();
+            this.compareExpression();
+        },
+
+        // Recognize and translate a relational "equal"
+        equal: function () {
+            this.nextExpression();
+            this.setEqual();
+        },
+
+        // Recognize and translate a relational "less than or equal"
+        lessOrEqual: function () {
+            this.nextExpression();
+            this.setLessOrEqual();
+        },
+
+        // Recognize and translate a relational "not equals"
+        notEqual: function () {
+            this.nextExpression();
+            this.setNEqual();
+        },
+
+        // Recognize and translate a relational "less than"
+        less: function () {
+            this.next();
+            switch (this.token) {
+            case '=':   // <=
+                this.lessOrEqual();
+                break;
+            case '>':   // <>
+                this.notEqual();
+                break;
+            default:    // <
+                this.compareExpression();
+                this.setLess();
+            }
+        },
+
+        // Recognize and translate a relational "greater than"
+        greater: function () {
+            this.next();
+            if (this.token === '=') {   // >=
+                this.nextExpression();
+                this.setGreaterOrEqual();
+            } else {                    // >
+                this.compareExpression();
+                this.setGreater();
+            }
+        },
+
+        // Parse and translate a relation
+        relation: function () {
+            this.expression();
+            if (this.isRelop(this.token)) {
+                this.push();
+                switch (this.token) {
+                case '=':
+                    this.equals();
+                    break;
+                case '<':
+                    this.less();
+                    break;
+                case '>':
+                    this.greater();
+                    break;
+                }
+            }
+        },
+
+        // Parse and translate a boolean factor with leading NOT
+        notFactor: function () {
+            if (this.token === '!') {
+                this.next();
+                this.relation();
+                this.notIt();
+            } else {
+                this.relation();
+            }
+        },
+
+        // Parse and translate a boolean term
+        boolTerm: function () {
+            this.notFactor();
+            while (this.token === '&') {
+                this.push();
+                this.next();
+                this.notFactor();
+                this.popAnd();
+            }
+        },
+
+        // Recognize and translate a boolean OR
+        boolOr: function () {
+            this.next();
+            this.boolTerm();
+            this.popOr();
+        },
+
+        // Recognize and translate an exclusive or (XOR)
+        boolXor: function () {
+            this.next();
+            this.boolTerm();
+            this.popXor();
+        },
+
+        // Parse and translate a boolean expression
+        boolExpression: function () {
+            this.boolTerm();
+            while (this.isOrop(this.token)) {
+                this.push();
+                switch (this.token) {
+                case '|':
+                    this.boolOr();
+                    break;
+                case '~':
+                    this.boolXor();
+                    break;
+                }
+            }
+        },
+
+        // Parse and translate an assignment statement
+        assignment: function () {
+            var name;
+            this.checkTable(this.value);
+            name = this.value;
+            this.next();
+            this.matchString('=');
+            this.boolExpression();
+            this.store(name);
+        },
+
+        /**
+         * <program> ::= <block> END
+         * <block> ::= [<statement>]*
+         * <statement> ::= <if> | <assignment>
+         * <if stmt> ::= IF <condition> <block> [ELSE <block>] ENDIF
+         * <assignment> ::= <identifier> = <expression>
+         */
+
+        // Recognize and translate an IF constructor
+        doIf: function () {
+            var label_1, label_2;
+            this.next();
+            this.boolExpression();
+            label_1 = this.newLabel();
+            label_2 = label_1;
+            this.branchFalse(label_1);
+            this.block();
+
+            if (this.token === 'l') {
+                this.next();
+                label_2 = this.newLabel();
+                this.branch(label_2);
+                this.postLabel(label_1);
+                this.block();
+            }
+
+            this.postLabel(label_2);
+            this.matchString('ENDIF');
+        },
+
+        // Parse and translate a WHILE statement
+        doWhile: function () {
+            var label_1, label_2;
+            this.next();
+            label_1 = this.newLabel();
+            label_2 = this.newLabel();
+            this.postLabel(label_1);
+            this.boolExpression();
+            this.branchFalse(label_2);
+            this.block();
+            this.matchString('ENDWHILE');
+            this.branch(label_1);
+            this.postLabel(label_2);
+        },
+
+        // Read variable to primary register
+        readVar: function () {
+            this.checkIdent();
+            this.checkTable(this.value);
+            this.readIt(this.value);
+            this.next();
+        },
+
+        // Process a read statement
+        doRead: function () {
+            this.next();
+            this.matchString('(');
+            this.readVar();
+            while (this.token === ',') {
+                this.next();
+                this.readVar();
+            }
+            this.matchString(')');
+        },
+
+        // Process a write statement
+        doWrite: function () {
+            this.next();
+            this.matchString('(');
+            this.expression();
+            this.writeIt();
+            while (this.token === ',') {
+                this.next();
+                this.expression();
+                this.writeIt();
+            }
+            this.matchString(')');
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            while (this.token !== 'e' && this.token !== 'l') {
+                switch (this.token) {
+                case 'i':
+                    this.doIf();
+                    break;
+                case 'w':
+                    this.doWhile();
+                    break;
+                case 'R':
+                    this.doRead();
+                    break;
+                case 'W':
+                    this.doWrite();
+                    break;
+                default:
+                    this.assignment();
+                }
+                this.scan();
+            }
+        },
+
+        // Allocate storage for a variable
+        alloc: function () {
+            this.next();
+            if (this.token !== 'x') {
+                this.expected('Variable Name');
+            }
+            this.checkDup(this.value);
+            this.addEntry(this.value, 'v');
+            this.allocate(this.value, '0');
+            this.next();
+        },
+
+        // Parse and translate global declarations
+        topDecls: function () {
+            this.scan();
+            while (this.token === 'v') {
+                this.alloc();
+                while (this.token === ',') {
+                    this.alloc();
+                }
+                this.scan();    // <--
+            }
+        },
+
+        // Initialize
+        init: function () {
+            this.symbolTable = {};
+            this.lCount = 0;
+            this.getChar();
+            this.next();
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            this.matchString('PROGRAM');
+            this.header();
+            this.topDecls();
+            this.matchString('BEGIN');
+            this.prolog();
+            this.block();
+            this.matchString('END');
+            this.epilog();
+        }
+
+    });
+
+    // return main functions for executions
+    // and the program itself for chapter 12
+    return {
+        run: boundMain(program),
+        object: program
+    };
+
+});
+/**
+ * Chapter 12 Miscellany
+ */
+
+define(['./object', './11.6-tiny-1.1'], function (object, tiny_11) {
+    'use strict';
+
+    var boundMain = object.boundMain,
+        dealingWithSemicolons;          // 12.4
+
+    // 12.1 Introduction
+
+    // 12.2 Semicolons
+
+    // 12.3 Syntactic sugar
+
+    /**
+     * 12.4 Dealing with semicolons
+     * In Pascal, semicolon is a statement SEPARATOR:
+     * <block> ::= <statement> (';' <statement>)*
+     * <statement> ::= <assignment> | <if> | <while> ... | null
+     * In C and Ada, semicolon is a statement TERMINATOR
+     * <block> ::= ( <statement> ';' )*
+     */
+    dealingWithSemicolons = tiny_11.object.extend({
+
+        // Match a semicolon
+        semi: function () {
+            this.matchString(';');
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            while (this.token !== 'e' && this.token !== 'l') {
+                switch (this.token) {
+                case 'i':
+                    this.doIf();
+                    break;
+                case 'w':
+                    this.doWhile();
+                    break;
+                case 'R':
+                    this.doRead();
+                    break;
+                case 'W':
+                    this.doWrite();
+                    break;
+                case 'x':   // <--
+                    this.assignment();
+                    break;
+                }
+                this.semi();    // <--
+                this.scan();
+            }
+        },
+
+        // Parse and translate global declarations
+        topDecls: function () {
+            this.scan();
+            while (this.token === 'v') {
+                this.alloc();
+                while (this.token === ',') {
+                    this.alloc();
+                }
+                this.semi();    // <--
+                this.scan();    // <--
+            }
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            this.matchString('PROGRAM');
+            this.semi();        // <--
+            this.header();
+            this.topDecls();
+            this.matchString('BEGIN');
+            this.prolog();
+            this.block();
+            this.matchString('END');
+            this.epilog();
+        }
+
+    });
+
+
+    // return main functions for executions
+    return {
+
+        dealingWithSemicolons: boundMain(dealingWithSemicolons)
+
+    };
+
+});
+/**
+ * Chapter 2 Expression Parsing
+ */
+
+define(['./1.2-cradle'], function (cradle) {
+    'use strict';
+
+    var boundMain = cradle.boundMain,
+        singleDigits,               // 2.2
+        binaryExpressions,          // 2.3
+        generalExpressions,         // 2.4
+        usingTheStack,              // 2.5
+        multiplicationAndDivision,   // 2.6
+        parentheses,                // 2.7
+        unaryMinus;               // 2.8
+
+    /**
+     * 2.1 Getting started
+     * x = 2 * y + 3 / (4 * z)
+     */
+
+    /**
+     * 2.2 Single digits
+     */
+    singleDigits = cradle.extend({
+
+        // Parse and translate a math expression
+        expression: function () {
+            this.emitLn('MOVE #' + this.getNum() + ', D0');
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            this.expression();
+        }
+
+    });
+
+    /**
+     * 2.3 Binary expressions
+     * In BNF:
+     * <term> +/- <term>
+     */
+    binaryExpressions = singleDigits.extend({
+
+        // Parse and translate a math term
+        term: function () {
+            this.emitLn('MOVE #' + this.getNum() + ', D0');
+        },
+
+        // Recognize and translate an add
+        add: function () {
+            this.match('+');
+            this.term();
+            this.emitLn('ADD D1, D0');
+        },
+
+        // Recognize and translate a subtract
+        subtract: function () {
+            this.match('-');
+            this.term();
+            this.emitLn('SUB D1, D0');
+            this.emitLn('NEG D0');
+        },
+
+        // Parse and translate an expression
+        expression: function () {
+            this.term();
+            this.emitLn('MOVE D0, D1');
+            switch (this.look) {
+            case '+':
+                this.add();
+                break;
+            case '-':
+                this.subtract();
+                break;
+            default:
+                this.expected('Addop');
+            }
+        }
+
+    });
+
+    /**
+     * 2.4 General expressions
+     * In BNF:
+     * <expression> ::= <term> |<addop> <term>|*
+     */
+    generalExpressions = binaryExpressions.extend({
+
+        // Parse and translate an expression
+        expression: function () {
+            this.term();
+            while (this.look === '+' || this.look === '-') {
+                this.emitLn('MOVE D0, D1');
+                switch (this.look) {
+                case '+':
+                    this.add();
+                    break;
+                case '-':
+                    this.subtract();
+                    break;
+                }
+            }
+        }
+
+    });
+
+    /**
+     * 2.5 Using the stack
+     * to deal with complexity, such as 1 + (2 - (3 + (4 - 5)))
+     */
+    usingTheStack = binaryExpressions.extend({
+
+        // Recognize and translate an add
+        add: function () {
+            this.match('+');
+            this.term();
+            this.emitLn('ADD (SP)+, D0');    // <-- pop from stack
+        },
+
+        // Recognize and translate a subtract
+        subtract: function () {
+            this.match('-');
+            this.term();
+            this.emitLn('SUB (SP)+, D0');    // <-- pop from stack
+            this.emitLn('NEG D0');
+        },
+
+        // Parse and translate an expression
+        expression: function () {
+            this.term();
+            while (this.look === '+' || this.look === '-') {
+                this.emitLn('MOVE D0, -(SP)');   // <-- push to stack
+                switch (this.look) {
+                case '+':
+                    this.add();
+                    break;
+                case '-':
+                    this.subtract();
+                    break;
+                }
+            }
+        }
+
+    });
+
+    /**
+     * 2.6 Multiplication and division
+     * In BNF:
+     * <term> ::= <factor> |<mulop> <factor>|*
+     */
+    multiplicationAndDivision = usingTheStack.extend({
+
+        // Parse and translate a math factor
+        // same as term() in 2.3 binary expressions
+        factor: function () {
+            this.emitLn('MOVE #' + this.getNum() + ', D0');
+        },
+
+        // Recognize and translate a multiply
+        multiply: function () {
+            this.match('*');
+            this.factor();
+            this.emitLn('MULS (SP)+, D0');
+        },
+
+        // Recognize and translate a divide
+        divide: function () {
+            this.match('/');
+            this.factor();
+            this.emitLn('MOVE (SP)+, D1');
+            this.emitLn('EXG  D0, D1');  // exchange, swap(D0, D1)
+            this.emitLn('DIVS D1, D0');
+        },
+
+        // Parse and translate a math term
+        term: function () {
+            this.factor();
+            while (this.look === '*' || this.look === '/') {
+                this.emitLn('MOVE D0, -(SP)');
+                switch (this.look) {
+                case '*':
+                    this.multiply();
+                    break;
+                case '/':
+                    this.divide();
+                    break;
+                }
+            }
+        }
+
+    });
+
+    /**
+     * 2.7 Parentheses
+     * a mechanism to force a desired operator precedence
+     * 2 * (3 + 4);
+     * a mechanism for defining expressions of any degree of complexity
+     * (1 + 2)/((3 + 4) + (5 - 6))
+     * In BNF:
+     * <factor> ::= <number> | (<expression>)
+     * This is where the recursion comes in.
+     */
+    parentheses = multiplicationAndDivision.extend({
+
+        // Parse and translate a math factor
+        factor: function () {
+            if (this.look === '(') {
+                this.match('(');
+                this.expression();
+                this.match(')');
+            } else {
+                this.emitLn('MOVE #' + this.getNum() + ' ,D0');
+            }
+        }
+
+    });
+
+    /**
+     * 2.8 Unary minus
+     * e.g. -1, +3 or -(3-2), etc.
+     * solution: stick an imaginary leading zero in front of expressions
+     * of this type, so that -3 becomes 0 - 3.
+     *
+     * <expression> ::= [<unary op>] <term> [<addop> <term>]*
+     */
+    unaryMinus = parentheses.extend({
+
+        // Recognize an addop
+        isAddop: function (c) {
+            return c === '+' || c === '-';
+        },
+
+        // Parse and translate an expression
+        expression: function () {
+            if (this.isAddop(this.look)) {
+                this.emitLn('CLR D0');
+            } else {
+                this.term();
+            }
+            while (this.look === '+' || this.look === '-') {
+                this.emitLn('MOVE D0, -(SP)');   // <-- push to stack
+                switch (this.look) {
+                case '+':
+                    this.add();
+                    break;
+                case '-':
+                    this.subtract();
+                    break;
+                }
+            }
+        }
+
+    });
+
+    // return main functions for executions,
+    // and the final unitaryMinus object for next chapter (ch. 3),
+    return {
+
+        // <expression> ::= <number>
+        singleDigits: boundMain(singleDigits),
+
+        // <term> ::= <number>
+        // <expression> ::= <term> <addop> <term>
+        binaryExpressions: boundMain(binaryExpressions),
+
+        // <expression> ::= <term> |<addop> <term>|*
+        generalExpressions: boundMain(generalExpressions),
+
+        // Use the stack instead of registers to serve for complexity
+        usingTheStack: boundMain(usingTheStack),
+
+        // <factor> ::= <number>
+        // <term> ::= <factor> |<mulop> <factor>|*
+        multiplicationAndDivision: boundMain(multiplicationAndDivision),
+
+        // <factor> ::= <number> | (<expression>)
+        parentheses: boundMain(parentheses),
+
+        // <expression> ::= <unary op> <term> [<addop> <term>]*
+        unaryMinus: boundMain(unaryMinus),
+
+        // Export the object for the next chapter
+        unaryMinusObject: unaryMinus
+
+    };
+
+    /**
+     * Final results of this chapter in BNF:
+     * -----
+     * <expression> ::= [<unary op>] <term> [<addop> <term>]*
+     * <term> ::= <factor> |<mulop> <factor>|*
+     * <factor> ::= <number> | (<expression>)
+     */
+
+});
+/**
+ * Chapter 3 More Expressions
+ */
+
+define([
+    './object', './2-expression-parsing'
+], function (object, expressionParsing) {
+    'use strict';
+
+    var boundMain = object.boundMain,
+        variables,              // 3.2
+        functions,              // 3.3
+        moreOnErrorHandling,    // 3.4
+        assignmentStatements,   // 3.5
+        multiCharacterTokens,   // 3.6
+        whiteSpace;             // 3.7
+
+    /**
+     * 3.2 Variables
+     * e.g. b * b + 4 * a * c
+     * In BNF notation:
+     * <factor> ::= <number> | (<expression>) | <variable>
+     */
+    variables = expressionParsing.unaryMinusObject.extend({
+
+        // Parse and translate a math factor
+        factor: function () {
+            if (this.look === '(') {
+                this.match('(');
+                this.expression();
+                this.match(')');
+            } else if (this.isAlpha(this.look)) {
+                this.emitLn('MOVE ' + this.getName() + '(PC), D0');
+            } else {
+                this.emitLn('MOVE #' + this.getNum() + ' ,D0');
+            }
+        }
+
+    });
+
+    /**
+     * 3.3 Functions
+     * e.g. x(), C form with an empty parameter list
+     * In BNF:
+     * <identifier> ::= <variable> | <function>
+     * <factor> ::= <number> | (<expression>) | <identifier>
+     */
+    functions = variables.extend({
+
+        // Parse and translate an identifier
+        identifier: function () {
+            var name = this.getName();
+            if (this.look === '(') {
+                this.match('(');
+                this.match(')');
+                this.emitLn('BSR ' + name);
+            } else {
+                this.emitLn('MOVE ' + name + '(PC), D0');
+            }
+        },
+
+        // Parse and translate a math factor
+        factor: function () {
+            if (this.look === '(') {
+                this.match('(');
+                this.expression();
+                this.match(')');
+            } else if (this.isAlpha(this.look)) {
+                this.identifier();
+            } else {
+                this.emitLn('MOVE #' + this.getNum() + ', D0');
+            }
+        }
+
+    });
+
+    /**
+     * 3.4 More on error handling
+     * assert that the expression should end with an end-of-line
+     */
+    moreOnErrorHandling = functions.extend({
+
+        // Main function
+        main: function () {
+            this.init();
+            this.expression();
+            if (this.look !== this.LF) {   // <--
+                this.expected('Newline');   // <--
+            }
+        }
+
+    });
+
+    /**
+     * 3.5 Assignment statements
+     * In BNF:
+     * <assignment> ::= <identifier> = <expression>
+     */
+    assignmentStatements = moreOnErrorHandling.extend({
+
+        // Parse and translate an assignment statement
+        assignment: function () {
+            var name = this.getName();
+            this.match('=');
+            this.expression();
+            this.emitLn('LEA ' + name + '(PC), A0');
+            this.emitLn('MOVE D0, (A0)');
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            this.assignment();  // <--
+            if (this.look !== this.LF) {
+                this.expected('Newline');
+            }
+        }
+
+    });
+
+    /**
+     * 3.6 Multi-character tokens
+     */
+    multiCharacterTokens = assignmentStatements.extend({
+
+        // Recognize and alphanumeric
+        isAlNum: function (c) {
+            return this.isAlpha(c) || this.isDigit(c);
+        },
+
+        // Get an identifier
+        getName: function () {
+            var token = ''; // <--
+            if (!this.isAlpha(this.look)) {
+                this.expected('Name');
+            }
+            while (this.isAlNum(this.look)) { // <--
+                token += this.look.toUpperCase(); // <--
+                this.getChar();
+            }
+            return token;   // <--
+        },
+
+        // Get a number
+        getNum: function () {
+            var value = ''; // <--
+            if (!this.isDigit(this.look)) {
+                this.expected('Integer');
+            }
+            while (this.isDigit(this.look)) { // <--
+                value += this.look; // <--
+                this.getChar();
+            }
+            return value;   // <--
+        }
+
+    });
+
+    /**
+     * 3.7 White space
+     */
+    whiteSpace = multiCharacterTokens.extend({
+
+        // Recognize white space
+        isWhite: function (c) {
+            return c === ' ' || c === this.TAB;
+        },
+
+        // Skip over leading white space
+        skipWhite: function () {
+            while (this.isWhite(this.look)) {
+                this.getChar();
+            }
+        },
+
+        // Match a specific input character
+        match: function (x) {
+            if (this.look === x) {
+                this.getChar();
+                this.skipWhite();   // <--
+            } else {
+                this.expected('"' + x + '"');
+            }
+        },
+
+        // Get an identifier
+        getName: function () {
+            var token = '';
+            if (!this.isAlpha(this.look)) {
+                this.expected('Name');
+            }
+            while (this.isAlNum(this.look)) {
+                token += this.look.toUpperCase();
+                this.getChar();
+            }
+            this.skipWhite();   // <--
+            return token;
+        },
+
+        // Get a number
+        getNum: function () {
+            var value = '';
+            if (!this.isDigit(this.look)) {
+                this.expected('Integer');
+            }
+            while (this.isDigit(this.look)) {
+                value += this.look;
+                this.getChar();
+            }
+            this.skipWhite();   // <--
+            return value;
+        },
+
+        // Initialize
+        init: function () {
+            this.getChar();
+            this.skipWhite();   // <--
+        }
+
+    });
+
+    // return main functions for executions
+    // and the final assignmentStatementsObject object for chapter 6.
+    return {
+
+        // <factor> ::= <number> | (<expression>) | <variable>
+        variables: boundMain(variables),
+
+        // <identifier> ::= <variable> | <function>
+        // <factor> ::= <number> | (<expression>) | <identifier>
+        functions: boundMain(functions),
+
+        // Assert that the expression should end with an end-of-line
+        moreOnErrorHandling: boundMain(moreOnErrorHandling),
+
+        // <identifier> = <expression>
+        assignmentStatements: boundMain(assignmentStatements),
+
+        multiCharacterTokens: boundMain(multiCharacterTokens),
+
+        whiteSpace: boundMain(whiteSpace),
+
+        // Export the object for chapter 6
+        assignmentStatementsObject: assignmentStatements
+
+    };
+
+});
+/**
+ * Chapter 4 Interpreters
+ */
+
+define(['./1.2-cradle', 'io'], function (cradle, io) {
+    'use strict';
+
+    var boundMain = cradle.boundMain,
+        singleDigits,                   // 4.2.1
+        binaryExpressions,              // 4.2.2
+        generalExpressions,             // 4.2.3
+        multiDigitsNumber,              // 4.2.4
+        parentheses,                    // 4.2.5
+        variables,                      // 4.3.1
+        assignmentStatements,           // 4.3.2
+        multipleStatements,             // 4.3.3
+        ioRoutines;                     // 4.3.4
+
+    /**
+     * 4.2 The interpreter
+     */
+
+    /**
+     * 4.2.1 Single digits
+     * <expression> ::= <number>
+     */
+    singleDigits = cradle.extend({
+
+        // Get a number
+        getNum: function () {
+            var num;
+            if (!this.isDigit(this.look)) {
+                this.expected('Integer');
+            }
+            num = +this.look;
+            this.getChar();
+            return num;
+        },
+
+        // Parse and translate an expression
+        expression: function () {
+            return this.getNum();
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            io.writeLn(this.expression());
+        }
+
+    });
+
+    /**
+     * 4.2.2 Binary expressions
+     * <expression> ::= <number> |<addop> <number>|*
+     */
+    binaryExpressions = singleDigits.extend({
+
+        // Recognize an addop
+        isAddop: function (c) {
+            return c === '+' || c === '-';
+        },
+
+        // Parse and translate an expression
+        expression: function () {
+            var value;
+            if (this.isAddop(this.look)) {
+                value = 0;
+            } else {
+                value = this.getNum();
+            }
+            while (this.isAddop(this.look)) {
+                switch (this.look) {
+                case '+':
+                    this.match('+');
+                    value += this.getNum();
+                    break;
+                case '-':
+                    this.match('-');
+                    value -= this.getNum();
+                    break;
+                }
+            }
+            return value;
+        }
+
+    });
+
+    /**
+     * 4.2.3 General expressions
+     * <term> ::= <number> |<mulop> <number>|*
+     * <expression> ::= <term> |<addop> <term>|*
+     */
+    generalExpressions = binaryExpressions.extend({
+
+        // Parse and translate a math term
+        term: function () {
+            var value = this.getNum();
+            while (this.look === '*' || this.look === '/') {
+                switch (this.look) {
+                case '*':
+                    this.match('*');
+                    value *= this.getNum();
+                    break;
+                case '/':
+                    this.match('/');
+                    value = Math.floor(value / this.getNum());
+                    break;
+                }
+            }
+            return value;
+        },
+
+        // Parse and translate an expression
+        expression: function () {
+            var value;
+            if (this.isAddop(this.look)) {
+                value = 0;
+            } else {
+                value = this.term();    // <--
+            }
+            while (this.isAddop(this.look)) {
+                switch (this.look) {
+                case '+':
+                    this.match('+');
+                    value += this.term();   // <--
+                    break;
+                case '-':
+                    this.match('-');    // <--
+                    value -= this.term();
+                    break;
+                }
+            }
+            return value;
+        }
+
+    });
+
+    /**
+     * 4.2.4 Multi-digits number
+     */
+    multiDigitsNumber = generalExpressions.extend({
+
+        // Get a Number
+        getNum: function () {
+            var value = 0;
+            if (!this.isDigit(this.look)) {
+                this.expected('Integer');
+            }
+            while (this.isDigit(this.look)) {    // <--
+                value = 10 * value + (+this.look);  // <--
+                this.getChar();
+            }
+            return value;
+        }
+
+    });
+
+    /**
+     * 4.2.5 Parentheses
+     * <factor> ::= <number> | (<expression>)
+     * <term> ::= <factor> |<mulop> <factor>|*
+     */
+    parentheses = multiDigitsNumber.extend({
+
+        // Parse and translate a math factor
+        factor: function () {
+            var value;
+            if (this.look === '(') {
+                this.match('(');
+                value = this.expression();  // <--
+                this.match(')');
+            } else {
+                value = this.getNum();  // <--
+            }
+            return value;
+        },
+
+        // Parse and translate a math term
+        term: function () {
+            var value = this.factor();  // <--
+            while (this.look === '*' || this.look === '/') {
+                switch (this.look) {
+                case '*':
+                    this.match('*');
+                    value *= this.factor(); // <--
+                    break;
+                case '/':
+                    this.match('/');
+                    value = Math.floor(value / this.factor());  // <--
+                    break;
+                }
+            }
+            return value;
+        }
+
+    });
+
+    /**
+     * 4.3 A little philosophy
+     */
+
+    /**
+     * 4.3.1 Variables
+     * In BNF notation:
+     * <factor> ::= <number> | (<expression>) | <variable>
+     */
+    variables = parentheses.extend({
+
+        table: {},
+
+        // Initialize the variable Area
+        initTable: function () {
+            var charCodeOfA = 'A'.charCodeAt(0),
+                i,
+                name;
+
+            for (i = 0; i < 26; i += 1) {
+                name = String.fromCharCode(charCodeOfA + i);
+                this.table[name] = 0;
+            }
+        },
+
+        // Initialize
+        init: function () {
+            this.initTable();   // <--
+            this.getChar();
+        },
+
+        // Parse and translate a math factor
+        factor: function () {
+            var value;
+            if (this.look === '(') {
+                this.match('(');
+                value = this.expression();
+                this.match(')');
+            } else if (this.isAlpha(this.look)) {    // <--
+                value = this.table[this.getName()]; // <--
+            } else {
+                value = this.getNum();
+            }
+            return value;
+        }
+
+    });
+
+    /**
+     * 4.3.2 Assignment statements
+     * In BNF:
+     * <identifier> = <expression>
+     */
+    assignmentStatements = variables.extend({
+
+        // Parse and translate an assignment statement
+        assignment: function () {
+            var name = this.getName();
+            this.match('=');
+            this.table[name] = this.expression();
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            this.assignment();  // <--
+            io.writeLn(this.table.A);
+        }
+
+    });
+
+    /**
+     * 4.3.3 Multiple statements
+     */
+    multipleStatements = assignmentStatements.extend({
+
+        // Recognize and skip over a newline
+        newLine: function () {
+            if (this.look === this.LF) {
+                this.getChar();
+            }
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            do {
+                this.assignment();
+                this.newLine();
+            } while (this.look !== '.');
+        }
+
+    });
+
+    /**
+     * 4.3.4 I/O routines
+     */
+    ioRoutines = multipleStatements.extend({
+
+        // Input routine
+        input: function () {
+            this.match('?');
+            //
+        },
+
+        // Output routine
+        output: function () {
+            this.match('!');
+            io.writeLn(this.table[this.getName()]);
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            do {
+                switch (this.look) {
+                case '?':
+                    this.input();
+                    break;
+                case '!':
+                    this.output();
+                    break;
+                default:
+                    this.assignment();
+                }
+                this.newLine();
+            } while (this.look !== '.');
+        }
+
+    });
+
+    // return main functions for executions
+    return {
+
+        // <expression> ::= <number>
+        singleDigits: boundMain(singleDigits),
+
+        // <expression> ::= <number> |<addop> <number>|*
+        binaryExpressions: boundMain(binaryExpressions),
+
+        // <term> ::= <number> |<mulop> <number>|*
+        // <expression> ::= <term> |<addop> <term>|*
+        generalExpressions: boundMain(generalExpressions),
+
+        // Multi-digits number
+        multiDigitsNumber: boundMain(multiDigitsNumber),
+
+        // <factor> ::= <number> | (<expression>)
+        // <term> ::= <factor> |<mulop> <factor>|*
+        parentheses: boundMain(parentheses),
+
+        // <factor> ::= <number> | (<expression>) | <variable>
+        variables: boundMain(variables),
+
+        assignmentStatements: boundMain(assignmentStatements),
+
+        multipleStatements: boundMain(multipleStatements),
+
+        ioRoutines: boundMain(ioRoutines)
+
+    };
+
+});
+/**
+ * Chapter 5 Control Constructs
+ */
+
+define(['./1.2-cradle', 'io'], function (cradle, io) {
+    'use strict';
+
+    var boundMain = cradle.boundMain,
+        oneStatement,               // 5.2.1
+        moreThanOneStatement,       // 5.2.2
+        someGroundwork,             // 5.3
+        theIfStatement,             // 5.4
+        addTheElseClause,           // 5.4.2
+        theWhileStatement,          // 5.5
+        theLoopStatement,           // 5.6
+        theRepeatUntilStatement,    // 5.7
+        theForLoop,                 // 5.8
+        theDoStatement,             // 5.9
+        theBreakStatement;          // 5.10
+
+    /**
+     * 5.2 The plan
+     */
+
+    /*
+     * 5.2.1 One statement
+     * <program> ::= <statement>
+     */
+    oneStatement = cradle.extend({
+
+        // Recognize and translate an "Other"
+        // an anonymous statement serve as a place-holder
+        other: function () {
+            this.emitLn('<block ' + this.getName() + '>');
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            this.other();
+        }
+
+    });
+
+    /**
+     * 5.2.2 More than one statement
+     * In BNF:
+     * <program> ::= <block> END
+     * <block> ::= [<statement>]*
+     */
+    moreThanOneStatement = oneStatement.extend({
+
+        // Recognize and translate a statement block
+        block: function () {
+            while (this.look !== 'e') {
+                this.other();
+            }
+        },
+
+        // Parse and translate a program
+        doProgram: function () {
+            this.block();
+            if (this.look !== 'e') {
+                this.expected('End');
+            }
+            this.emitLn('END');
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            this.doProgram();
+        }
+
+    });
+
+    /**
+     * 5.3 Some groundwork
+     */
+    someGroundwork = moreThanOneStatement.extend({
+
+        lCount: 0,  // label number
+
+        // Generate a unique lable
+        newLabel: function () {
+            var label = 'L' + this.lCount;
+            this.lCount += 1;
+            return label;
+        },
+
+        // Post a label to output
+        postLabel: function (label) {
+            io.writeLn(label + ':');
+        },
+
+        // Initialize
+        init: function () {
+            this.lCount = 0;
+            this.getChar();
+        }
+
+    });
+
+    /**
+     * 5.4 The IF statement
+     * In BNF:
+     * <if> ::= IF <condition> <block> ENDIF
+     *
+     * Output should be:
+     *      <condition>
+     *      BEQ L1      # branch if false
+     *      <block>
+     * L1:
+     *
+     * Syntax-directed translation:
+     * SYNTAX           ACTIONS
+     * -------------------------------------------
+     * IF
+     * <condition>    { condition();
+     *                  L = newLabel();
+     *                  emit(Branch False to L); }
+     * <block>
+     * ENDIF          { postLabel(L) }
+     * -------------------------------------------
+     */
+    theIfStatement = someGroundwork.extend({
+
+        // Parse and translate a boolean condition
+        // This version is a dummy
+        condition: function () {
+            this.emitLn('<condition>');
+        },
+
+        // Recognize and translate an IF constructor
+        doIf: function () {
+            var label;
+            this.match('i');
+            label = this.newLabel();
+            this.condition();
+            this.emitLn('BEQ ' + label);
+            this.block();
+            this.match('e');
+            this.postLabel(label);
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            while (this.look !== 'e') {
+                switch (this.look) {
+                case 'i':
+                    this.doIf();
+                    break;
+                default:
+                    this.other();
+                }
+            }
+        }
+
+    });
+
+    /**
+     * 5.4.2 Add the ELSE clause
+     * BNF of the IF statement
+     * <if> ::= IF <condition> <block> [ELSE <block>] ENDIF
+     *
+     * Output should be:
+     *      <condition>
+     *      BEQ L1      # branch if false
+     *      <block>
+     *      BRA L2      # unconditional branch
+     * L1:
+     *      <block>
+     * L2:
+     *
+     * Syntax-directed translation
+     *   SYNTAX           ACTIONS
+     *   -------------------------------------------
+     *   IF
+     *   <condition>    { condition();
+     *                    L1 = newLabel();
+     *                    L2 = newLabel();
+     *                    emit(BEQ L1); }
+     *   <block>
+     *   ELSE           { emit(BRA L2);
+     *                    postLabel(L1); }
+     *   <block>
+     *   ENDIF          { postLabel(L2); }
+     *   -------------------------------------------
+     */
+    addTheElseClause = theIfStatement.extend({
+
+        // Recognize and translate an IF constructor
+        doIf: function () {
+            var label_1, label_2;
+            this.match('i');
+            this.condition();
+            label_1 = this.newLabel();
+            label_2 = label_1;
+            this.emitLn('BEQ ' + label_1);
+            this.block();
+
+            if (this.look === 'l') {
+                this.match('l');
+                label_2 = this.newLabel();
+                this.emitLn('BRA ' + label_2);
+                this.postLabel(label_1);
+                this.block();
+            }
+
+            this.match('e');
+            this.postLabel(label_2);
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            while (this.look !== 'e' && this.look !== 'l') {  // <--
+                switch (this.look) {
+                case 'i':
+                    this.doIf();
+                    break;
+                default:
+                    this.other();
+                }
+            }
+        }
+
+    });
+
+    /**
+     * 5.5 The WHILE statement
+     * BNF of the WHILE statement
+     * <while> ::= WHILE <condition> <block> ENDWHILE
+     *
+     * Output should be:
+     * L1:  <condition>
+     *      BEQ L2
+     *      <block>
+     *      BRA L1
+     * L2:
+     *
+     * Syntax-directed translation
+     * SYNTAX           ACTIONS
+     * -------------------------------------------
+     * WHILE          { L1 = newLabel;
+     *                  postLabel(L1) }
+     * <condition>    { emit(BEQ L2) }
+     * <block>
+     * ENDWHILE       { emit(BRA L1);
+     *                  PostLabel(L2) }
+     */
+    theWhileStatement = addTheElseClause.extend({
+
+        // Parse and translate a WHILE statement
+        doWhile: function () {
+            var label_1, label_2;
+            this.match('w');
+            label_1 = this.newLabel();
+            label_2 = this.newLabel();
+            this.postLabel(label_1);
+            this.condition();
+            this.emitLn('BEQ ' + label_2);
+            this.block();
+            this.match('e');
+            this.emitLn('BRA ' + label_1);
+            this.postLabel(label_2);
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            while (this.look !== 'e' && this.look !== 'l') {
+                switch (this.look) {
+                case 'i':
+                    this.doIf();
+                    break;
+                case 'w':   // <--
+                    this.doWhile();
+                    break;
+                default:
+                    this.other();
+                }
+            }
+        }
+
+    });
+
+    /**
+     * 5.6 The LOOP statement
+     * BNF of the LOOP statement
+     * <loop> ::= LOOP <block> ENDLOOP
+     *
+     * Output should be:
+     * L1:
+     *      <block>
+     *      BRA L1
+     *
+     * Syntax-directed translation
+     * SYNTAX           ACTIONS
+     * -------------------------------------------
+     * LOOP           { L = newLabel();
+     *                  postLabel(L) }
+     * <block>
+     * ENDLOOP        { emit(BRA L) }
+     */
+    theLoopStatement = theWhileStatement.extend({
+
+        // Parse and translate a LOOP statement
+        doLoop: function () {
+            var label;
+            this.match('p');
+            label = this.newLabel();
+            this.postLabel(label);
+            this.block();
+            this.match('e');
+            this.emitLn('BRA ' + label);
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            while (this.look !== 'e' && this.look !== 'l') {
+                switch (this.look) {
+                case 'i':
+                    this.doIf();
+                    break;
+                case 'w':
+                    this.doWhile();
+                    break;
+                case 'p':   // <--
+                    this.doLoop();
+                    break;
+                default:
+                    this.other();
+                }
+            }
+        }
+
+    });
+
+    /**
+     * 5.7 The Repeat-Until statement
+     * BNF of the REPEAT statement
+     * <repeat> ::= REPEAT <block> UNTIL <conditon>
+     *
+     * Output should be:
+     * L1:
+     *      <block>
+     *      <condition>
+     *      BEQ L1
+     *
+     * Syntax-directed translation
+     * SYNTAX              ACTIONS
+     * -------------------------------------------
+     * REPEAT         { L = newLabel();
+     *                  postLabel(L) }
+     * <block>
+     * UNTIL
+     * <condition>    { emit(BEQ L) }
+     */
+    theRepeatUntilStatement = theLoopStatement.extend({
+
+        // Parse and translate a REPEAT statement
+        doRepeat: function () {
+            var label;
+            this.match('r');
+            label = this.newLabel();
+            this.postLabel(label);
+            this.block();
+            this.match('u');
+            this.condition();
+            this.emitLn('BEQ ' + label);
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            while (this.look !== 'e' && this.look !== 'l' &&
+                    this.look !== 'u') {    // <--
+                switch (this.look) {
+                case 'i':
+                    this.doIf();
+                    break;
+                case 'w':
+                    this.doWhile();
+                    break;
+                case 'p':
+                    this.doLoop();
+                    break;
+                case 'r':   // <--
+                    this.doRepeat();
+                    break;
+                default:
+                    this.other();
+                }
+            }
+        }
+
+    });
+
+    /**
+     * 5.8 The FOR loop
+     * BNF of the FOR statement
+     * <for> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
+     *
+     * equivalence to:
+     *  <ident> = <expr1>
+     *  temp = <expr2>
+     *  WHILE <ident> <= temp
+     *  <block>
+     *  ENDWHILE
+     *
+     * translated code:
+     *
+     *      <ident>             get name of loop counter
+     *      <expr1>             get initial value
+     *      LEA <ident>(PC),A0  address the loop counter
+     *      SUBQ #1, D0         predecrement it
+     *      MOVE D0, (A0)       save it
+     *      <expr2>             get upper limit
+     *      MOVE D0, -(SP)      save it on stack
+     * L1:
+     *      LEA <ident>(PC), A0 address loop counter
+     *      MOVE (A0), D0       fetch it to D0
+     *      ADDQ #1, D0         bump the counter
+     *      MOVE D0, (A0)       save new value
+     *      CMP (SP), D0        check for range
+     *      BLE L2              skip out if D0 > (SP)
+     *      <block>
+     *      BRA L1              loop for next pass
+     * L2:
+     *      ADDQ #2, SP         clean up the stack
+     */
+    theForLoop = theRepeatUntilStatement.extend({
+
+        // Parse and translate an expression
+        // This version is a dummy
+        expression: function () {
+            this.emitLn('<expression>');
+        },
+
+        // Parse and translate a FOR statement
+        doFor: function () {
+            var label_1,
+                label_2,
+                name;
+
+            this.match('f');
+            label_1 = this.newLabel();
+            label_2 = this.newLabel();
+            name = this.getName();
+            this.match('=');
+            this.expression();
+            this.emitLn('SUBQ #1, D0');
+            this.emitLn('LEA ' + name + '(PC), A0');
+            this.emitLn('MOVE D0, (A0)');
+            this.expression();
+            this.emitLn('MOVE D0, -(SP)');
+
+            this.postLabel(label_1);
+            this.emitLn('LEA ' + name + '(PC), A0');
+            this.emitLn('MOVE (A0), D0');
+            this.emitLn('ADDQ #1, D0');
+            this.emitLn('MOVE D0, (A0)');
+            this.emitLn('CMP (SP), D0');
+            this.emitLn('BGT ' + label_2);
+            this.block();
+            this.match('e');
+            this.emitLn('BRA ' + label_1);
+            this.postLabel(label_2);
+            this.emitLn('ADDQ #2, SP');
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            while (this.look !== 'e' && this.look !== 'l' &&
+                    this.look !== 'u') {
+                switch (this.look) {
+                case 'i':
+                    this.doIf();
+                    break;
+                case 'w':
+                    this.doWhile();
+                    break;
+                case 'p':
+                    this.doLoop();
+                    break;
+                case 'r':
+                    this.doRepeat();
+                    break;
+                case 'f':   // <--
+                    this.doFor();
+                    break;
+                default:
+                    this.other();
+                }
+            }
+        }
+
+    });
+
+    /**
+     * 5.9 The DO statement
+     * BNF of the DO statement
+     * <do> ::= DO <expr> <block> ENDDO
+     *
+     * translated code:
+     *
+     *      <expression>
+     *      SUBQ #1, D0
+     * L1:
+     *      MOVE D0, -(SP)      # push D0
+     *      <block>
+     *      MOVE (SP)+, D0      # pop D0
+     *      DBRA D0, L1
+     *
+     * Syntax-directed translation
+     * SYNTAX           ACTIONS
+     * -------------------------------------------
+     * DO             { emit(SUBQ #1,D0);
+     *                  L = newLabel();
+     *                  postLabel(L)
+     *                  emit(MOVE D0,-(SP)) }
+     * <block>
+     * ENDDO          { emit(MOVE (SP)+,D0);
+     *                  emit(DBRA D0,L) }
+     */
+    theDoStatement = theForLoop.extend({
+
+        // Parse and translate a DO statement
+        doDo: function () {
+            var label;
+            this.match('d');
+            label = this.newLabel();
+            this.expression();
+            this.emitLn('SUBQ #1, D0');
+            this.postLabel(label);
+            this.emitLn('MOVE D0, -(SP)');
+            this.block();
+            this.emitLn('MOVE (SP)+, D0');
+            this.emitLn('DBRA D0, ' + label);
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            while (this.look !== 'e' && this.look !== 'l' &&
+                    this.look !== 'u') {
+                switch (this.look) {
+                case 'i':
+                    this.doIf();
+                    break;
+                case 'w':
+                    this.doWhile();
+                    break;
+                case 'p':
+                    this.doLoop();
+                    break;
+                case 'r':
+                    this.doRepeat();
+                    break;
+                case 'f':
+                    this.doFor();
+                    break;
+                case 'd':   // <--
+                    this.doDo();
+                    break;
+                default:
+                    this.other();
+                }
+            }
+        }
+
+    });
+
+    /**
+     * 5.10 The BREAK statement
+     * In BNF:
+     * <break> ::= BREAK
+     */
+    theBreakStatement = theDoStatement.extend({
+
+        // Recognize and translate an IF constructor
+        doIf: function (label) {    // <--
+            var label_1, label_2;
+            this.match('i');
+            this.condition();
+            label_1 = this.newLabel();
+            label_2 = label_1;
+            this.emitLn('BEQ ' + label_1);
+            this.block(label);  // <--
+
+            if (this.look === 'l') {
+                this.match('l');
+                label_2 = this.newLabel();
+                this.emitLn('BRA ' + label_2);
+                this.postLabel(label_1);
+                this.block();
+            }
+
+            this.match('e');
+            this.postLabel(label_2);
+        },
+
+        // Parse and translate a WHILE statement
+        doWhile: function () {
+            var label_1, label_2;
+            this.match('w');
+            label_1 = this.newLabel();
+            label_2 = this.newLabel();
+            this.postLabel(label_1);
+            this.condition();
+            this.emitLn('BEQ ' + label_2);
+            this.block(label_2);    // <--
+            this.match('e');
+            this.emitLn('BRA ' + label_1);
+            this.postLabel(label_2);
+        },
+
+        // Parse and translate a LOOP statement
+        doLoop: function () {
+            var label_1, label_2;   // <--
+            this.match('p');
+            label_1 = this.newLabel();
+            label_2 = this.newLabel();  // <--
+            this.postLabel(label_1);
+            this.block(label_2);    // <--
+            this.match('e');
+            this.emitLn('BRA ' + label_1);
+            this.postLabel(label_2);    // <--
+        },
+
+        // Parse and translate a REPEAT statement
+        doRepeat: function () {
+            var label_1, label_2;   // <--
+            this.match('r');
+            label_1 = this.newLabel();
+            label_2 = this.newLabel();  // <--
+            this.postLabel(label_1);
+            this.block(label_2);    // <--
+            this.match('u');
+            this.condition();
+            this.emitLn('BEQ ' + label_1);
+            this.postLabel(label_2);    // <--
+        },
+
+        // Parse and translate a FOR statement
+        doFor: function () {
+            var label_1,
+                label_2,
+                name;
+
+            this.match('f');
+            label_1 = this.newLabel();
+            label_2 = this.newLabel();
+            name = this.getName();
+            this.match('=');
+            this.expression();
+            this.emitLn('SUBQ #1, D0');
+            this.emitLn('LEA ' + name + '(PC), A0');
+            this.emitLn('MOVE D0, (A0)');
+            this.expression();
+            this.emitLn('MOVE D0, -(SP)');
+
+            this.postLabel(label_1);
+            this.emitLn('LEA ' + name + '(PC), A0');
+            this.emitLn('MOVE (A0), D0');
+            this.emitLn('ADDQ #1, D0');
+            this.emitLn('MOVE D0,(A0)');
+            this.emitLn('CMP (SP), D0');
+            this.emitLn('BGT ' + label_2);
+            this.block(label_2);   // <--
+            this.match('e');
+            this.emitLn('BRA ' + label_1);
+            this.postLabel(label_2);
+            this.emitLn('ADDQ #2, SP');
+        },
+
+        // Parse and translate a DO statement
+        doDo: function () {
+            var label_1, label_2;   // <--
+            this.match('d');
+            label_1 = this.newLabel();
+            label_2 = this.newLabel();
+            this.expression();
+            this.emitLn('SUBQ #1, D0');
+            this.postLabel(label_1);
+            this.emitLn('MOVE D0, -(SP)');
+            this.block(label_2);    // <--
+            this.emitLn('MOVE (SP)+, D0');
+            this.emitLn('DBRA D0, ' + label_1);
+            this.emitLn('SUBQ #2, SP');  // <--
+            this.postLabel(label_2);    // <--
+            this.emitLn('ADDQ #2, SP'); // <--
+
+        },
+
+        // Recognize and translate a break
+        doBreak: function (label) {
+            this.match('b');
+            if (label) {
+                this.emitLn('BRA ' + label);
+            } else {
+                this.abort('No loop to break from');
+            }
+        },
+
+        // Recognize and translate a statement block
+        block: function (label) {   // <--
+            while (this.look !== 'e' && this.look !== 'l' &&
+                    this.look !== 'u') {
+                switch (this.look) {
+                case 'i':
+                    this.doIf(label);   // <--
+                    break;
+                case 'w':
+                    this.doWhile();
+                    break;
+                case 'p':
+                    this.doLoop();
+                    break;
+                case 'r':
+                    this.doRepeat();
+                    break;
+                case 'f':
+                    this.doFor();
+                    break;
+                case 'd':
+                    this.doDo();
+                    break;
+                case 'b':   // <--
+                    this.doBreak(label);
+                    break;
+                default:
+                    this.other();
+                }
+            }
+        }
+
+    });
+
+    // return main functions for executions
+    // and the final theBreakStatement object for next chapter (ch. 6),
+    return {
+
+        // <program> ::= <statement>
+        oneStatement: boundMain(oneStatement),
+
+        // <program> ::= <block> END
+        // <block> ::= [<statement>]*
+        moreThanOneStatement: boundMain(moreThanOneStatement),
+
+        // <if> ::= IF <condition> <block> ENDIF
+        theIfStatement: boundMain(theIfStatement),
+
+        // <if> ::= IF <condition> <block> [ELSE <block>] ENDIF
+        addTheElseClause: boundMain(addTheElseClause),
+
+        // <while> ::= WHILE <condition> <block> ENDWHILE
+        theWhileStatement: boundMain(theWhileStatement),
+
+        // <loop> ::= LOOP <block> ENDLOOP
+        theLoopStatement: boundMain(theLoopStatement),
+
+        // <repeat> ::= REPEAT <block> UNTIL <conditon>
+        theRepeatUntilStatement: boundMain(theRepeatUntilStatement),
+
+        // <for> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
+        theForLoop: boundMain(theForLoop),
+
+        // <do> ::= DO <expression> <block> ENDDO
+        theDoStatement: boundMain(theDoStatement),
+
+        theBreakStatement: boundMain(theBreakStatement),
+
+        // Export the object for the next chapter
+        theBreakStatementObject: theBreakStatement
+
+    };
+
+    /**
+     * Final results of this chapter in BNF:
+     *
+     * ----- program -----
+     * <program> ::= <block> END
+     * <block> ::= [<statement>]*
+     * <statement> ::= <if> | <while> | <loop> | <repeat> |
+     *                 <for> | <do> | <break> |
+     *                 <other>
+     *
+     * ----- control statements -----
+     * <if statement> ::= IF <condition> <block> [ELSE <block>] ENDIF
+     * <while statement> ::= WHILE <condition> <block> ENDWHILE
+     * <loop statement> ::= LOOP <block> ENDLOOP
+     * <repeat statement> ::= REPEAT <block> UNTIL <conditon>
+     * <for statement> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
+     * <do statement> ::= DO <expression> <block> ENDDO
+     * <break statement> ::= BREAK
+     */
+
+});
+/**
+ * Chapter 6 Boolean Expressions
+ */
+
+define([
+    './1.2-cradle', './3-more-expressions', './5-control-constructs',
+    'jquery', 'io'
+], function (cradle, moreExpressions, controlConstructs, $, io) {
+    'use strict';
+
+    var boundMain = cradle.boundMain,
+        theParser,                      // 6.6.1
+        booleanLiteral,                 // 6.6.2
+        generalExpressions,             // 6.6.3
+        andOperation,                   // 6.6.4
+        notOperation,                   // 6.6.5
+        expandTheFactor,                // 6.6.6
+        fullBlownRelation,              // 6.6.7
+        mergingWithExpressions,         // 6.6.8
+        changeToLatestExpressionSyntax, // 6.6.9
+        mergingWithControlConstructs,   // 6.7
+        addingAssignments;              // 6.8
+
+    // 6.1 Introduction
+
+    // 6.2 The plan
+
+    // 6.3 The grammar
+
+    /** BNF syntax equations for arithmetic expressions
+     *  we have been implementing:
+     *  <expression> ::= <unary op> <term> [<addop> <term>]*
+     *  <term>       ::= <factor> [<mulop> factor]*
+     *  <factor>     :== <integer> | <variable> | (<expression>)
+     **/
+
+    /** It's better to write the grammar this way:
+     *  <expression>    ::= <term> [<addop> <term>]*
+     *  <term>          ::= <signed factor> [<mulop> factor]*
+     *  <signed factor> ::= [<addop>] <factor>
+     *  <factor>        :== <integer> | <variable> | (<expression>)
+     **/
+
+    /** Analogous grammar for boolean algebra
+     *  <b-expression> ::= <b-term> [<orop> <b-term>]*
+     *  <b-term>       ::= <not-factor> [AND <not-factor>]*
+     *  <not-factor>   ::= [NOT] <b-factor>
+     *  <b-factor>     ::= <b-literal> | <b-variable> | (<b-expression>)
+     **/
+
+    // 6.4 Relops
+
+    /** BNF for relational expressions
+     *  <relation> ::= <expression> <relop> <expression>
+     *  relops are any of =, <> (or !=), <, >, <=, and >=
+     **/
+
+    /** Expand the definition of a boolean factor to read:
+     *  <b-factor> ::= <b-literal>
+     *               | <b-variable>
+     *               | (<b-expression>) |
+     *               | <relation>
+     * The relops and the relation they define serve
+     * to wed the two kinds of algebra.
+     **/
+
+    // 6.5 Fixing the grammar
+
+    /** BNF
+     *  <b-expression>  ::= <b-term> [<orop> <b-term>]*
+     *  <b-term>        ::= <not-factor> [AND <not-factor>]*
+     *  <not-factor>    ::= [NOT] <b-factor>
+     *  <b-factor>      ::= <b-literal> | <b-variable> | <relation>
+     *
+     *  <relation>      ::= <expression> [<relop> <expression>]
+     *
+     *  <expression>    ::= <term> [<addop> <term>]*
+     *  <term>          ::= <signed factor> [<mulop> factor]*
+     *  <signed factor> ::= [<addop>] <factor>
+     *  <factor>        ::= <integer> | <variable> | (<b-expression>)
+     **/
+
+    /**
+     * 6.6 The parser
+     */
+
+    // 6.6.1 The parser
+    theParser = cradle.extend({
+
+        // Recognize a boolean literal
+        isBoolean: function (c) {
+            c = c.toUpperCase();
+            return c === 'T' || c === 'F';
+        },
+
+        // Get a boolean literal
+        getBoolean: function () {
+            var result;
+            if (!this.isBoolean(this.look)) {
+                this.expected('Boolean Literal');
+            }
+            result = this.look.toUpperCase() === 'T';
+            this.getChar();
+            return result;
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            io.writeLn(this.getBoolean());
+        }
+
+    });
+
+    /**
+     * 6.6.2 Boolean literal
+     * In BNF
+     * <b-expression>  ::= <b-literal>
+     */
+    booleanLiteral = theParser.extend({
+
+        // Parse and translate a boolean expression
+        boolExpression: function () {
+            if (!this.isBoolean(this.look)) {
+                this.expected('Boolean Literal');
+            }
+            if (this.getBoolean()) {
+                this.emitLn('MOVE #-1, D0');
+            } else {
+                this.emitLn('CLR D0');
+            }
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            this.boolExpression();
+        }
+
+    });
+
+    /**
+     * 6.6.3 General expressions
+     * In BNF:
+     * <b-expression> ::= <b-term> [<orop> <b-term>]*
+     * <b-term> ::= <b-literal>
+     */
+    generalExpressions = booleanLiteral.extend({
+
+        // Recognize a boolean orop
+        isOrop: function (c) {
+            return c === '|' || c === '~';
+        },
+
+        // Parse and translate a boolean term
+        // rename from previous boolExpression()
+        boolTerm: function () {
+            if (!this.isBoolean(this.look)) {
+                this.expected('Boolean Literal');
+            }
+            if (this.getBoolean()) {
+                this.emitLn('MOVE #-1, D0');
+            } else {
+                this.emitLn('CLR D0');
+            }
+        },
+
+        // Recognize and translate a boolean OR
+        boolOr: function () {
+            this.match('|');
+            this.boolTerm();
+            this.emitLn('OR (SP)+, D0');
+        },
+
+        // Recognize and translate an exclusive or (XOR)
+        boolXor: function () {
+            this.match('~');
+            this.boolTerm();
+            this.emitLn('EOR (SP)+, D0');
+        },
+
+        // Parse and translate a boolean expression
+        boolExpression: function () {
+            this.boolTerm();
+            while (this.isOrop(this.look)) {
+                this.emitLn('MOVE D0, -(SP)');
+                switch (this.look) {
+                case '|':
+                    this.boolOr();
+                    break;
+                case '~':
+                    this.boolXor();
+                    break;
+                }
+            }
+        }
+
+    });
+
+    /**
+     * 6.6.4 AND operation
+     * In BNF:
+     * <b-term> ::= <not-factor> [AND <not-factor>]*
+     * <not-factor> :== <b-literal>
+     **/
+    andOperation = generalExpressions.extend({
+
+        // Parse and translate a boolean factor with NOT
+        // rename from previous boolTerm()
+        notFactor: function () {
+            if (!this.isBoolean(this.look)) {
+                this.expected('Boolean Literal');
+            }
+            if (this.getBoolean()) {
+                this.emitLn('MOVE #-1, D0');
+            } else {
+                this.emitLn('CLR D0');
+            }
+        },
+
+        // Parse and translate a boolean term
+        boolTerm: function () {
+            this.notFactor();
+            while (this.look === '&') {
+                this.emitLn('MOVE D0, -(SP)');
+                this.match('&');
+                this.notFactor();
+                this.emitLn('AND (SP)+, D0');
+            }
+        }
+
+    });
+
+    /**
+     * 6.6.5 NOT operation
+     * In BNF:
+     * <not-factor> ::= [NOT] <b-factor>
+     * <b-factor> ::= <b-literal>
+     */
+    notOperation = andOperation.extend({
+
+        // Parse and translate a boolean factor
+        // Rename for previous notFactor()
+        boolFactor: function () {
+            if (!this.isBoolean(this.look)) {
+                this.expected('Boolean Literal');
+            }
+            if (this.getBoolean()) {
+                this.emitLn('MOVE #-1, D0');
+            } else {
+                this.emitLn('CLR D0');
+            }
+        },
+
+        // Parse and translate a boolean factor with NOT
+        notFactor: function () {
+            if (this.look === '!') {
+                this.match('!');
+                this.boolFactor();
+                this.emitLn('EOR #-1, D0');
+            } else {
+                this.boolFactor();
+            }
+        }
+
+    });
+
+    /**
+     * 6.6.6 Expand the factor
+     * In BNF:
+     * <b-factor> ::= <b-literal> | <relation>
+     */
+    expandTheFactor = notOperation.extend({
+
+        // Parse and translate a relation
+        // This version is a dummy
+        relation: function () {
+            this.emitLn('<relation' + this.getName() + '>');
+        },
+
+        // Parse and translate a boolean factor
+        boolFactor: function () {
+            if (this.isBoolean(this.look)) {
+                if (this.getBoolean()) {
+                    this.emitLn('MOVE #-1, D0');
+                } else {
+                    this.emitLn('CLR D0');
+                }
+            } else {
+                this.relation();
+            }
+        }
+
+    });
+
+    /**
+     * 6.6.7 Full-blown relation
+     * <relation> ::= <expression> [<relop> <expression>]
+     */
+    fullBlownRelation = expandTheFactor.extend({
+
+        // Recognize a relop
+        isRelop: function (c) {
+            return c === '=' || c === '#' || c === '<' || c === '>';
+        },
+
+        // Recognize and translate a relational "equals"
+        equals: function () {
+            this.match('=');
+            this.expression();
+            this.emitLn('CMP (SP)+, D0');
+            this.emitLn('SEQ D0');
+        },
+
+        // Recognize and translate a relational "not equals"
+        notEquals: function () {
+            this.match('#');
+            this.expression();
+            this.emitLn('CMP (SP)+, D0');
+            this.emitLn('SNE D0');
+        },
+
+        // Recognize and translate a relational "less than"
+        less: function () {
+            this.match('<');
+            this.expression();
+            this.emitLn('CMP (SP)+, D0');
+            this.emitLn('SGE D0');
+        },
+
+        // Recognize and translate a relational "greater than"
+        greater: function () {
+            this.match('>');
+            this.expression();
+            this.emitLn('CMP (SP)+, D0');
+            this.emitLn('SLE D0');
+        },
+
+        // Parse and translate a relation
+        relation: function () {
+            this.expression();
+            if (this.isRelop(this.look)) {
+                this.emitLn('MOVE D0, -(SP)');
+                switch (this.look) {
+                case '=':
+                    this.equals();
+                    break;
+                case '#':
+                    this.notEquals();
+                    break;
+                case '<':
+                    this.less();
+                    break;
+                case '>':
+                    this.greater();
+                    break;
+                }
+                this.emitLn('TST D0');
+            }
+        },
+
+        // Parse and translate an expression
+        // This version is a dummy
+        expression: function () {
+            this.emitLn('<Expression' + this.getName() + '>');
+        }
+
+    });
+
+    /**
+     * 6.6.8 Merging with expressions
+     * After merging, the syntax in BNF:
+     * ----- boolean expressions -----
+     * <b-expression> ::= <b-term> [<orop> <b-term>]*
+     * <b-term>       ::= <not-factor> [AND <not-factor>]*
+     * <not-factor>   ::= [NOT] <b-factor>
+     * <b-factor>     ::= <b-literal> | <relation>
+     * <relation>     ::= <expression> [<relop> <expression>]
+     * ----- arithmetic expressions -----
+     * <expression>   ::= [<unary op>] <term> [<addop> <term>]*
+     * <term>         ::= <factor> |<mulop> <factor>|*
+     * <factor>       ::= <number> | (<expression>) | <identifier>
+     * <identifier>   ::= <variable> | <function>
+     */
+    mergingWithExpressions = $.extend(
+        true,
+        {},
+
+        // 3.5
+        moreExpressions.assignmentStatementsObject,
+
+        // 6.6.7
+        fullBlownRelation,
+
+        // 3.5
+        {
+            expression : moreExpressions.assignmentStatementsObject.expression
+        }
+    );
+
+    /**
+     * 6.6.9 Change to latest expression syntax
+     * <expression>   ::= <term> [<addop> <term>]*
+     * <term>         ::= <signed factor> [<mulop> <factor>]*
+     * <factor>       ::= <number> | (<b-expression>) | <identifier>
+     */
+    changeToLatestExpressionSyntax = mergingWithExpressions.extend({
+
+        // parse and translate an expression
+        expression: function () {
+            this.term();
+            while (this.look === '+' || this.look === '-') {
+                this.emitLn('MOVE D0, -(SP)');
+                switch (this.look) {
+                case '+':
+                    this.add();
+                    break;
+                case '-':
+                    this.subtract();
+                    break;
+                }
+            }
+        },
+
+        // Parse and translate a math term
+        term: function () {
+            this.signedFactor();    // <--
+            while (this.look === '*' || this.look === '/') {
+                this.emitLn('MOVE D0, -(SP)');
+                switch (this.look) {
+                case '*':
+                    this.multiply();
+                    break;
+                case '/':
+                    this.divide();
+                    break;
+                }
+            }
+        },
+
+        // Parse and translate the first math factor
+        signedFactor: function () {
+            if (this.look === '+') {
+                this.getChar();
+            }
+
+            if (this.look === '-') {
+                this.getChar();
+                if (this.isDigit(this.look)) {
+                    this.emitLn('MOVE #-' + this.getNum() + ', D0');
+                } else {
+                    this.factor();
+                    this.emitLn('NEG D0');
+                }
+            } else {
+                this.factor();
+            }
+        },
+
+        // Parse and translate a math factor
+        factor: function () {
+            if (this.look === '(') {
+                this.match('(');
+                this.boolExpression();  // <--
+                this.match(')');
+            } else if (this.isAlpha(this.look)) {
+                this.identifier();
+            } else {
+                this.emitLn('MOVE #' + this.getNum() + ' ,D0');
+            }
+        }
+
+    });
+
+    /**
+     * 6.7 Merging with control constructs
+     * <program> ::= <block> END
+     * <block> ::= [<statement>]*
+     * <statement> ::= <control-statement> | <b-expression>
+     */
+    mergingWithControlConstructs = $.extend(
+        true,
+        {},
+
+        // 6.6.9
+        changeToLatestExpressionSyntax,
+
+        // 5.10
+        controlConstructs.theBreakStatementObject,
+
+        // 6.6.9
+        {
+            condition: changeToLatestExpressionSyntax.boolExpression,
+            expression: changeToLatestExpressionSyntax.expression,
+            other: changeToLatestExpressionSyntax.boolExpression
+        }
+    );
+
+    /**
+     * 6.8 Adding assignments
+     * <statement> ::= <control-statement> | <assignment>
+     * <assignment> ::= <identifier> = <b-expression>
+     */
+    addingAssignments = mergingWithControlConstructs.extend({
+
+        // Skip a CRLF
+        fin: function () {
+            if (this.look === this.CR) {
+                this.getChar();
+            }
+            if (this.look === this.LF) {
+                this.getChar();
+            }
+        },
+
+        // Recognize and translate a statement block
+        block: function (label) {
+            while (this.look !== 'e' && this.look !== 'l' &&
+                    this.look !== 'u') {
+                this.fin();     // <--
+                switch (this.look) {
+                case 'i':
+                    this.doIf(label);
+                    break;
+                case 'w':
+                    this.doWhile();
+                    break;
+                case 'p':
+                    this.doLoop();
+                    break;
+                case 'r':
+                    this.doRepeat();
+                    break;
+                case 'f':
+                    this.doFor();
+                    break;
+                case 'd':
+                    this.doDo();
+                    break;
+                case 'b':   // <--
+                    this.doBreak(label);
+                    break;
+                default:
+                    this.assignment();
+                }
+                this.fin();     // <--
+            }
+        },
+
+        // Parse and translate an assignment statement
+        assignment: function () {
+            var name = this.getName();
+            this.match('=');
+            this.boolExpression();  // <--
+            this.emitLn('LEA ' + name + '(PC), A0');
+            this.emitLn('MOVE D0, (A0)');
+        }
+
+    });
+
+    // return main functions for executions
+    return {
+
+        // 6.6
+        theParser: boundMain(theParser),
+
+        // <b-expression>  ::= <b-literal>
+        booleanLiteral: boundMain(booleanLiteral),
+
+        // <b-expression> ::= <b-term> [<orop> <b-term>]*
+        // <b-term> ::= <b-literal>
+        generalExpressions: boundMain(generalExpressions),
+
+        // <b-term> ::= <not-factor> [AND <not-factor>]*
+        // <not-factor> :== <b-literal>
+        andOperation: boundMain(andOperation),
+
+        // <not-factor> ::= [NOT] <b-factor>
+        // <b-factor> ::= <b-literal>
+        notOperation: boundMain(notOperation),
+
+        // <b-factor> ::= <b-literal> | <relation>
+        expandTheFactor: boundMain(expandTheFactor),
+
+        // <relation> ::= <expression> [<relop> <expression>]
+        fullBlownRelation: boundMain(fullBlownRelation),
+
+        /**
+         * 6.6.8 Merging with expressions
+         * No new codes after merging, the syntax in BNF:
+         * ----- boolean expressions -----
+         * <b-expression> ::= <b-term> [<orop> <b-term>]*
+         * <b-term>       ::= <not-factor> [AND <not-factor>]*
+         * <not-factor>   ::= [NOT] <b-factor>
+         * <b-factor>     ::= <b-literal> | <relation>
+         * <relation>     ::= <expression> [<relop> <expression>]
+         * ----- arithmetic expressions -----
+         * <expression>   ::= [<unary op>] <term> [<addop> <term>]*
+         * <term>         ::= <factor> |<mulop> <factor>|*
+         * <factor>       ::= <number> | (<expression>) | <identifier>
+         * <identifier>   ::= <variable> | <function>
+         */
+        mergingWithExpressions: boundMain(mergingWithExpressions),
+
+        /**
+         * 6.6.9 Change to latest expression syntax
+         * <expression>   ::= <term> [<addop> <term>]*
+         * <term>         ::= <signed factor> [<mulop> <factor>]*
+         * <factor>       ::= <number> | (<b-expression>) | <identifier>
+         */
+        changeToLatestExpressionSyntax:
+                boundMain(changeToLatestExpressionSyntax),
+
+        // 6.7
+        // <program> ::= <block> END
+        // <block> ::= [<statement>]*
+        // <statement> ::= <control-statement> | <b-expression>
+        mergingWithControlConstructs: boundMain(mergingWithControlConstructs),
+
+        // 6.8
+        // <statement> ::= <control-statement> | <assignment>
+        // <assignment> ::= <identifier> = <b-expression>
+        addingAssignments: boundMain(addingAssignments)
+
+    };
+
+    /**
+     * Final results of this chapter in BNF:
+     *
+     * ----- program -----
+     * <program> ::= <block> END
+     * <block> ::= [<statement>]*
+     * <statement> ::= <if> | <while> | <loop> | <repeat> |<for> |
+     *                 <do> | <break> | <assignment>
+     *
+     * ----- control statements -----
+     * <if statement> ::= IF <condition> <block> [ELSE <block>] ENDIF
+     * <while statement> ::= WHILE <condition> <block> ENDWHILE
+     * <loop statement> ::= LOOP <block> ENDLOOP
+     * <repeat statement> ::= REPEAT <block> UNTIL <conditon>
+     * <for statement> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
+     * <do statement> ::= DO <expression> <block> ENDDO
+     * <break statement> ::= BREAK
+     *
+     * ----- assignment statement -----
+     * <assignment statement> ::= <identifier> = <b-expression>
+     *
+     * ----- boolean expressions -----
+     * <b-expression> ::= <b-term> [<orop> <b-term>]*
+     * <b-term>       ::= <not-factor> [AND <not-factor>]*
+     * <not-factor>   ::= [NOT] <b-factor>
+     * <b-factor>     ::= <b-literal> | <relation>
+     * <relation>     ::= <expression> [<relop> <expression>]
+     *
+     * ----- arithmetic expressions -----
+     * <expression>   ::= <term> [<addop> <term>]*
+     * <term>         ::= <signed factor> [<mulop> <factor>]*
+     * <factor>       ::= <number> | (<b-expression>) | <identifier>
+     * <identifier>   ::= <variable> | <function>
+     */
+
+});
+/**
+ * Chapter 7 Lexical Scanning
+ */
+
+define(['./1.2-cradle', 'io'], function (cradle, io) {
+    'use strict';
+
+    var boundMain = cradle.boundMain,
+        enumerate = cradle.enumerate,
+        someExperimentsInScanning,          // 7.4
+        whiteSpace,                         // 7.5
+        newlines,                           // 7.7
+        operators,                          // 7.8
+        listsCommasAndCommandLines,         // 7.9
+        gettingFancy,                       // 7.10.1
+        returningCodes,                     // 7.10.2
+        cleanupWithGlobal,                  // 7.10.3
+        returningACharacter;                // 7.11
+
+    // 7.1 Introduction
+
+    // 7.2 Lexical scanning
+    /**
+     * Compiler:
+     * Text editor -> [stream of input characters]
+     * -> Lexical scanner -> [stream of input tokens]
+     * -> Parser (could be in one module) -> [object code]
+     *
+     * Chomsky Hierarchy of grammars:
+     * Type 0: Unrestricted (e.g. English)
+     * Type 1: Context-Sensitive (older, e.g. Fortran)
+     * Type 2: Context-Free (modern)
+     * Type 3: Regular (modern)
+     *
+     * Parser for
+     * Type 3 - Regular grammar: an abstract machine called
+     * the state machine (finite automaton)
+     * Type 2 - Context-free: push-down automaton
+     * (a state machine augmented by a stack)
+     *
+     * Regular expression (lower-level of real, practical grammars)
+     * e.g. <identifier> ::= <letter> [<letter> | <digit>]*
+     *
+     * Lexical scanning is lower-level parsing
+     */
+
+    // 7.3 State machines and alternatives
+    /**
+     * Regular expressions can be parsed by a state machine.
+     * State machine: integers (current state), table of actions, input chars
+     *
+     * LEX output: a state machine + table of actions crspd. to input grammar
+     * YACC output: a canned table-driven parser + table crspd. to lang syntax
+     */
+
+    /**
+     * 7.4 Some experiments in scanning
+     * <identifier> ::= <letter> [<letter> | <digit>]*
+     * <number> ::= [<digit>]+
+     */
+    someExperimentsInScanning = cradle.extend({
+
+        // Recognize an alphanumeric character
+        isAlNum: function (c) {
+            return this.isAlpha(c) || this.isDigit(c);
+        },
+
+        // Get an identifier
+        getName: function () {
+            var name = '';
+            if (!this.isAlpha(this.look)) {
+                this.expected('Name');
+            }
+            while (this.isAlNum(this.look)) {
+                name += this.look.toUpperCase();
+                this.getChar();
+            }
+            return name;
+        },
+
+        // Get a number
+        getNum: function () {
+            var num = '';
+            if (!this.isDigit(this.look)) {
+                this.expected('Integer');
+            }
+            while (this.isDigit(this.look)) {
+                num += this.look;
+                this.getChar();
+            }
+            return num;
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            io.writeLn(this.getName());
+        }
+
+    });
+
+    /**
+     * 7.5 White space
+     */
+    whiteSpace = someExperimentsInScanning.extend({
+
+        // Recognize white space
+        isWhite: function (c) {
+            return c === ' ' || c === this.TAB;
+        },
+
+        // Skip over leading white space
+        skipWhite: function () {
+            while (this.isWhite(this.look)) {
+                this.getChar();
+            }
+        },
+
+        // Get an identifier
+        getName: function () {
+            var name = '';
+            if (!this.isAlpha(this.look)) {
+                this.expected('Name');
+            }
+            while (this.isAlNum(this.look)) {
+                name += this.look.toUpperCase();
+                this.getChar();
+            }
+            this.skipWhite();   // <--
+            return name;
+        },
+
+        // Get a number
+        getNum: function () {
+            var num = '';
+            if (!this.isDigit(this.look)) {
+                this.expected('Integer');
+            }
+            while (this.isDigit(this.look)) {
+                num += this.look;
+                this.getChar();
+            }
+            this.skipWhite();   // <--
+            return num;
+        },
+
+        // Lexical scanner
+        scan: function () {
+            var result;
+            if (this.isAlpha(this.look)) {
+                result = this.getName();
+            } else if (this.isDigit(this.look)) {
+                result = this.getNum();
+            } else {
+                result = this.look;
+                this.getChar();
+            }
+            this.skipWhite();
+            return result;
+        },
+
+        // Main function
+        main: function () {
+            var token;
+
+            this.init();
+            do {
+                token = this.scan();
+                io.writeLn(token);
+            } while (token !== this.LF);
+        }
+
+    });
+
+    /**
+     * 7.6 State machines
+     *
+     * getName() does indeed implement a state machine.
+     *
+     * Syntax diagram (railroad-track diagram):
+     *
+     *          |-----> Other---------------------------> Error
+     *          |
+     *  Start -------> Letter ---------------> Other -----> Finish
+     *          ^                        V
+     *          |                        |
+     *          |<----- Letter <---------|
+     *          |                        |
+     *          |<----- Digit  <----------
+     *
+     * SkipWhite(), getNum(), and scan() are also state machines.
+     * Little machines make big machines.
+     * This is an implicit approach opposed to table-driven (explicite) one.
+     */
+
+    /**
+     * 7.7 Newlines
+     */
+    newlines = whiteSpace.extend({
+
+        // Recognize white space
+        isWhite: function (c) {
+            return c === ' ' || c === this.TAB ||
+                   c === this.CR || c === this.LF;
+        },
+
+        // Main function
+        main: function () {
+            var token;
+
+            this.init();
+            do {
+                token = this.scan();
+                io.writeLn(token);
+            } while (token !== '.');
+        }
+
+    });
+
+    /**
+     * 7.8 Operators
+     */
+    operators = newlines.extend({
+
+        // Recognize any operator
+        isOp: function (c) {
+            return c === '+' || c === '-' || c === '*' || c === '/' ||
+                   c === '<' || c === '>' || c === ':' || c === '=';
+        },
+
+        // Get an operator
+        getOp: function () {
+            var op = '';
+            if (!this.isOp(this.look)) {
+                this.expected('Operator');
+            }
+            while (this.isOp(this.look)) {
+                op += this.look;
+                this.getChar();
+            }
+            return op;
+        },
+
+        // Lexical scanner
+        scan: function () {
+            var result;
+            if (this.isAlpha(this.look)) {
+                result = this.getName();
+            } else if (this.isDigit(this.look)) {
+                result = this.getNum();
+            } else if (this.isOp(this.look)) {
+                result = this.getOp();
+            } else {
+                result = this.look;
+                this.getChar();
+            }
+            this.skipWhite();
+            return result;
+        }
+
+    });
+
+    /**
+     * 7.9 Lists, commas and command lines
+     */
+    listsCommasAndCommandLines = operators.extend({
+
+        // Skip over a comma
+        skipComma: function () {
+            this.skipWhite();
+            if (this.look === ',') {
+                this.getChar();
+                this.skipWhite();
+            }
+        },
+
+        // Lexical scanner
+        // change skipWhite() to skipComma() temporarily
+        scan: function () {
+            var result;
+            if (this.isAlpha(this.look)) {
+                result = this.getName();
+            } else if (this.isDigit(this.look)) {
+                result = this.getNum();
+            } else if (this.isOp(this.look)) {
+                result = this.getOp();
+            } else {
+                result = this.look;
+                this.getChar();
+            }
+            this.skipComma();   // <--
+            return result;
+        }
+
+    });
+
+    /**
+     * 7.10 Getting fancy
+     * 7.10.1
+     */
+    gettingFancy = listsCommasAndCommandLines.extend({
+
+        // Definition of keywords and token types
+        keywordType: enumerate(['IF', 'ELSE', 'ENDIF', 'END']),
+
+        // Main program
+        // temporarily changed.
+        main: function () {
+            var token = io.readLn();
+            io.writeLn(this.keywordType[token]);
+        }
+
+    });
+
+    // 7.10.2 Returning codes
+    returningCodes = gettingFancy.extend({
+
+        // Type declarations
+        symType: enumerate(['ifSym', 'elseSym', 'endifSym', 'endSym',
+                'identifier', 'number', 'operator']),
+
+        // variable declarations
+        token: 0,   // Current token (symType)
+        value: '',  // String token of look
+
+        // Lexical scanner
+        scan: function () {
+            if (this.isAlpha(this.look)) {
+                this.value = this.getName();
+                this.token = this.keywordType[this.value];
+                if (this.token === undefined) {
+                    this.token = this.symType.identifier;
+                }
+            } else if (this.isDigit(this.look)) {
+                this.value = this.getNum();
+                this.token = this.symType.number;
+            } else if (this.isOp(this.look)) {
+                this.value = this.getOp();
+                this.token = this.symType.operator;
+            } else {
+                this.value = this.look;
+                this.getChar();
+            }
+            this.skipWhite();
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            do {
+                this.scan();
+
+                switch (this.token) {
+                case this.symType.identifier:
+                    io.write('Ident ');
+                    break;
+                case this.symType.number:
+                    io.write('Number ');
+                    break;
+                case this.symType.operator:
+                    io.write('Operator ');
+                    break;
+                case this.symType.ifSym:    // fall through
+                case this.symType.elseSym:  // fall through
+                case this.symType.endifSym: // fall through
+                case this.symType.endSym:
+                    io.write('Keyword ');
+                    break;
+                }
+                io.writeLn(this.value);
+            } while (this.token !== this.symType.endSym);
+        }
+
+    });
+
+    /**
+     * 7.10.3 Cleanup with global
+     * getName(), getNum(), and getOp() becomes procedures,
+     * use globle variables (value and token) to eliminate the local copies.
+     */
+    cleanupWithGlobal = returningCodes.extend({
+
+        // Get an identifier
+        getName: function () {
+            this.value = '';
+            if (!this.isAlpha(this.look)) {
+                this.expected('Name');
+            }
+            while (this.isAlNum(this.look)) {
+                this.value += this.look.toUpperCase();
+                this.getChar();
+            }
+            this.token = this.keywordType[this.value];  // copy
+            if (this.token === undefined) {    // from previous
+                this.token = this.symType.identifier;   // scan()
+            }
+        },
+
+        // Get a number
+        getNum: function () {
+            this.value = '';
+            if (!this.isDigit(this.look)) {
+                this.expected('Integer');
+            }
+            while (this.isDigit(this.look)) {
+                this.value += this.look;
+                this.getChar();
+            }
+            this.token = this.symType.number;   // copy from previous scan()
+        },
+
+        // Get an operator
+        getOp: function () {
+            this.value = '';
+            if (!this.isOp(this.look)) {
+                this.expected('Operator');
+            }
+            while (this.isOp(this.look)) {
+                this.value += this.look;
+                this.getChar();
+            }
+            this.token = this.symType.operator; // copy from previous scan()
+        },
+
+        // Lexical scanner
+        scan: function () {
+            if (this.isAlpha(this.look)) {
+                this.getName();
+            } else if (this.isDigit(this.look)) {
+                this.getNum();
+            } else if (this.isOp(this.look)) {
+                this.getOp();
+            } else {
+                this.value = this.look;
+                this.getChar();
+            }
+            this.skipWhite();
+        }
+
+    });
+
+    /**
+     * 7.11 Returning a character
+     */
+    returningACharacter = cleanupWithGlobal.extend({
+
+        // Instead of symType, use keywordCode
+        keywordCode: 'xilee',
+        keywordType: enumerate(['IF', 'ELSE', 'ENDIF', 'END'], 1),
+
+        // Get an identifier
+        getName: function () {
+            var index;
+            this.value = '';
+
+            if (!this.isAlpha(this.look)) {
+                this.expected('Name');
+            }
+            while (this.isAlNum(this.look)) {
+                this.value += this.look.toUpperCase();
+                this.getChar();
+            }
+            index = this.keywordType[this.value] || 0;   // <--
+            this.token = this.keywordCode.charAt(index); // <--
+        },
+
+        // Get a number
+        getNum: function () {
+            this.value = '';
+            if (!this.isDigit(this.look)) {
+                this.expected('Integer');
+            }
+            while (this.isDigit(this.look)) {
+                this.value += this.look;
+                this.getChar();
+            }
+            this.token = '#';   // <--
+        },
+
+        // Get an operator
+        getOp: function () {
+            this.value = '';
+            if (!this.isOp(this.look)) {
+                this.expected('Operator');
+            }
+            while (this.isOp(this.look)) {
+                this.value += this.look;
+                this.getChar();
+            }
+            if (this.value.length === 1) {  // <--
+                this.token = this.value;    // .
+            } else {                        // .
+                this.token = '?';           // .
+            }
+        },
+
+        // Lexical scanner
+        scan: function () {
+            if (this.isAlpha(this.look)) {
+                this.getName();
+            } else if (this.isDigit(this.look)) {
+                this.getNum();
+            } else if (this.isOp(this.look)) {
+                this.getOp();
+            } else {
+                this.value = this.look;
+                this.token = '?';   // <--
+                this.getChar();
+            }
+            this.skipWhite();
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            do {
+                this.scan();
+
+                switch (this.token) {
+                case 'x':
+                    io.write('Ident ');
+                    break;
+                case '#':
+                    io.write('Number ');
+                    break;
+                case 'i':    // fall through
+                case 'l':  // fall through
+                case 'e':
+                    io.write('Keyword ');
+                    break;
+                default:
+                    io.write('Operator ');
+                }
+                io.writeLn(this.value);
+            } while (this.value !== 'END');
+        }
+
+    });
+
+    // 7.12 Distributed vs centralized scanners
+
+    // 7.13 Merging scanner and parser
+    // see file: 7.13.kiss.js
+
+    // return main functions for executions
+    return {
+
+        someExperimentsInScanning: boundMain(someExperimentsInScanning),
+        whiteSpace: boundMain(whiteSpace),
+        newlines: boundMain(newlines),
+        operators: boundMain(operators),
+        listsCommasAndCommandLines: boundMain(listsCommasAndCommandLines),
+        gettingFancy: boundMain(gettingFancy),
+        returningCodes: boundMain(returningCodes),
+        cleanupWithGlobal: boundMain(cleanupWithGlobal),
+        returningACharacter: boundMain(returningACharacter)
+
+    };
+
+});
+/**
+ * Chapter 7.13 Merging Scanner and Parser
+ * Program kiss
+ */
+
+define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
+    'use strict';
+
+    var boundMain = object.boundMain,
+        enumerate = object.enumerate,
+        judiciousCopying,           // 7.13.1
+        mergingScannerAndParser;    // 7.13.2
+
+
+    /**
+     * 7.13.1 Judicious copying
+     * const: TAB, CR, LF
+     * variable: look, lCount
+     * function: getChar, error, abort, expected,
+     *           isAlpha, isDigit, isAlNum, isAddop, isMulop, isWhite
+     *           skipWhite, match, fin, getName, getNum,
+     *           newLabel, postLabel, emit, emitLn
+     *           identifier, expression, signedFactor, multiply, divide
+     *           term1, term, firstTerm, add, subtract
+     *           expression, condition
+     *           doIf, assignment, block, doProgram,
+     *           init, main
+     */
+    judiciousCopying = object.extend({
+
+        // Constant declarations
+        TAB: '\t',
+        CR: '\r',
+        LF: '\n',
+
+        // Variable declarations
+        look: '',   // lookahead character
+        lCount: 0,  // label counter
+
+        // Read new character from input
+        getChar: function () {
+            this.look = io.read();
+        },
+
+        // Report an error
+        error: function (str) {
+            io.writeLn('Error: ', str, '.');
+        },
+
+        // Report error and halt
+        abort: function (str) {
+            this.error(str);
+            io.halt();
+        },
+
+        // Report what was expected
+        expected: function (str) {
+            this.abort(str + ' Expected');
+        },
+
+        // Recognize an alpha character
+        isAlpha: function (c) {
+            return (/[A-Z]/i).test(c);
+        },
+
+        // Recognize a decimal digit
+        isDigit: function (c) {
+            return (/\d/).test(c);
+        },
+
+        // Recognize an alphanumeric character
+        isAlNum: function (c) {
+            return this.isAlpha(c) || this.isDigit(c);
+        },
+
+        // Recognize an addop
+        isAddop: function (c) {
+            return c === '+' || c === '-';
+        },
+
+        // Recognize a mulop
+        isMulop: function (c) {
+            return c === '*' || c === '/';
+        },
+
+        // Recognize white space
+        isWhite: function (c) {
+            return c === ' ' || c === this.TAB;
+        },
+
+        // Skip over leading white space
+        skipWhite: function () {
+            while (this.isWhite(this.look)) {
+                this.getChar();
+            }
+        },
+
+        // Match a specific input character
+        match: function (x) {
+            if (this.look === x) {
+                this.getChar();
+                this.skipWhite();   // <--
+            } else {
+                this.expected('"' + x + '"');
+            }
+        },
+
+        // Skip a CRLF
+        fin: function () {
+            if (this.look === this.CR) {
+                this.getChar();
+            }
+            if (this.look === this.LF) {
+                this.getChar();
+            }
+            this.skipWhite();   // <--
+        },
+
+        // Get an identifier
+        getName: function () {
+            var name;
+
+            while (this.look === this.LF) {
+                this.fin();
+            }
+            if (!this.isAlpha(this.look)) {
+                this.expected('Name');
+            }
+            name = this.look.toUpperCase();
+            this.getChar();
+            this.skipWhite();   // <--
+            return name;
+        },
+
+        // Get a number
+        getNum: function () {
+            var num;
+            if (!this.isDigit(this.look)) {
+                this.expected('Integer');
+            }
+            num = this.look;
+            this.getChar();
+            this.skipWhite();   // <--
+            return num;
+        },
+
+        // Generate a unique lable
+        newLabel: function () {
+            var label = 'L' + this.lCount;
+            this.lCount += 1;
+            return label;
+        },
+
+        // Post a label to output
+        postLabel: function (label) {
+            io.writeLn(label + ':');
+        },
+
+         // Output a string with tab
+        emit: function (str) {
+            io.write(this.TAB + str);
+        },
+
+        // Output a string with tab and newline
+        emitLn: function (str) {
+            this.emit(str);
+            io.writeLn();
+        },
+
+        /**
+         * Improving arithmetic expressions:
+         * in 2.8
+         * <expression> ::= [<unary op>] <term> [<addop> <term>]*
+         * <term> ::= <factor> |<mulop> <factor>|*
+         * <factor> ::= <number> | (<expression>)
+         *
+         * in 6.6.9
+         * <expression>   ::= <term> [<addop> <term>]*
+         * <term>         ::= <signed factor> [<mulop> factor]*
+         * <signed factor> ::= [<addop>] <factor>
+         * <factor>       ::= <number> | (<b-expression>) | <identifier>
+         * <identifier>   ::= <variable> | <function>
+         *
+         * this version (only first term allows <signed factor>)
+         * <expression> ::= <first term> [<addop> <term>]*
+         * <first term> ::= <signed factor> <term 1>
+         * <term> ::= <factor> <term 1>
+         * <term 1> ::= [<mulop> <factor>]*
+         * <signed factor> ::= [<addop>] <factor>
+         * <factor>       ::= <number> | (<expression>) | <identifier>
+         * <identifier>   ::= <variable> | <function>
+         */
+
+        // Parse and translate an identifier
+        identifier: function () {
+            var name = this.getName();
+            if (this.look === '(') {
+                this.match('(');
+                this.match(')');
+                this.emitLn('BSR ' + name);
+            } else {
+                this.emitLn('MOVE ' + name + '(PC), D0');
+            }
+        },
+
+        // Parse and translate a math factor
+        factor: function () {
+            if (this.look === '(') {
+                this.match('(');
+                this.expression();
+                this.match(')');
+            } else if (this.isAlpha(this.look)) {
+                this.identifier();
+            } else {
+                this.emitLn('MOVE #' + this.getNum() + ' ,D0');
+            }
+        },
+
+        // Parse and translate the first math factor
+        signedFactor: function () {
+            var signed = this.look === '-';
+
+            if (this.isAddop(this.look)) {
+                this.getChar();
+                this.skipWhite();
+            }
+
+            if (signed) {
+                if (this.isDigit(this.look)) {
+                    this.emitLn('MOVE #-' + this.getNum() + ', D0');
+                } else {
+                    this.factor();
+                    this.emitLn('NEG D0');
+                }
+            } else {
+                this.factor();
+            }
+        },
+
+        // Recognize and translate a multiply
+        multiply: function () {
+            this.match('*');
+            this.factor();
+            this.emitLn('MULS (SP)+, D0');
+        },
+
+        // Recognize and translate a divide
+        divide: function () {
+            this.match('/');
+            this.factor();
+            this.emitLn('MOVE (SP)+, D1');
+            this.emitLn('EXG  D0, D1');
+            this.emitLn('DIVS D1, D0');
+        },
+
+        // Parse and translate a math term
+        term1: function () {
+            while (this.look === '*' || this.look === '/') {
+                this.emitLn('MOVE D0, -(SP)');
+                switch (this.look) {
+                case '*':
+                    this.multiply();
+                    break;
+                case '/':
+                    this.divide();
+                    break;
+                }
+            }
+        },
+
+        // Parse and translate a math term
+        term: function () {
+            this.factor();    // <--
+            this.term1();
+        },
+
+        // Parse and translate a math term with possible leading sing
+        firstTerm: function () {
+            this.signedFactor();    // <--
+            this.term1();
+        },
+
+        // Recognize and translate an add
+        add: function () {
+            this.match('+');
+            this.term();
+            this.emitLn('ADD (SP)+, D0');    // <-- pop from stack
+        },
+
+        // Recognize and translate a subtract
+        subtract: function () {
+            this.match('-');
+            this.term();
+            this.emitLn('SUB (SP)+, D0');    // <-- pop from stack
+            this.emitLn('NEG D0');
+        },
+
+        // parse and translate an expression
+        expression: function () {
+            this.firstTerm();   // <--
+            while (this.look === '+' || this.look === '-') {
+                this.emitLn('MOVE D0, -(SP)');
+                switch (this.look) {
+                case '+':
+                    this.add();
+                    break;
+                case '-':
+                    this.subtract();
+                    break;
+                }
+            }
+        },
+
+        /**
+         * <program> ::= <block> END
+         * <block> ::= [<statement>]*
+         * <statement> ::= <if> | <assignment>
+         * <if stmt> ::= IF <condition> <block> [ELSE <block>] ENDIF
+         * <assignment> ::= <identifier> = <expression>
+         */
+
+        // Parse and translate a boolean condition
+        // This version is a dummy
+        condition: function () {
+            this.emitLn('<condition>');
+        },
+
+        // Recognize and translate an IF constructor
+        doIf: function () {
+            var label_1, label_2;
+            this.match('i');
+            this.condition();
+            label_1 = this.newLabel();
+            label_2 = label_1;
+            this.emitLn('BEQ ' + label_1);
+            this.block();
+
+            if (this.look === 'l') {
+                this.match('l');
+                label_2 = this.newLabel();
+                this.emitLn('BRA ' + label_2);
+                this.postLabel(label_1);
+                this.block();
+            }
+
+            this.match('e');
+            this.postLabel(label_2);
+        },
+
+        // Parse and translate an assignment statement
+        assignment: function () {
+            var name = this.getName();
+            this.match('=');
+            this.expression();
+            this.emitLn('LEA ' + name + '(PC), A0');
+            this.emitLn('MOVE D0, (A0)');
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            while (this.look !== 'e' && this.look !== 'l') {
+                switch (this.look) {
+                case 'i':
+                    this.doIf();
+                    break;
+                case this.LF:
+                    while (this.look === this.LF) {
+                        this.fin();
+                    }
+                    break;
+                default:
+                    this.assignment();
+                }
+            }
+        },
+
+        // Parse and translate a program
+        doProgram: function () {
+            this.block();
+            if (this.look !== 'e') {
+                this.expected('End');
+            }
+            this.emitLn('END');
+        },
+
+        // Initialize
+        init: function () {
+            this.lCount = 0;
+            this.getChar();
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            this.doProgram();
+        }
+
+    });
+
+    // 7.13.2 Merging scanner and parser
+    mergingScannerAndParser = judiciousCopying.extend({
+
+        // Variable declarations
+        token: '',      // encoded token
+        value: '',      // unencoded token
+
+        //
+        keywordCode: 'xilee',
+        keywordType: enumerate(['IF', 'ELSE', 'ENDIF', 'END'], 1),
+
+        // Get an identifier
+        getName: function () {
+            while (this.look === this.LF) {
+                this.fin();
+            }
+            if (!this.isAlpha(this.look)) {
+                this.expected('Name');
+            }
+            this.value = '';
+            while (this.isAlNum(this.look)) {
+                this.value += this.look.toUpperCase();
+                this.getChar();
+            }
+            this.skipWhite();
+        },
+
+        // Get a number
+        getNum: function () {
+            if (!this.isDigit(this.look)) {
+                this.expected('Integer');
+            }
+            this.value = '';
+            while (this.isDigit(this.look)) {
+                this.value += this.look;
+                this.getChar();
+            }
+            this.token = '#';
+            this.skipWhite();
+        },
+
+        // Get an identifier and scan it for keywords
+        scan: function () {
+            this.getName();
+            this.token = this.keywordCode.charAt(this.keywordType[this.value]);
+        },
+
+        // Match a specific input string
+        matchString: function (str) {
+            if (this.value !== str) {
+                this.expected('"' + str + '"');
+            }
+        },
+
+        // Parse and translate an identifier
+        identifier: function () {
+            this.getName();     // <--
+            if (this.look === '(') {
+                this.match('(');
+                this.match(')');
+                this.emitLn('BSR ' + this.value);   // <--
+            } else {
+                this.emitLn('MOVE ' + this.value + '(PC), D0');   // <--
+            }
+        },
+
+        // Parse and translate the first math factor
+        signedFactor: function () {
+            var signed = this.look === '-';
+
+            if (this.isAddop(this.look)) {
+                this.getChar();
+                this.skipWhite();
+            }
+
+            if (signed) {
+                if (this.isDigit(this.look)) {
+                    this.getNum();  // <--
+                    this.emitLn('MOVE #-' + this.value + ', D0');   // <--
+                } else {
+                    this.factor();
+                    this.emitLn('NEG D0');
+                }
+            } else {
+                this.factor();
+            }
+        },
+
+        // Parse and translate a math factor
+        factor: function () {
+            if (this.look === '(') {
+                this.match('(');
+                this.expression();
+                this.match(')');
+            } else if (this.isAlpha(this.look)) {
+                this.identifier();
+            } else {
+                this.getNum();
+                this.emitLn('MOVE #' + this.value + ' ,D0');
+            }
+        },
+
+        // Recognize and translate an IF constructor
+        doIf: function () {
+            var label_1, label_2;
+
+            this.condition();
+            label_1 = this.newLabel();
+            label_2 = label_1;
+            this.emitLn('BEQ ' + label_1);
+            this.block();
+
+            if (this.token === 'l') {   // <--
+                label_2 = this.newLabel();
+                this.emitLn('BRA ' + label_2);
+                this.postLabel(label_1);
+                this.block();
+            }
+
+            this.postLabel(label_2);
+            this.matchString('ENDIF');  // <--
+        },
+
+        // Parse and translate an assignment statement
+        assignment: function () {
+            var name = this.value;  // <--
+            this.match('=');
+            this.expression();
+            this.emitLn('LEA ' + name + '(PC), A0');    // <--
+            this.emitLn('MOVE D0, (A0)');
+        },
+
+        // Recognize and translate a statement block
+        block: function () {
+            this.scan();    // <--
+            while (this.token !== 'e' && this.token !== 'l') {  // <--
+                switch (this.token) {   // <--
+                case 'i':
+                    this.doIf();
+                    break;
+                default:
+                    this.assignment();
+                }
+                this.scan();    // <--
+            }
+        },
+
+        // Parse and translate a program
+        doProgram: function () {
+            this.block();
+            this.matchString('END');    // <--
+            this.emitLn('END');
+        }
+
+    });
+
+
+    // return main functions for executions
+    return {
+
+        judiciousCopying: boundMain(judiciousCopying),
+        mergingScannerAndParser: boundMain(mergingScannerAndParser)
+
+    };
+
+});
+/**
+ * Chapter 9 A Top View
+ * Program kiss
+ */
+
+define(['./1.2-cradle', 'io'], function (cradle, io) {
+    'use strict';
+
+    var boundMain = cradle.boundMain,
+        theStructureOfPascal,           // 9.3
+        fleshingItOut,                  // 9.4
+        declarations,                   // 9.5
+        theStructureOfC;                // 9.6
+
+    // 9.1 Introduction
+
+    /**
+     * 9.2 The top level
+     * In program design language (PDL):
+     * begin
+     *     solve the problem
+     * end
+     */
+
+    /**
+     * 9.3 The structure of Pascal
+     * In BNF:
+     * <program> ::= <program-header> <block> '.'
+     * <program-header> ::= PROGRAM <ident>
+     * <block> ::= <declarations> | <statements>
+     *
+     * this section:
+     * <program> ::= <program-header> '.'
+     * <program-header> ::= PROGRAM <ident>
+     */
+    theStructureOfPascal = cradle.extend({
+
+        // Parse and translate a program
+        prog: function () {
+            var name;
+            this.match('p');    // Handles program header part
+            name = this.getName();
+            this.prolog(name);
+            this.match('.');
+            this.epilog(name);
+        },
+
+        // Write the prolog
+        prolog: function () {
+            this.emitLn('WARMST EQU $A01E');
+        },
+
+        // Write the epilog
+        epilog: function (name) {
+            this.emitLn('DC WARMST');
+            this.emitLn('END ' + name);
+        },
+
+        // Main function
+        main: function () {
+            this.init();
+            this.prog();
+        }
+
+    });
+
+    /**
+     * 9.4 Fleshing it out
+     * In BNF:
+     * <program> ::= <program-header> <block> '.'
+     * <program-header> ::= PROGRAM <ident>
+     * <block> ::= <declarations> | <statements>
+     */
+    fleshingItOut = theStructureOfPascal.extend({
+
+        // Post a label to output (ch 5.3)
+        postLabel: function (label) {
+            io.writeLn(label + ':');
+        },
+
+        declarations: function () {},
+
+        statements: function () {},
+
+        // Parse and translate a Pascal block
+        doBlock: function (name) {
+            this.declarations();
+            this.postLabel(name);
+            this.statements();
+        },
+
+        // Parse and translate a program
+        prog: function () {
+            var name;
+            this.match('p');
+            name = this.getName();
+            this.prolog(name);
+            this.doBlock(name);     // <--
+            this.match('.');
+            this.epilog(name);
+        }
+
+    });
+
+    /**
+     * 9.5 Declarations
+     * The BNF for Pascal declarations is:
+     * <declarations> ::= ( <label list>    |
+     *                      <constant list> |
+     *                      <type list>     |
+     *                      <variable list> |
+     *                      <procedure>     |
+     *                      <function>        )*
+     *
+     * Statement part in BNF:
+     * <statements> ::= <compound statement>
+     * <compound statement> ::= BEGIN <statement> (';' <statement>)* END
+     *
+     * Procedure statements:
+     * <statement> ::= <simple statement> | <structured statement>
+     * <simple statement> ::= <assignment> | <procedure call> | null
+     * <structured statement> ::= <compound statement> |
+     *                            <if statement>       |
+     *                            <case statement>     |
+     *                            <while statement>    |
+     *                            <repeat statement>   |
+     *                            <for statement>      |
+     *                            <with statement>
+     */
+    declarations = fleshingItOut.extend({
+
+        // Process label statement
+        labels: function () {
+            this.match('l');
+        },
+
+        // Process const statement
+        constants: function () {
+            this.match('c');
+        },
+
+        // Process type statement
+        types: function () {
+            this.match('t');
+        },
+
+        // Process var statement
+        variables: function () {
+            this.match('v');
+        },
+
+        // Process procedure statement
+        doProcedure: function () {
+            this.match('p');
+        },
+
+        // Process function statement
+        doFunction: function () {
+            this.match('f');
+        },
+
+        // Parse and translate the declaration part
+        declarations: function () {
+            while ((/[lctvpf]/).test(this.look)) {
+                switch (this.look) {
+                case 'l':
+                    this.labels();
+                    break;
+                case 'c':
+                    this.constants();
+                    break;
+                case 't':
+                    this.types();
+                    break;
+                case 'v':
+                    this.variables();
+                    break;
+                case 'p':
+                    this.doProcedure();
+                    break;
+                case 'f':
+                    this.doFunction();
+                    break;
+                }
+            }
+        },
+
+        // Parse and translate the statement part
+        statements: function () {
+            this.match('b');
+            while (this.look !== 'e') {
+                this.getChar();
+            }
+            this.match('e');
+        }
+
+    });
+
+    /**
+     * 9.6 The structure of C
+     * At the top level, everything in C is a static declaration,
+     * either of data or of a function.
+     * <program> ::= ( <global declaration> )*
+     * <global declaration> ::= <data declaration> |
+     *                          <function>
+     *
+     * In Small C:
+     * <global declaration> ::= '#' <preprocessor command>  |
+     *                          'int' <data list>           |
+     *                          'char' <data list>          |
+     *                          '<ident> <function body>
+     *
+     * BNF for full C:
+     * <program> ::= ( <top-level decl> )*
+     * <top-level decl> ::= <function def> | <data decl>
+     * <data decl> ::= [<class>] <type> <decl-list>
+     * <function def> ::= [<class>] [<type>] <function decl>
+     *
+     * ambiguous for <data decl> and <function def> above,
+     * we can transform it:
+     * <top-level decl> ::= [<class>] <decl>
+     * <decl> ::= <type> <typed decl> | <function decl>
+     * <typed decl> ::= <data list> | <function decl>
+     */
+    theStructureOfC = cradle.extend({
+
+        // Demonstrates the top-level structure for small C
+        // Parse and translate a program
+        prog: function () {
+            while (this.look !== 'Z') {    // ^Z in real
+                switch (this.look) {
+                case '#':
+                    this.preProc();
+                    break;
+                case 'i':
+                    this.intDecl();
+                    break;
+                case 'c':
+                    this.charDecl();
+                    break;
+                default:
+                    this.doFunction();
+                }
+            }
+        },
+
+        // For full C
+        // Main program
+        main: function () {
+            this.init();
+            while (this.look !== this.LF) {     // ^Z in real
+                this.getClass();
+                this.getType();
+                this.topDecl();
+            }
+        },
+
+        // Global variable
+        clas: '',   // storage class: auto, extern, static, register, typedef
+        sign: '',   // signed, unsigned
+        typ: '',    // long, int, char, ...
+
+        showClass: {
+            a: 'auto ',
+            x: 'extern ',
+            s: 'static '
+        },
+        showSign: {
+            s: 'signed ',
+            u: 'unsigned '
+        },
+        showType: {
+            l: 'long ',
+            i: 'int ',
+            c: 'char '
+        },
+
+        // Get a storage class specifier
+        // a: auto, x: extern, s: static
+        getClass: function () {
+            if (this.look === 'a' || this.look === 'x' || this.look === 's') {
+                this.clas = this.look;
+                this.getChar();
+            } else {
+                this.clas = 'a';
+            }
+        },
+
+        // Get a type specifier
+        getType: function () {
+            this.typ = ' ';
+            if (this.look === 'u') {
+                this.sign = 'u';
+                this.typ = 'i';
+                this.getChar();
+            } else {
+                this.sign = 's';
+            }
+            if (this.look === 'i' || this.look === 'l' || this.look === 'c') {
+                this.typ = this.look;
+                this.getChar();
+            }
+        },
+
+        // Process a type-level declaration
+        topDecl: function () {
+            var name = this.getName();
+            if (this.look === '(') {
+                this.doFunc(name);
+            } else {
+                this.doData(name);
+            }
+        },
+
+        // Process a function definition
+        doFunc: function (name) {
+            this.match('(');
+            this.match(')');
+            this.match('{');
+            this.match('}');
+            if (this.typ === ' ') {
+                this.typ = 'i';
+            }
+            io.writeLn(this.showClass[this.clas], this.showSign[this.sign],
+                    this.showType[this.typ], 'function ', name);
+        },
+
+        // Process a data declaration
+        doData: function (name) {
+            if (this.typ === ' ') {
+                this.expected('Type declaration');
+            }
+            io.writeLn(this.showClass[this.clas], this.showSign[this.sign],
+                    this.showType[this.typ], 'data ', name);
+            this.match(';');
+        }
+
+    });
+
+    // return main functions for executions
+    return {
+
+        theStructureOfPascal: boundMain(theStructureOfPascal),
+        fleshingItOut: boundMain(fleshingItOut),
+        declarations: boundMain(declarations),
+        theStructureOfC: boundMain(theStructureOfC)
+
+    };
+
+});
+define([
+    './2-expression-parsing',
+    './3-more-expressions',
+    './4-interpreters',
+    './5-control-constructs',
+    './6-boolean-expressions',
+    './7-lexical-scanning',
+    './7.13-kiss',
+    './9.a-top-view',
+    './10-introducing-tiny',
+    './11-lexical-scan-revisited',
+    './11.6-tiny-1.1',
+    './12-miscellany'
+], function (
+    expressionParsing,      // 2
+    moreExpressions,        // 3
+    interpreters,           // 4
+    controlConstructs,      // 5
+    booleanExpressions,     // 6
+    lexicalScanning,        // 7
+    kiss,                   // 7.13
+    aTopView,               // 9
+    introducingTiny,        // 10
+    lexicalScanRevisited,   // 11
+    tiny_11,                // 11.6
+    miscellany              // 12
+) {
+    'use strict';
+
+    return {
+        expressionParsing: expressionParsing,
+        moreExpressions: moreExpressions,
+        interpreters: interpreters,
+        controlConstructs: controlConstructs,
+        booleanExpressions: booleanExpressions,
+        lexicalScanning: lexicalScanning,
+        kiss: kiss,
+        aTopView: aTopView,
+        introducingTiny: introducingTiny,
+        lexicalScanRevisited: lexicalScanRevisited,
+        tiny_11: tiny_11,
+        miscellany: miscellany
+    };
+
+});
+/* Base object for prototypal inheritance and utilities */
+define(['jquery'], function ($) {
+    'use strict';
+
+    return {
+
+        // Extend method for prototyal inheritance
+        extend: function (obj) {
+            var newObj = Object.create(this),
+                prop;
+
+            for (prop in obj) {
+                if (obj.hasOwnProperty(prop)) {
+                    newObj[prop] = obj[prop];
+                }
+            }
+            return newObj;
+        },
+
+        // get the binded main function
+        boundMain: function (obj) {
+            return obj.main.bind(obj);
+        },
+
+        // Helper, covert an array to an object to work as enum
+        // e.g. enumerate([a, b]) => { a: 0, b: 1 }
+        enumerate: function (arr, start) {
+            var result = Object.create(null);
+
+            start = start || 0;
+            $.each(arr, function (i, name) {
+                result[name] = start + i;
+            });
+            return result;
+        }
+    };
+
+});
+/**
+ * Chapter 11 Lexical Scan Revisited
+ */
+
+define(['./1.2-cradle', 'io'], function (cradle, io) {
+    'use strict';
+
+    var boundMain = cradle.boundMain,
+        theSolution,                // 11.4.1
+        singleCharacterOperators;   // 11.4.2
+
+    // 11.1 Introduction
+
+    // 11.2 background
+
+    // 11.3 The problem
+
+    // 11.4 The solution
+    theSolution = cradle.extend({
+
+        // Recognize an alphanumeric character
+        isAlNum: function (c) {
+            return this.isAlpha(c) || this.isDigit(c);
+        },
+
+        // Recognize white space
+        isWhite: function (c) {
+            return c === ' ' || c === this.TAB ||
+                   c === this.CR || c === this.LF;
+        },
+
+        // Skip over leading white space
+        skipWhite: function () {
+            while (this.isWhite(this.look)) {
+                this.getChar();
+            }
+        },
+
+        // Get an identifier
+        getName: function () {
+            this.skipWhite();
+            if (!this.isAlpha(this.look)) {
+                this.expected('Name');
+            }
+            this.token = 'x';
+            this.value = '';
+            do {
+                this.value += this.look.toUpperCase();
+                this.getChar();
+            } while (this.isAlNum(this.look));
+        },
+
+        // Get a Number
+        getNum: function () {
+            this.skipWhite();
+            if (!this.isDigit(this.look)) {
+                this.expected('Number');
+            }
+            this.token = '#';
+            this.value = '';
+            do {
+                this.value += this.look;
+                this.getChar();
+            } while (this.isDigit(this.look));
+        },
+
+        // Get an operator
+        getOp: function () {
+            this.token = this.look;
+            this.value = '';
+            do {
+                this.value += this.look;
+                this.getChar();
+            } while (!this.isAlpha(this.look) && !this.isDigit(this.look) &&
+                     !this.isWhite(this.look));
+        },
+
+        // Get the next input token
+        next: function () {
+            this.skipWhite();
+            if (this.isAlpha(this.look)) {
+                this.getName();
+            } else if (this.isDigit(this.look)) {
+                this.getNum();
+            } else {
+                this.getOp();
+            }
+        },
+
+        // Main program
+        main: function () {
+            this.init();
+            do {
+                this.next();
+                io.writeLn(this.token, ' ', this.value);
+            } while (this.token !== '.');
+        }
+
+    });
+
+    /**
+     * 11.4.2 Single-character operators
+     * e.g. (a+b)*(c+d), problem of op: ')*(' is fixed.
+     */
+    singleCharacterOperators = theSolution.extend({
+
+        // Get an operator
+        getOp: function () {
+            this.token = this.look;
+            this.value = this.look;
+            this.getChar();
+        },
+
+        // Scan the current identifier for keywords
+        scan: function () {
+            if (this.token === 'x') {
+                this.token = this.keywordCode(this.value);
+            }
+        },
+
+        // Match a specific input string
+        matchString: function (str) {
+            if (this.value !== str) {
+                this.expected('"' + str + '"');
+            }
+        }
+
+    });
+
+    // 11.5 Fixing up the compiler
+
+    // 11.6 Conclusion
+    // in file: 11.6-tiny-1.1.js
+
+
+    // return main functions for executions
+    return {
+
+        theSolution: boundMain(theSolution),
+        singleCharacterOperators: boundMain(singleCharacterOperators)
+
+    };
+
+});
