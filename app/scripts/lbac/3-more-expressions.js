@@ -21,7 +21,7 @@ define([
      * In BNF notation:
      * <factor> ::= <number> | (<expression>) | <variable>
      */
-    variables = expressionParsing.unitaryMinusObject.extend({
+    variables = expressionParsing.unaryMinusObject.extend({
 
         // Parse and translate a math factor
         factor: function () {
@@ -68,7 +68,7 @@ define([
             } else if (this.isAlpha(this.look)) {
                 this.identifier();
             } else {
-                this.emitLn('MOVE #' + this.getNum() + ' ,D0');
+                this.emitLn('MOVE #' + this.getNum() + ', D0');
             }
         }
 

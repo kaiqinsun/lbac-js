@@ -9,6 +9,7 @@ $iconWhiteSpritePath: "../images/glyphicons-halflings-white.png";
 
 @import 'sass-bootstrap/lib/bootstrap';
 @import 'sass-bootstrap/lib/responsive';
+@import 'vendor/prettify';
 @import 'tiny-console';
 
 @media (max-width: 980px) {
@@ -28,7 +29,6 @@ $iconWhiteSpritePath: "../images/glyphicons-halflings-white.png";
 }
 
 .accordion {
-    // Add disabled state for items in accordion menu
     .disabled {
         pointer-events: none;
     }

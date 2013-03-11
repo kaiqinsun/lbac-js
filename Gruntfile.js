@@ -149,11 +149,21 @@ module.exports = function (grunt) {
                 }
             }
         },
+
         // not used since Uglify task does concat,
         // but still available if needed
-        /*concat: {
-            dist: {}
-        },*/
+        concat: {
+            all: {
+                files: [{
+                    dest: '.tmp/ajax/lbac.src.txt',
+                    src: [
+                        '<%= yeoman.app %>/scripts/lbac/*.js',
+                        '!<%= yeoman.app %>/scripts/lbac/11-lexical-scan-revisited.js',
+                        '<%= yeoman.app %>/scripts/lbac/11-lexical-scan-revisited.js'
+                    ]
+                }]
+            }
+        },
         requirejs: {
             dist: {
                 // Options: https://github.com/jrburke/r.js/blob/master/build/example.build.js
@@ -238,6 +248,11 @@ module.exports = function (grunt) {
                         '*.{ico,txt}',
                         '.htaccess'
                     ]
+                }, {
+                    expand: true,
+                    flatten: true,
+                    dest: '<%= yeoman.dist %>/ajax',
+                    src: '.tmp/ajax/*'
                 }]
             }
         },
@@ -259,6 +274,7 @@ module.exports = function (grunt) {
             'clean:server',
             'coffee:dist',
             'compass:server',
+            'concat',
             'livereload-start',
             'connect:livereload',
             'open',

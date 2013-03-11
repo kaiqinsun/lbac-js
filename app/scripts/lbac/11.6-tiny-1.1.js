@@ -1,6 +1,5 @@
 /**
- * Chapter Lexical Scan Revisited
- * 11.6 Conclusion
+ * Chapter 11 Lexical Scan Revisited - 11.6 Conclusion
  * Program Tiny v1.1
  */
 

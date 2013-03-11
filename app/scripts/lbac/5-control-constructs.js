@@ -20,7 +20,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.2 The plan
-     *
+     */
+
+    /*
      * 5.2.1 One statement
      * <program> ::= <statement>
      */

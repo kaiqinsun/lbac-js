@@ -1139,7 +1139,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 10.13 Input/Output
+     * 10.13 Input / Output
      * Assuming a library call TINYLIB.LIB exists
      */
     inputOutput = moreRelops.extend({

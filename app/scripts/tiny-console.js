@@ -477,7 +477,7 @@
                     $this.data('tinyConsole', consoleData);
 
                     // exprimental
-                    addEditor($this);
+                    // addEditor($this);
 
                 }
             });

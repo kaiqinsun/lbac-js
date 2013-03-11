@@ -47,14 +47,14 @@
             ======================================= -->
             <div class="accordion-group">
                 <div class="accordion-heading">
-                    <a class="accordion-toggle btn disabled" data-toggle="collapse" data-parent="#accordion2" href="#ch1">
+                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch1">
                         Chapter 1 Introduction
                     </a>
                 </div>
                 <div id="ch1" class="accordion-body collapse">
                 <ul class="accordion-inner nav nav-tabs nav-stacked">
                     <li class="disabled"><a href="#">1.1 Introduction</a></li>
-                    <li><a href="#">1.2 The cradle</a></li>
+                    <li class="disabled"><a href="#">1.2 The cradle</a></li>
                 </ul>
                 </div>
             </div>    
@@ -74,9 +74,9 @@
                     <li><a href="#">2.3 Binary expressions</a></li>
                     <li><a href="#">2.4 General expressions</a></li>
                     <li><a href="#">2.5 Using the stack</a></li>
-                    <li><a href="#">2.6 Multiplcation and division</a></li>
+                    <li><a href="#">2.6 Multiplication and division</a></li>
                     <li><a href="#">2.7 Parentheses</a></li>
-                    <li><a href="#">2.8 Unitary minus</a></li>
+                    <li><a href="#">2.8 Unary minus</a></li>
                     <li class="disabled"><a href="#">2.9 A word about optimization</a></li>
                 </ul>
                 </div>
@@ -87,7 +87,7 @@
             <div class="accordion-group">
                 <div class="accordion-heading">
                     <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch3">
-                        Chapter 3 More expressions
+                        Chapter 3 More Expressions
                     </a>
                 </div>
                 <div id="ch3" class="accordion-body collapse">
@@ -134,7 +134,7 @@
             <div class="accordion-group">
                 <div class="accordion-heading">
                     <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch5">
-                        Chapter 5 Control constructs
+                        Chapter 5 Control Constructs
                     </a>
                 </div>
                 <div id="ch5" class="accordion-body collapse">
@@ -144,7 +144,7 @@
                     <li><a href="#">5.2.2 More than one statement</a></li>
                     <li class="disabled"><a href="#">5.3 Some groundwork</a></li>
                     <li><a href="#">5.4 The IF statement</a></li>
-                    <li><a href="#">5.4.2 Add the ELSE Clause</a></li>
+                    <li><a href="#">5.4.2 Add the ELSE clause</a></li>
                     <li><a href="#">5.5 The WHILE statement</a></li>
                     <li><a href="#">5.6 The LOOP statement</a></li>
                     <li><a href="#">5.7 The Repeat-Until statement</a></li>
@@ -401,6 +401,7 @@
 
         <div class="span8">
             <div id="console"></div>
+            <pre id="source-codes" class="prettyprint" style="display: none;"></pre>
         </div><!--/.span-->
 
     </div><!--/row-->
@@ -412,21 +413,21 @@
 <![endif]-->
 
 <footer class="footer">
-    <p>Let's Build a Compiler (JavaScript)</p>
+    <p>JavaScript port of <a href="http://compilers.iecc.com/crenshaw/" target="_blank">Let's Build a Compiler - Copyright &copy; 1988 - 1995 Jack W. Crenshaw.</a></p>
 </footer>
-    
-<!-- Google Analytics: change UA-XXXXX-X to be your site's ID.
-================================================================= -->
-<script>
-    var _gaq=[['_setAccount','UA-36429024-3'],['_trackPageview']];
-    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-    s.parentNode.insertBefore(g,s)}(document,'script'));
-</script>
 
 <!-- build:js scripts/main.js -->
 <script data-main="scripts/main" src="components/requirejs/require.js"></script>
 <!-- endbuild -->
+
+<!-- Google Analytics: change UA-XXXXX-X to be your site's ID.
+================================================================= -->
+<script>
+    var _gaq=[['_setAccount','UA-36429024-3'],['_trackPageview']];
+    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=true;
+    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+    s.parentNode.insertBefore(g,s)}(document,'script'));
+</script>
 
 </body>
 </html>

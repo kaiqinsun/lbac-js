@@ -10,9 +10,9 @@ define(['./1.2-cradle'], function (cradle) {
         binaryExpressions,          // 2.3
         generalExpressions,         // 2.4
         usingTheStack,              // 2.5
-        multiplcationAndDivision,   // 2.6
+        multiplicationAndDivision,   // 2.6
         parentheses,                // 2.7
-        unitaryMinus;               // 2.8
+        unaryMinus;               // 2.8
 
     /**
      * 2.1 Getting started
@@ -38,7 +38,7 @@ define(['./1.2-cradle'], function (cradle) {
     });
 
     /**
-     * 2.3 Binary expression
+     * 2.3 Binary expressions
      * In BNF:
      * <term> +/- <term>
      */
@@ -83,7 +83,7 @@ define(['./1.2-cradle'], function (cradle) {
     });
 
     /**
-     * 2.4 General expression
+     * 2.4 General expressions
      * In BNF:
      * <expression> ::= <term> |<addop> <term>|*
      */
@@ -151,7 +151,7 @@ define(['./1.2-cradle'], function (cradle) {
      * In BNF:
      * <term> ::= <factor> |<mulop> <factor>|*
      */
-    multiplcationAndDivision = usingTheStack.extend({
+    multiplicationAndDivision = usingTheStack.extend({
 
         // Parse and translate a math factor
         // same as term() in 2.3 binary expressions
@@ -203,7 +203,7 @@ define(['./1.2-cradle'], function (cradle) {
      * <factor> ::= <number> | (<expression>)
      * This is where the recursion comes in.
      */
-    parentheses = multiplcationAndDivision.extend({
+    parentheses = multiplicationAndDivision.extend({
 
         // Parse and translate a math factor
         factor: function () {
@@ -226,7 +226,7 @@ define(['./1.2-cradle'], function (cradle) {
      *
      * <expression> ::= [<unary op>] <term> [<addop> <term>]*
      */
-    unitaryMinus = parentheses.extend({
+    unaryMinus = parentheses.extend({
 
         // Recognize an addop
         isAddop: function (c) {
@@ -274,16 +274,16 @@ define(['./1.2-cradle'], function (cradle) {
 
         // <factor> ::= <number>
         // <term> ::= <factor> |<mulop> <factor>|*
-        multiplcationAndDivision: boundMain(multiplcationAndDivision),
+        multiplicationAndDivision: boundMain(multiplicationAndDivision),
 
         // <factor> ::= <number> | (<expression>)
         parentheses: boundMain(parentheses),
 
         // <expression> ::= <unary op> <term> [<addop> <term>]*
-        unitaryMinus: boundMain(unitaryMinus),
+        unaryMinus: boundMain(unaryMinus),
 
         // Export the object for the next chapter
-        unitaryMinusObject: unitaryMinus
+        unaryMinusObject: unaryMinus
 
     };
 

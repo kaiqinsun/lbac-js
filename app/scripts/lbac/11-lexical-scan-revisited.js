@@ -1,5 +1,5 @@
 /**
- * Chapter 11 Lexical scan revisited
+ * Chapter 11 Lexical Scan Revisited
  */
 
 define(['./1.2-cradle', 'io'], function (cradle, io) {
@@ -98,8 +98,10 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 11.4.2 Single-character operators
-    // e.g. (a+b)*(c+d), problem of op: ')*(' is fixed.
+    /**
+     * 11.4.2 Single-character operators
+     * e.g. (a+b)*(c+d), problem of op: ')*(' is fixed.
+     */
     singleCharacterOperators = theSolution.extend({
 
         // Get an operator
@@ -128,7 +130,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     // 11.5 Fixing up the compiler
 
     // 11.6 Conclusion
-    // in file: tiny-1.1.js
+    // in file: 11.6-tiny-1.1.js
 
 
     // return main functions for executions

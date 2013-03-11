@@ -14,7 +14,7 @@ define([
         generalExpressions,             // 6.6.3
         andOperation,                   // 6.6.4
         notOperation,                   // 6.6.5
-        expandTheFactor,               // 6.6.6
+        expandTheFactor,                // 6.6.6
         fullBlownRelation,              // 6.6.7
         mergingWithExpressions,         // 6.6.8
         changeToLatestExpressionSyntax, // 6.6.9
@@ -382,17 +382,21 @@ define([
      * <factor>       ::= <number> | (<expression>) | <identifier>
      * <identifier>   ::= <variable> | <function>
      */
-    mergingWithExpressions = $.extend(true, {},
+    mergingWithExpressions = $.extend(
+        true,
+        {},
 
-            // 3.5
-            moreExpressions.assignmentStatementsObject,
+        // 3.5
+        moreExpressions.assignmentStatementsObject,
 
-            // 6.6.7
-            fullBlownRelation
-        );
-    // 3.5
-    mergingWithExpressions.expression =
-            moreExpressions.assignmentStatementsObject.expression;
+        // 6.6.7
+        fullBlownRelation,
+
+        // 3.5
+        {
+            expression : moreExpressions.assignmentStatementsObject.expression
+        }
+    );
 
     /**
      * 6.6.9 Change to latest expression syntax

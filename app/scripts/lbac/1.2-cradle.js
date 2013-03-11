@@ -1,18 +1,21 @@
 /**
  * Chapter 1 Introduction
- * 1.2 Program cradle
+ */
+
+/**
+ * 1.2 The cradle
  */
 
 define(['./object', 'io'], function (object, io) {
     'use strict';
 
    /**
-     * const: TAB, CR, LF
-     * variable: look
-     * function: getChar, error, abort, expected,
-     *           match, isAlpha, isDigit, getName, getNum
-     *           emit, emitLn, init, main
-     */
+    * const: TAB, CR, LF
+    * variable: look
+    * function: getChar, error, abort, expected,
+    *           match, isAlpha, isDigit, getName, getNum
+    *           emit, emitLn, init, main
+    */
     return object.extend({
 
         // Constant declarations

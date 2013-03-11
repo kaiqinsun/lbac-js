@@ -194,7 +194,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      */
 
     /**
-     * 7.7 newlines
+     * 7.7 Newlines
      */
     newlines = whiteSpace.extend({
 
