@@ -3,7 +3,7 @@ lbac-js
 
 A JavaScript port of "Let's Build a Compiler" by Jack Crenshaw. A a non-technical introduction to compiler construction.
 
-Please refer to the [original context](http://compilers.iecc.com/crenshaw/) or alternately a [LaTeX typeset PDF version](http://www.stack.nl/~marcov/compiler.pdf). 
+Please refer to the [original context](http://compilers.iecc.com/crenshaw/) or alternatively a [LaTeX typeset PDF version](http://www.stack.nl/~marcov/compiler.pdf). 
 
 Demo
 --------
@@ -30,7 +30,7 @@ git clone git://github.com/malcomwu/lbac-js.git
 cd lbac-js
 ```
 
-Install node modules defined in `package.json` locally, to `node_modules/`
+Install node modules defined in `package.json` locally to `node_modules/`
 
     npm install
 
