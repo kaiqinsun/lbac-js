@@ -264,13 +264,16 @@ require([
         }
 
         function init() {
-            var title;
+            var title,
+                path;
 
             initConsole();
             attachMenuClickHandler();
             title = restorePageState();
+            
+            path = location.pathname.replace('index.html', '');
             $.ajax({
-                url: '../ajax/lbac.src.txt',
+                url: path + 'ajax/lbac.src.txt',
                 success: function (data) {
                     SourceCodeLines = data.split('\n');
                     $s.show();
