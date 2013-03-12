@@ -2,6 +2,8 @@
  * Chapter 1 Introduction
  */
 
+// 1.1 Introduction
+
 /**
  * 1.2 The cradle
  */
@@ -305,8 +307,10 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <var> ::= <ident> [ = <integer> ]
      */
 
-    // 10.5.1
-    // code example: pvx=5,y,z=3be.
+    /**
+     * 10.5.1
+     * code example: pvx=5,y,z=3be.
+     */
     initializers = variableList.extend({
 
         // Allocate storage for a variable
@@ -322,8 +326,10 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 10.5.2 Multi-digit integer
-    // code example: pvx=15,y,z=-23be.
+    /**
+     * 10.5.2 Multi-digit integer
+     * code example: pvx=15,y,z=-23be.
+     */
     multiDigitInteger = initializers.extend({
 
         // Get a Number
@@ -428,7 +434,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 10.7.2 Code generation routines
+    /**
+     * 10.7.2 Code generation routines
+     */
     codeGenerationRoutines = executableStatements.extend({
 
         // Clear the primary register
@@ -644,7 +652,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * 10.8 Booleans
      */
 
-    // 10.8.1 More code generation routines
+    /**
+     * 10.8.1 More code generation routines
+     */
     moreCodeGenerationRoutines = assignmentStatement.extend({
 
         // Complement the primary register
@@ -1366,8 +1376,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         theSymbolTable: boundMain(theSymbolTable),
         // 10.7.1
         executableStatements: boundMain(executableStatements),
+        // 10.7.2
+        codeGenerationRoutines: boundMain(codeGenerationRoutines),
         // 10.7.3
         assignmentStatement: boundMain(assignmentStatement),
+        // 10.8.1
+        moreCodeGenerationRoutines: boundMain(moreCodeGenerationRoutines),
         // 10.8.2
         booleanExpressions: boundMain(booleanExpressions),
         // 10.9
@@ -1383,7 +1397,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
 });
 /**
- * Chapter 11 Lexical Scan Revisited - 11.6 Conclusion
+ * Chapter 11 Lexical scan revisited - 11.6 Conclusion
  * Program Tiny v1.1
  */
 
@@ -1401,8 +1415,8 @@ define(['./object', 'io'], function (object, io) {
         LF: '\n',
 
         // Variable declarations
-        look: '',   // lookahead character
-        lCount: 0,  // label counter
+        look: '',       // lookahead character
+        lCount: 0,      // label counter
         token: '',      // encoded token
         value: '',      // unencoded token
         symbolTable: null,
@@ -2283,9 +2297,9 @@ define(['./1.2-cradle'], function (cradle) {
         binaryExpressions,          // 2.3
         generalExpressions,         // 2.4
         usingTheStack,              // 2.5
-        multiplicationAndDivision,   // 2.6
+        multiplicationAndDivision,  // 2.6
         parentheses,                // 2.7
-        unaryMinus;               // 2.8
+        unaryMinus;                 // 2.8
 
     /**
      * 2.1 Getting started
@@ -2528,6 +2542,9 @@ define(['./1.2-cradle'], function (cradle) {
 
     });
 
+    // 2.9 A word about optimization
+
+
     // return main functions for executions,
     // and the final unitaryMinus object for next chapter (ch. 3),
     return {
@@ -2585,6 +2602,8 @@ define([
         assignmentStatements,   // 3.5
         multiCharacterTokens,   // 3.6
         whiteSpace;             // 3.7
+
+    // 3.1 Introduction
 
     /**
      * 3.2 Variables
@@ -2834,6 +2853,10 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         assignmentStatements,           // 4.3.2
         multipleStatements,             // 4.3.3
         ioRoutines;                     // 4.3.4
+
+    // 4.1 Introduction
+
+    // 4.2 The interpreters
 
     /**
      * 4.2 The interpreter
@@ -3197,6 +3220,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         theForLoop,                 // 5.8
         theDoStatement,             // 5.9
         theBreakStatement;          // 5.10
+
+    // 5.1 Introduction
 
     /**
      * 5.2 The plan
@@ -3925,6 +3950,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         // <block> ::= [<statement>]*
         moreThanOneStatement: boundMain(moreThanOneStatement),
 
+        someGroundwork: boundMain(someGroundwork),
+
         // <if> ::= IF <condition> <block> ENDIF
         theIfStatement: boundMain(theIfStatement),
 
@@ -4358,9 +4385,10 @@ define([
      * <factor>       ::= <number> | (<expression>) | <identifier>
      * <identifier>   ::= <variable> | <function>
      */
+    //{
     mergingWithExpressions = $.extend(
-        true,
-        {},
+        true,   // deep copy
+        {},     // empty target
 
         // 3.5
         moreExpressions.assignmentStatementsObject,
@@ -4372,7 +4400,9 @@ define([
         {
             expression : moreExpressions.assignmentStatementsObject.expression
         }
+
     );
+    //}
 
     /**
      * 6.6.9 Change to latest expression syntax
@@ -4454,9 +4484,10 @@ define([
      * <block> ::= [<statement>]*
      * <statement> ::= <control-statement> | <b-expression>
      */
+    //{
     mergingWithControlConstructs = $.extend(
-        true,
-        {},
+        true,   // deep copy
+        {},     // empty target
 
         // 6.6.9
         changeToLatestExpressionSyntax,
@@ -4470,7 +4501,9 @@ define([
             expression: changeToLatestExpressionSyntax.expression,
             other: changeToLatestExpressionSyntax.boolExpression
         }
+
     );
+    //}
 
     /**
      * 6.8 Adding assignments
@@ -4682,8 +4715,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * Lexical scanning is lower-level parsing
      */
 
-    // 7.3 State machines and alternatives
     /**
+     * 7.3 State machines and alternatives
+     *
      * Regular expressions can be parsed by a state machine.
      * State machine: integers (current state), table of actions, input chars
      *
@@ -5162,7 +5196,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                     io.write('Number ');
                     break;
                 case 'i':    // fall through
-                case 'l':  // fall through
+                case 'l':    // fall through
                 case 'e':
                     io.write('Keyword ');
                     break;
@@ -5178,7 +5212,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     // 7.12 Distributed vs centralized scanners
 
     // 7.13 Merging scanner and parser
-    // see file: 7.13.kiss.js
+    // see file: 7.13-kiss.js
 
     // return main functions for executions
     return {
