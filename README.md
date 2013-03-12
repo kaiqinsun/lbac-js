@@ -7,12 +7,11 @@ Please refer to the [original context](http://compilers.iecc.com/crenshaw/) or a
 
 Demo
 --------
-The codes are constructed upon prototypal inheritance section by section.
-Check out the [demo...](http://malcomwu.github.com/lbac-js/)
+The codes are constructed section by section based on prototypal inheritance. They are intended to be as similar to the original Pascal codes as possible. A tiny console is provided for the interaction. [Check out the demo](http://malcomwu.github.com/lbac-js/).
 
 Build
 --------
-The lbac-js project structures and workflow were created using [yeoman](http://yeoman.io/).
+The lbac-js project structures and workflow were initialized using [Yeoman](http://yeoman.io/).
 Building lbac-js requires [node.js](http://nodejs.org/)
 and [Ruby](http://www.ruby-lang.org/en/downloads/) (for [Compass](http://compass-style.org/)) installed prior.
 
