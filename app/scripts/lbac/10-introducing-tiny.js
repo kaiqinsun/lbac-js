@@ -191,8 +191,10 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <var> ::= <ident> [ = <integer> ]
      */
 
-    // 10.5.1
-    // code example: pvx=5,y,z=3be.
+    /**
+     * 10.5.1
+     * code example: pvx=5,y,z=3be.
+     */
     initializers = variableList.extend({
 
         // Allocate storage for a variable
@@ -208,8 +210,10 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 10.5.2 Multi-digit integer
-    // code example: pvx=15,y,z=-23be.
+    /**
+     * 10.5.2 Multi-digit integer
+     * code example: pvx=15,y,z=-23be.
+     */
     multiDigitInteger = initializers.extend({
 
         // Get a Number
@@ -314,7 +318,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 10.7.2 Code generation routines
+    /**
+     * 10.7.2 Code generation routines
+     */
     codeGenerationRoutines = executableStatements.extend({
 
         // Clear the primary register
@@ -530,7 +536,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * 10.8 Booleans
      */
 
-    // 10.8.1 More code generation routines
+    /**
+     * 10.8.1 More code generation routines
+     */
     moreCodeGenerationRoutines = assignmentStatement.extend({
 
         // Complement the primary register
@@ -1252,8 +1260,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         theSymbolTable: boundMain(theSymbolTable),
         // 10.7.1
         executableStatements: boundMain(executableStatements),
+        // 10.7.2
+        codeGenerationRoutines: boundMain(codeGenerationRoutines),
         // 10.7.3
         assignmentStatement: boundMain(assignmentStatement),
+        // 10.8.1
+        moreCodeGenerationRoutines: boundMain(moreCodeGenerationRoutines),
         // 10.8.2
         booleanExpressions: boundMain(booleanExpressions),
         // 10.9

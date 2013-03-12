@@ -1,5 +1,5 @@
 /**
- * Chapter 11 Lexical Scan Revisited - 11.6 Conclusion
+ * Chapter 11 Lexical scan revisited - 11.6 Conclusion
  * Program Tiny v1.1
  */
 
@@ -17,8 +17,8 @@ define(['./object', 'io'], function (object, io) {
         LF: '\n',
 
         // Variable declarations
-        look: '',   // lookahead character
-        lCount: 0,  // label counter
+        look: '',       // lookahead character
+        lCount: 0,      // label counter
         token: '',      // encoded token
         value: '',      // unencoded token
         symbolTable: null,

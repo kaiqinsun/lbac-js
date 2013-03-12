@@ -44,8 +44,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * Lexical scanning is lower-level parsing
      */
 
-    // 7.3 State machines and alternatives
     /**
+     * 7.3 State machines and alternatives
+     *
      * Regular expressions can be parsed by a state machine.
      * State machine: integers (current state), table of actions, input chars
      *
@@ -524,7 +525,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                     io.write('Number ');
                     break;
                 case 'i':    // fall through
-                case 'l':  // fall through
+                case 'l':    // fall through
                 case 'e':
                     io.write('Keyword ');
                     break;
@@ -540,7 +541,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     // 7.12 Distributed vs centralized scanners
 
     // 7.13 Merging scanner and parser
-    // see file: 7.13.kiss.js
+    // see file: 7.13-kiss.js
 
     // return main functions for executions
     return {

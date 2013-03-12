@@ -18,6 +18,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         theDoStatement,             // 5.9
         theBreakStatement;          // 5.10
 
+    // 5.1 Introduction
+
     /**
      * 5.2 The plan
      */
@@ -744,6 +746,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         // <program> ::= <block> END
         // <block> ::= [<statement>]*
         moreThanOneStatement: boundMain(moreThanOneStatement),
+
+        someGroundwork: boundMain(someGroundwork),
 
         // <if> ::= IF <condition> <block> ENDIF
         theIfStatement: boundMain(theIfStatement),

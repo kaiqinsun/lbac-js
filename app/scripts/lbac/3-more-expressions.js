@@ -15,6 +15,8 @@ define([
         multiCharacterTokens,   // 3.6
         whiteSpace;             // 3.7
 
+    // 3.1 Introduction
+
     /**
      * 3.2 Variables
      * e.g. b * b + 4 * a * c

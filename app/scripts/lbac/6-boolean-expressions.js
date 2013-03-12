@@ -382,9 +382,10 @@ define([
      * <factor>       ::= <number> | (<expression>) | <identifier>
      * <identifier>   ::= <variable> | <function>
      */
+    //{
     mergingWithExpressions = $.extend(
-        true,
-        {},
+        true,   // deep copy
+        {},     // empty target
 
         // 3.5
         moreExpressions.assignmentStatementsObject,
@@ -396,7 +397,9 @@ define([
         {
             expression : moreExpressions.assignmentStatementsObject.expression
         }
+
     );
+    //}
 
     /**
      * 6.6.9 Change to latest expression syntax
@@ -478,9 +481,10 @@ define([
      * <block> ::= [<statement>]*
      * <statement> ::= <control-statement> | <b-expression>
      */
+    //{
     mergingWithControlConstructs = $.extend(
-        true,
-        {},
+        true,   // deep copy
+        {},     // empty target
 
         // 6.6.9
         changeToLatestExpressionSyntax,
@@ -494,7 +498,9 @@ define([
             expression: changeToLatestExpressionSyntax.expression,
             other: changeToLatestExpressionSyntax.boolExpression
         }
+
     );
+    //}
 
     /**
      * 6.8 Adding assignments

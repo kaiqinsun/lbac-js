@@ -176,6 +176,7 @@ require([
             $s.html(prettify.prettyPrintOne(contents));
         }
 
+        // Initialize tiny console
         function initConsole() {
             $c.tinyConsole({
                 // width: '80%',
@@ -250,11 +251,11 @@ require([
                 if (sectionTitle) {
                     updateConsole(chapterTitle, sectionTitle);
                     return sectionTitle;
-                } else {
-                    $c.hide();
-                    return chapterTitle;
                 }
 
+                // Hide console if no section selected
+                $c.hide();
+                return chapterTitle;
             }
 
             // First time at chapter 1
@@ -270,7 +271,7 @@ require([
             initConsole();
             attachMenuClickHandler();
             title = restorePageState();
-            
+
             path = location.pathname.replace('index.html', '');
             $.ajax({
                 url: path + 'ajax/lbac.src.txt',

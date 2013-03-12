@@ -10,9 +10,9 @@ define(['./1.2-cradle'], function (cradle) {
         binaryExpressions,          // 2.3
         generalExpressions,         // 2.4
         usingTheStack,              // 2.5
-        multiplicationAndDivision,   // 2.6
+        multiplicationAndDivision,  // 2.6
         parentheses,                // 2.7
-        unaryMinus;               // 2.8
+        unaryMinus;                 // 2.8
 
     /**
      * 2.1 Getting started
@@ -254,6 +254,9 @@ define(['./1.2-cradle'], function (cradle) {
         }
 
     });
+
+    // 2.9 A word about optimization
+
 
     // return main functions for executions,
     // and the final unitaryMinus object for next chapter (ch. 3),
