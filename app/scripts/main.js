@@ -257,10 +257,10 @@ require([
 
             }
 
-            // First time at section 2.2
+            // First time at chapter 1
             $('#ch1').collapse('show');
             $c.hide();
-            return chapterTitle;
+            return 'Chapter 1 Introduction';
         }
 
         function init() {
