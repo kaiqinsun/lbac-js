@@ -1,19 +1,19 @@
 lbac-js
 =======
 
-A JavaScript port of "Let's Build a Compiler" by Jack Crenshaw. A a non-technical introduction to compiler construction.
+A JavaScript port of **Let's Build a Compiler** (lbac) by Jack Crenshaw. *A a non-technical introduction to compiler construction*.
 
 Please refer to the [original context](http://compilers.iecc.com/crenshaw/) or alternatively a [LaTeX typeset PDF version](http://www.stack.nl/~marcov/compiler.pdf). 
 
 Demo
 --------
-The codes are constructed section by section based on prototypal inheritance. They are intended to be as similar to the original Pascal codes as possible. A tiny console is provided for the interaction. [Check out the demo](http://malcomwu.github.com/lbac-js/).
+The code is constructed section by section based on prototypal inheritance. It aims to be as similar to the original Pascal version as possible. A tiny console provids I/O routines and basic user interactions. [Check out the demo](http://malcomwu.github.com/lbac-js/).
 
 Build
 --------
 The lbac-js project structures and workflow were initialized using [Yeoman](http://yeoman.io/).
 Building lbac-js requires [node.js](http://nodejs.org/)
-and [Ruby](http://www.ruby-lang.org/en/downloads/) (for [Compass](http://compass-style.org/)) installed prior.
+and [Ruby](http://www.ruby-lang.org/en/downloads/) (for [Compass](http://compass-style.org/)) pre-installed.
 
 Install grunt-cli and bower globally
 
