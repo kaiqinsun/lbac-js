@@ -43,7 +43,7 @@ require([
                 $.cookie('sectionTitle', '', { expires: 60 });
             });
 
-            // Section nav
+            // Section nav list
             $('#accordion2 li').click(function (evt) {
                 var $el = $(this),
                     sectionTitle = $el.text().trim(),
@@ -76,7 +76,10 @@ require([
                 sectionTitle = $.cookie('sectionTitle');
 
             function getChapterId(title) {
-                return '#ch' + title.match(/\d+/g)[0];
+                var matched = title.match(/\d+/g),
+                    n = matched ? matched[0] : 0;
+
+                return '#ch' + n;
             }
 
             if (chapterTitle) {
@@ -92,10 +95,10 @@ require([
                 return chapterTitle;
             }
 
-            // First time at chapter 1
-            $('#ch1').collapse('show');
+            // Default at 'Preparation'
+            $('#ch0').collapse('show');
             $c.hide();
-            return 'Chapter 1 Introduction';
+            return 'Preparation';
         }
 
         function init() {

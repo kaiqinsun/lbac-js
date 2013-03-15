@@ -1,10 +1,14 @@
-/* Base object for prototypal inheritance and utilities */
+/**
+ * **Let's Build a Compiler** port in Javascript - Preparation
+ * Base object for prototypal inheritance and utilities
+ */
+
 define(['jquery'], function ($) {
     'use strict';
 
     return {
 
-        // Extend method for prototyal inheritance
+        // Extend method used for prototyal inheritance
         extend: function (obj) {
             var newObj = Object.create(this),
                 prop;
@@ -17,7 +21,7 @@ define(['jquery'], function ($) {
             return newObj;
         },
 
-        // get the binded main function
+        // get the bound main function
         boundMain: function (obj) {
             return obj.main.bind(obj);
         },
