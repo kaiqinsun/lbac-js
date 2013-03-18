@@ -1,6 +1,7 @@
 /**
- * Chapter 11 Lexical scan revisited - 11.6 Conclusion
- * Program Tiny v1.1
+ * 11.6 Conclusion
+ * ----------------
+ * **Program Tiny v1.1** concludes chapter 11 Lexical scan revisited.
  */
 
 define(['./object', 'io'], function (object, io) {
@@ -409,9 +410,11 @@ define(['./object', 'io'], function (object, io) {
         },
 
         /**
+         * ```
          * <expression> ::= <term> [<addop> <term>]*
          * <term> ::= <factor> [<mulop> <factor>]*
          * <factor> ::= <number> | (<b-expression>) | <variable>
+         * ```
          */
 
         // Parse and translate a math factor
@@ -637,11 +640,13 @@ define(['./object', 'io'], function (object, io) {
         },
 
         /**
+         * ```
          * <program> ::= <block> END
          * <block> ::= [<statement>]*
          * <statement> ::= <if> | <assignment>
          * <if stmt> ::= IF <condition> <block> [ELSE <block>] ENDIF
          * <assignment> ::= <identifier> = <expression>
+         * ```
          */
 
         // Recognize and translate an IF constructor

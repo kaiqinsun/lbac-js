@@ -1,5 +1,6 @@
 /**
  * Chapter 5 Control Constructs
+ * ============================
  */
 
 define(['./1.2-cradle', 'io'], function (cradle, io) {
@@ -18,15 +19,23 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         theDoStatement,             // 5.9
         theBreakStatement;          // 5.10
 
-    // 5.1 Introduction
+    /**
+     * 5.1 Introduction
+     * ----------------
+     */
 
     /**
      * 5.2 The plan
+     * -------------
      */
 
-    /*
-     * 5.2.1 One statement
+    /**
+     * ### 5.2.1 One statement ###
+     * **In BNF notation**
+     * ```
      * <program> ::= <statement>
+     * <statement> ::= <other>
+     * ```
      */
     oneStatement = cradle.extend({
 
@@ -45,10 +54,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 5.2.2 More than one statement
-     * In BNF:
+     * ### 5.2.2 More than one statement ###
+     * **In BNF notation**
+     * ```
      * <program> ::= <block> END
      * <block> ::= [<statement>]*
+     * ```
      */
     moreThanOneStatement = oneStatement.extend({
 
@@ -78,6 +89,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.3 Some groundwork
+     * --------------------
+     * Prepare two routines
+     *
+     * - `newLable` to generate label `Lnn',
+     *    where nn is a label number starting from zero.
+     * - `postLabel` to output the labels at the proper place.
      */
     someGroundwork = moreThanOneStatement.extend({
 
@@ -105,16 +122,20 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.4 The IF statement
-     * In BNF:
+     * ---------------------
+     * **In BNF**
+     * ```
      * <if> ::= IF <condition> <block> ENDIF
-     *
+     * ```
      * Output should be:
+     * ```
      *      <condition>
      *      BEQ L1      # branch if false
      *      <block>
      * L1:
-     *
-     * Syntax-directed translation:
+     * ```
+     * **Syntax-directed translation**
+     * ```
      * SYNTAX           ACTIONS
      * -------------------------------------------
      * IF
@@ -124,6 +145,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <block>
      * ENDIF          { postLabel(L) }
      * -------------------------------------------
+     * ```
+     * For the implementation, as usual,
+     * we will be using our single-character approach,
+     * with the character `i` for `IF`, and `e` for `ENDIF`
+     * (as well as `END` ... that dual nature causes no confusion).
      */
     theIfStatement = someGroundwork.extend({
 
@@ -161,11 +187,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 5.4.2 Add the ELSE clause
-     * BNF of the IF statement
+     * ### 5.4.2 Add the ELSE clause ###
+     * **BNF of the `IF` statement**
+     * ```
      * <if> ::= IF <condition> <block> [ELSE <block>] ENDIF
-     *
-     * Output should be:
+     * ```
+     * **Output** should be
+     * ```
      *      <condition>
      *      BEQ L1      # branch if false
      *      <block>
@@ -173,8 +201,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * L1:
      *      <block>
      * L2:
-     *
-     * Syntax-directed translation
+     * ```
+     * **Syntax-directed translation**
+     * ```
      *   SYNTAX           ACTIONS
      *   -------------------------------------------
      *   IF
@@ -188,6 +217,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *   <block>
      *   ENDIF          { postLabel(L2); }
      *   -------------------------------------------
+     * ```
      */
     addTheElseClause = theIfStatement.extend({
 
@@ -230,17 +260,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.5 The WHILE statement
-     * BNF of the WHILE statement
+     * ------------------------
+     * **BNF of the `WHILE` statement**
+     * ```
      * <while> ::= WHILE <condition> <block> ENDWHILE
-     *
+     * ```
      * Output should be:
+     * ```
      * L1:  <condition>
      *      BEQ L2
      *      <block>
      *      BRA L1
      * L2:
-     *
-     * Syntax-directed translation
+     * ```
+     * **Syntax-directed translation**
+     * ```
      * SYNTAX           ACTIONS
      * -------------------------------------------
      * WHILE          { L1 = newLabel;
@@ -249,6 +283,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <block>
      * ENDWHILE       { emit(BRA L1);
      *                  PostLabel(L2) }
+     * ```
      */
     theWhileStatement = addTheElseClause.extend({
 
@@ -287,21 +322,26 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.6 The LOOP statement
-     * BNF of the LOOP statement
+     * -----------------------
+     * **BNF** of the `LOOP` statement
+     * ```
      * <loop> ::= LOOP <block> ENDLOOP
-     *
-     * Output should be:
+     * ```
+     * **Output** should be:
+     * ```
      * L1:
      *      <block>
      *      BRA L1
-     *
-     * Syntax-directed translation
+     * ```
+     * **Syntax-directed translation**
+     * ```
      * SYNTAX           ACTIONS
      * -------------------------------------------
      * LOOP           { L = newLabel();
      *                  postLabel(L) }
      * <block>
      * ENDLOOP        { emit(BRA L) }
+     * ```
      */
     theLoopStatement = theWhileStatement.extend({
 
@@ -339,16 +379,20 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.7 The Repeat-Until statement
-     * BNF of the REPEAT statement
+     * -------------------------------
+     * **BNF of the `REPEAT` statement**
+     * ```
      * <repeat> ::= REPEAT <block> UNTIL <conditon>
-     *
-     * Output should be:
+     * ```
+     * **Output** should be:
+     * ```
      * L1:
      *      <block>
      *      <condition>
      *      BEQ L1
-     *
-     * Syntax-directed translation
+     * ```
+     * **Syntax-directed translation**
+     * ```
      * SYNTAX              ACTIONS
      * -------------------------------------------
      * REPEAT         { L = newLabel();
@@ -356,6 +400,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <block>
      * UNTIL
      * <condition>    { emit(BEQ L) }
+     * ```
      */
     theRepeatUntilStatement = theLoopStatement.extend({
 
@@ -398,36 +443,40 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.8 The FOR loop
-     * BNF of the FOR statement
+     * -----------------
+     * **BNF of the `FOR` statement**
+     * ```
      * <for> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
-     *
-     * equivalence to:
+     * ```
+     * The construct is equivalence to:
+     * ```
      *  <ident> = <expr1>
      *  temp = <expr2>
      *  WHILE <ident> <= temp
      *  <block>
      *  ENDWHILE
-     *
-     * translated code:
-     *
-     *      <ident>             get name of loop counter
-     *      <expr1>             get initial value
-     *      LEA <ident>(PC),A0  address the loop counter
-     *      SUBQ #1, D0         predecrement it
-     *      MOVE D0, (A0)       save it
-     *      <expr2>             get upper limit
-     *      MOVE D0, -(SP)      save it on stack
+     * ```
+     * The translated code came out like this:
+     * ```
+     *      <ident>               get name of loop counter
+     *      <expr1>               get initial value
+     *      LEA <ident>(PC),A0    address the loop counter
+     *      SUBQ #1, D0           predecrement it
+     *      MOVE D0, (A0)         save it
+     *      <expr2>               get upper limit
+     *      MOVE D0, -(SP)        save it on stack
      * L1:
-     *      LEA <ident>(PC), A0 address loop counter
-     *      MOVE (A0), D0       fetch it to D0
-     *      ADDQ #1, D0         bump the counter
-     *      MOVE D0, (A0)       save new value
-     *      CMP (SP), D0        check for range
-     *      BLE L2              skip out if D0 > (SP)
+     *      LEA <ident>(PC), A0   address loop counter
+     *      MOVE (A0), D0         fetch it to D0
+     *      ADDQ #1, D0           bump the counter
+     *      MOVE D0, (A0)         save new value
+     *      CMP (SP), D0          check for range
+     *      BLE L2                skip out if D0 > (SP)
      *      <block>
-     *      BRA L1              loop for next pass
+     *      BRA L1                loop for next pass
      * L2:
-     *      ADDQ #2, SP         clean up the stack
+     *      ADDQ #2, SP           clean up the stack
+     * ```
      */
     theForLoop = theRepeatUntilStatement.extend({
 
@@ -499,7 +548,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.9 The DO statement
-     * BNF of the DO statement
+     * ----------------------
+     * **BNF of the `DO` statement**
+     * ```
      * <do> ::= DO <expr> <block> ENDDO
      *
      * translated code:
@@ -511,8 +562,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *      <block>
      *      MOVE (SP)+, D0      # pop D0
      *      DBRA D0, L1
-     *
-     * Syntax-directed translation
+     * ```
+     * **Syntax-directed translation**
+     * ```
      * SYNTAX           ACTIONS
      * -------------------------------------------
      * DO             { emit(SUBQ #1,D0);
@@ -522,6 +574,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <block>
      * ENDDO          { emit(MOVE (SP)+,D0);
      *                  emit(DBRA D0,L) }
+     * ```
      */
     theDoStatement = theForLoop.extend({
 
@@ -572,8 +625,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.10 The BREAK statement
-     * In BNF:
+     * -------------------------
+     * **In BNF**
+     * ```
      * <break> ::= BREAK
+     * ```
      */
     theBreakStatement = theDoStatement.extend({
 
@@ -778,16 +834,18 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     };
 
     /**
-     * Final results of this chapter in BNF:
-     *
-     * ----- program -----
+     * Final results of this chapter in BNF
+     * ------------------------------------
+     * ### program ###
+     * ```
      * <program> ::= <block> END
      * <block> ::= [<statement>]*
      * <statement> ::= <if> | <while> | <loop> | <repeat> |
      *                 <for> | <do> | <break> |
      *                 <other>
-     *
-     * ----- control statements -----
+     * ```
+     * ### control statements ###
+     * ```
      * <if statement> ::= IF <condition> <block> [ELSE <block>] ENDIF
      * <while statement> ::= WHILE <condition> <block> ENDWHILE
      * <loop statement> ::= LOOP <block> ENDLOOP
@@ -795,6 +853,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <for statement> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
      * <do statement> ::= DO <expression> <block> ENDDO
      * <break statement> ::= BREAK
+     * ```
      */
 
 });

@@ -1,9 +1,10 @@
 /**
  * Chapter 7.13 Merging Scanner and Parser
+ * ---------------------------------------
  * Program kiss
  */
 
-define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
+define(['./object', 'io'], function (object, io) {
     'use strict';
 
     var boundMain = object.boundMain,
@@ -13,7 +14,14 @@ define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
 
 
     /**
-     * 7.13.1 Judicious copying
+     * 7.13 Merging scanner and parser
+     * --------------------------------
+     * ### 7.13.1 Judicious copying ###
+     * All the elements of the program to parse this subset, using 
+     * single-character tokens, exist already in our previous programs.
+     *
+     * **A short list of the program KISS**
+     * ```
      * const: TAB, CR, LF
      * variable: look, lCount
      * function: getChar, error, abort, expected,
@@ -25,6 +33,7 @@ define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
      *           expression, condition
      *           doIf, assignment, block, doProgram,
      *           init, main
+     * ```
      */
     judiciousCopying = object.extend({
 
@@ -169,19 +178,23 @@ define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
 
         /**
          * Improving arithmetic expressions:
-         * in 2.8
+         * ----------------------------------
+         * **in 2.8**
+         * ```
          * <expression> ::= [<unary op>] <term> [<addop> <term>]*
          * <term> ::= <factor> |<mulop> <factor>|*
          * <factor> ::= <number> | (<expression>)
-         *
-         * in 6.6.9
+         * ```
+         * ** in 6.6.9**
+         * ```
          * <expression>   ::= <term> [<addop> <term>]*
          * <term>         ::= <signed factor> [<mulop> factor]*
          * <signed factor> ::= [<addop>] <factor>
          * <factor>       ::= <number> | (<b-expression>) | <identifier>
          * <identifier>   ::= <variable> | <function>
-         *
+         * ```
          * this version (only first term allows <signed factor>)
+         * ```
          * <expression> ::= <first term> [<addop> <term>]*
          * <first term> ::= <signed factor> <term 1>
          * <term> ::= <factor> <term 1>
@@ -189,6 +202,7 @@ define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
          * <signed factor> ::= [<addop>] <factor>
          * <factor>       ::= <number> | (<expression>) | <identifier>
          * <identifier>   ::= <variable> | <function>
+         * ```
          */
 
         // Parse and translate an identifier
@@ -312,11 +326,13 @@ define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
         },
 
         /**
+         * ```
          * <program> ::= <block> END
          * <block> ::= [<statement>]*
          * <statement> ::= <if> | <assignment>
          * <if stmt> ::= IF <condition> <block> [ELSE <block>] ENDIF
          * <assignment> ::= <identifier> = <expression>
+         * ```
          */
 
         // Parse and translate a boolean condition
@@ -397,7 +413,9 @@ define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
 
     });
 
-    // 7.13.2 Merging scanner and parser
+    /**
+     * ### 7.13.2 Merging scanner and parser ###
+     */
     mergingScannerAndParser = judiciousCopying.extend({
 
         // Variable declarations

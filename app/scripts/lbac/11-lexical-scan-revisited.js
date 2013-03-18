@@ -1,5 +1,6 @@
 /**
  * Chapter 11 Lexical Scan Revisited
+ * ==================================
  */
 
 define(['./1.2-cradle', 'io'], function (cradle, io) {
@@ -9,13 +10,25 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         theSolution,                // 11.4.1
         singleCharacterOperators;   // 11.4.2
 
-    // 11.1 Introduction
+    /**
+     * 11.1 Introduction
+     * ------------------
+     */
 
-    // 11.2 background
+    /**
+     * 11.2 background
+     * ----------------
+     */
 
-    // 11.3 The problem
+    /**
+     * 11.3 The problem
+     * -----------------
+     */
 
-    // 11.4 The solution
+    /**
+     * 11.4 The solution
+     * ------------------
+     */
     theSolution = cradle.extend({
 
         // Recognize an alphanumeric character
@@ -99,8 +112,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 11.4.2 Single-character operators
-     * e.g. (a+b)*(c+d), problem of op: ')*(' is fixed.
+     * ### 11.4.2 Single-character operators ###
+     * e.g. `(a+b)*(c+d)`, problem of op: `)*(` is fixed.
      */
     singleCharacterOperators = theSolution.extend({
 
@@ -127,10 +140,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 11.5 Fixing up the compiler
+    /**
+     * 11.5 Fixing up the compiler
+     * ----------------------------
+     */
 
-    // 11.6 Conclusion
-    // in file: 11.6-tiny-1.1.js
+    /**
+     * 11.6 Conclusion
+     * ----------------
+     * in file: `11.6-tiny-1.1.js`
+     */
 
 
     // return main functions for executions

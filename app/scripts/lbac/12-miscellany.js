@@ -1,5 +1,6 @@
 /**
  * Chapter 12 Miscellany
+ * ======================
  */
 
 define(['./object', './11.6-tiny-1.1'], function (object, tiny_11) {
@@ -8,19 +9,33 @@ define(['./object', './11.6-tiny-1.1'], function (object, tiny_11) {
     var boundMain = object.boundMain,
         dealingWithSemicolons;          // 12.4
 
-    // 12.1 Introduction
+    /**
+     * 12.1 Introduction
+     * ------------------
+     */
 
-    // 12.2 Semicolons
+    /**
+     * 12.2 Semicolons
+     * ----------------
+     */
 
-    // 12.3 Syntactic sugar
+    /**
+     * 12.3 Syntactic sugar
+     * ---------------------
+     */
 
     /**
      * 12.4 Dealing with semicolons
-     * In Pascal, semicolon is a statement SEPARATOR:
+     * -----------------------------
+     * In **Pascal**, semicolon is a statement *SEPARATOR*
+     * ```
      * <block> ::= <statement> (';' <statement>)*
      * <statement> ::= <assignment> | <if> | <while> ... | null
-     * In C and Ada, semicolon is a statement TERMINATOR
+     * ```
+     * In **C** and **Ada**, semicolon is a statement *TERMINATOR*
+     * ```
      * <block> ::= ( <statement> ';' )*
+     * ```
      */
     dealingWithSemicolons = tiny_11.object.extend({
 

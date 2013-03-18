@@ -2,24 +2,74 @@
  * View lbac source codes
  */
 
-define(['jquery', 'prettify'], function ($, prettify) {
+define(['jquery', 'prettify', 'marked'], function ($, prettify, marked) {
     'use strict';
 
     function htmlEncode(value) {
         return $('<div/>').text(value).html();
     }
 
-    function isChapter(title) {
-        return title.indexOf('Chapter') > -1;
-    }
-
     // Extract source code lines of given title
     // quick and dirty solutions
-    function extractLines(title, lines) {
-        var begin,
-            end;
+    function extractContent(title, lines) {
+        var docBegin,
+            docEnd,
+            codeBegin,
+            codeEnd;
 
-        function getEndLine(begin) {
+        function getDocBegin(title, lines) {
+            var begin;
+
+            // Search for the line containing the title
+            $.each(lines, function (i, line) {
+                if (line.search(title) !== -1) {
+                    begin = i;
+                    return false;
+                }
+            });
+            return begin;
+        }
+
+        // Look behind for previous doc begin without a code section
+        function lookBehind(begin, lines) {
+            var i,
+                line;
+
+            for (i = begin; i >= 0; i -= 1) {
+                line = lines[i];
+                if (line) {
+                    if (line.indexOf('*') === -1) {
+                        break;
+                    }
+                    if (line.indexOf('/**') > -1) {
+                        begin = i;
+                    }
+                }
+            }
+            return begin;
+        }
+
+        function getDocEnd(docBegin, lines) {
+            var len = lines.length,
+                i;
+
+            for (i = docBegin; i < len; i += 1) {
+                if (lines[i].indexOf('*/') > -1) {
+                    return i;
+                }
+            }
+        }
+
+        function getCodeBegin(docEnd, lines) {
+            var i = docEnd + 1;
+
+            while (!lines[i].trim()) {
+                i += 1;
+            }
+            return i;
+        }
+
+        function getCodeEnd(codeBegin, lines) {
             var len = lines.length,
                 level = 0,
                 isCounting = false,
@@ -27,7 +77,7 @@ define(['jquery', 'prettify'], function ($, prettify) {
                 i,
                 line;
 
-            for (i = begin; i < len; i += 1) {
+            for (i = codeBegin; i < len; i += 1) {
                 line = lines[i];
 
                 if (line.indexOf('/*') > -1) {
@@ -45,60 +95,80 @@ define(['jquery', 'prettify'], function ($, prettify) {
                     level -= 1;
                 }
                 if (isCounting && level === 0) {
-                    return i;
+                    return i + 1;
                 }
             }
         }
 
-        $.each(lines, function (i, line) {
-            if (line.search(title) !== -1) {
-                begin = i - 1;
-                return false;
-            }
-        });
+        docBegin = getDocBegin(title, lines);
+        docEnd = getDocEnd(docBegin, lines);
+        docBegin = lookBehind(docBegin, lines);
+        codeBegin = getCodeBegin(docEnd, lines);
+        codeEnd = getCodeEnd(codeBegin, lines);
 
-        end = getEndLine(begin);
-
-        return lines.slice(begin, end + 1);
+        return {
+            docLines: lines.slice(docBegin, docEnd),
+            codeLines: lines.slice(codeBegin, codeEnd)
+        };
     }
 
-    function autoDedent(lines) {
+    function dedent(lines, auto, offset) {
         var minIndent = Number.MAX_VALUE;
 
-        function truncate(line) {
-            return line.slice(minIndent);
+        offset = offset || 0;
+        if (auto === undefined) {
+            auto = true;    // default
         }
 
-        $.each(lines, function (i, line) {
-            var index = line.search(/\S/);
-            if (index > -1 && index < minIndent) {
-                minIndent = index;
-                if (minIndent === 0) {
-                    return false; // break
+        function truncate(line) {
+            return line.slice(minIndent + offset);
+        }
+
+        if (auto) {
+
+            // Automatically find the minimum of indentation
+            $.each(lines, function (i, line) {
+                var index = line.search(/\S/);
+                if (index > -1 && index < minIndent) {
+                    minIndent = index;
+                    if (minIndent === 0) {
+                        return false; // break
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            minIndent = 0;
+        }
 
         return lines.map(truncate);
     }
 
+    // Set default options
+    marked.setOptions({
+        highlight: function (code) {
+            return prettify.prettyPrintOne(htmlEncode(code));
+        }
+    });
+
 
     return {
         codeLines: null,
-        $el: null,
+        $doc: null,
+        $code: null,
 
         init: function (data) {
             var that = this,
                 title = data.title,
                 path = location.pathname.replace('index.html', '');
 
-            this.$el = $('#' + data.element);
+            this.$code = $('#' + data.codeElement);
+            this.$doc = $('#' + data.docElement);
 
             $.ajax({
                 url: path + 'ajax/lbac.src.txt',
                 success: function (data) {
                     that.codeLines = data.split('\n');
-                    that.$el.show();
+                    that.$code.show();
                     that.update(title);
                 }
             });
@@ -106,15 +176,14 @@ define(['jquery', 'prettify'], function ($, prettify) {
 
         // Update source codes by chapter/section title
         update: function (title) {
-            var contentLines = extractLines(title, this.codeLines),
-                contents;
+            var content = extractContent(title, this.codeLines),
+                doc = dedent(content.docLines, true, 3).join('\n'),
+                code = htmlEncode(dedent(content.codeLines).join('\n'));
 
-            if (!isChapter(title)) {
-                contentLines = autoDedent(contentLines);
-            }
-            contents = htmlEncode(contentLines.join('\n'));
-            this.$el.html(prettify.prettyPrintOne(contents));
+            this.$doc.html(marked(doc));
+            this.$code.html(prettify.prettyPrintOne(code));
         }
+
     };
 
 });

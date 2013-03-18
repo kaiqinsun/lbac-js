@@ -1,5 +1,6 @@
 /**
  * Chapter 3 More Expressions
+ * ==========================
  */
 
 define([
@@ -15,13 +16,37 @@ define([
         multiCharacterTokens,   // 3.6
         whiteSpace;             // 3.7
 
-    // 3.1 Introduction
+    /**
+     * 3.1 Introduction
+     * ----------------
+     * In this chapter we will extend what we've done to deal with
+     *
+     * - variables
+     * - function calls
+     * - assignment statements
+     * - multi-character tokens (variables/numbers)
+     * - white space
+     */
 
     /**
      * 3.2 Variables
-     * e.g. b * b + 4 * a * c
-     * In BNF notation:
+     * --------------
+     * Most expressions that we see in practice involve variables, such as
+     * ```
+     * b * b + 4 * a * c
+     * ```
+     * It probably won’t come as too much of a surprise that a variable is
+     * just another kind of factor.
+     *
+     * **In BNF notation**
+     * ```
      * <factor> ::= <number> | (<expression>) | <variable>
+     * ```
+     * The format for a load in 68000 is
+     * ```
+     * MOVE X(PC), D0
+     * ```
+     * where `X` is the variable name.
      */
     variables = expressionParsing.unaryMinusObject.extend({
 
@@ -42,10 +67,17 @@ define([
 
     /**
      * 3.3 Functions
-     * e.g. x(), C form with an empty parameter list
-     * In BNF:
+     * -------------
+     * We don’t yet have a mechanism for declaring types,
+     * so let’s use the **C rule** for now. We also don’t have a mechanism
+     * to deal with parameters, we can only handle empty lists,
+     * so for now our function calls will have the form `x()`.
+     *
+     * **In BNF**
+     * ```
      * <identifier> ::= <variable> | <function>
      * <factor> ::= <number> | (<expression>) | <identifier>
+     * ```
      */
     functions = variables.extend({
 
@@ -78,7 +110,8 @@ define([
 
     /**
      * 3.4 More on error handling
-     * assert that the expression should end with an end-of-line
+     * --------------------------
+     * Assert that the expression should end with an end-of-line.
      */
     moreOnErrorHandling = functions.extend({
 
@@ -95,8 +128,13 @@ define([
 
     /**
      * 3.5 Assignment statements
-     * In BNF:
-     * <assignment> ::= <identifier> = <expression>
+     * --------------------------
+     * Expressions *USUALLY* (but not always) appear in assignment statements.
+     *
+     * **In BNF**
+     * ```
+     * <assignment> ::= <ident> = <expression>
+     * ```
      */
     assignmentStatements = moreOnErrorHandling.extend({
 
@@ -122,6 +160,9 @@ define([
 
     /**
      * 3.6 Multi-character tokens
+     * --------------------------
+     * We can handle the multi-character tokens that we need by
+     * very slight and very local modifications to `getName`  and `getNum`.
      */
     multiCharacterTokens = assignmentStatements.extend({
 
@@ -160,6 +201,10 @@ define([
 
     /**
      * 3.7 White space
+     * ----------------
+     * Because we’ve been careful to use `getName`, `getNum`, and `match`
+     * for most of our input processing, it is only those three routines
+     * (plus `Init`) that we need to modify.
      */
     whiteSpace = multiCharacterTokens.extend({
 

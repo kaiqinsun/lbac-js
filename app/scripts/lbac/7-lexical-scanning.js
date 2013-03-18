@@ -1,5 +1,6 @@
 /**
  * Chapter 7 Lexical Scanning
+ * ===========================
  */
 
 define(['./1.2-cradle', 'io'], function (cradle, io) {
@@ -17,47 +18,65 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         cleanupWithGlobal,                  // 7.10.3
         returningACharacter;                // 7.11
 
-    // 7.1 Introduction
-
-    // 7.2 Lexical scanning
     /**
-     * Compiler:
+     * 7.1 Introduction
+     * -----------------
+     */
+
+    /**
+     * 7.2 Lexical scanning
+     * ----------------------
+     * **Compiler**
+     * ```
      * Text editor -> [stream of input characters]
      * -> Lexical scanner -> [stream of input tokens]
      * -> Parser (could be in one module) -> [object code]
+     * ```
      *
-     * Chomsky Hierarchy of grammars:
+     * **Chomsky Hierarchy of grammars**
+     * ```
      * Type 0: Unrestricted (e.g. English)
      * Type 1: Context-Sensitive (older, e.g. Fortran)
      * Type 2: Context-Free (modern)
      * Type 3: Regular (modern)
-     *
-     * Parser for
+     * ```
+     * **Parser** for
+     * ```
      * Type 3 - Regular grammar: an abstract machine called
-     * the state machine (finite automaton)
+     *          the state machine (finite automaton)
      * Type 2 - Context-free: push-down automaton
-     * (a state machine augmented by a stack)
+     *          (a state machine augmented by a stack)
+     * ```
+     * **Regular expression** (lower-level of real, practical grammars)
      *
-     * Regular expression (lower-level of real, practical grammars)
-     * e.g. <identifier> ::= <letter> [<letter> | <digit>]*
-     *
-     * Lexical scanning is lower-level parsing
+     * e.g.
+     * ```
+     * <identifier> ::= <letter> [<letter> | <digit>]*
+     * ```
+     * Lexical scanning is lower-level parsing.
      */
 
     /**
      * 7.3 State machines and alternatives
+     * ------------------------------------
+     * - **Regular expressions** can be parsed by a state machine.
      *
-     * Regular expressions can be parsed by a state machine.
-     * State machine: integers (current state), table of actions, input chars
+     * - **State machine:** integers (current state), table of
+     *   actions, input chars
      *
-     * LEX output: a state machine + table of actions crspd. to input grammar
-     * YACC output: a canned table-driven parser + table crspd. to lang syntax
+     * - **LEX output:** a state machine + table of actions crspd.
+     *   to input grammar
+     * - **YACC output:** a canned table-driven parser + table crspd.
+     *   to lang syntax
      */
 
     /**
      * 7.4 Some experiments in scanning
+     * ---------------------------------
+     * ```
      * <identifier> ::= <letter> [<letter> | <digit>]*
      * <number> ::= [<digit>]+
+     * ```
      */
     someExperimentsInScanning = cradle.extend({
 
@@ -102,6 +121,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 7.5 White space
+     * ----------------
      */
     whiteSpace = someExperimentsInScanning.extend({
 
@@ -175,11 +195,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 7.6 State machines
+     * -------------------
+     * The `getName()` does indeed implement a state machine.
      *
-     * getName() does indeed implement a state machine.
-     *
-     * Syntax diagram (railroad-track diagram):
-     *
+     * **Syntax diagram (railroad-track diagram)**
+     * ```
      *          |-----> Other---------------------------> Error
      *          |
      *  Start -------> Letter ---------------> Other -----> Finish
@@ -188,14 +208,15 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *          |<----- Letter <---------|
      *          |                        |
      *          |<----- Digit  <----------
-     *
-     * SkipWhite(), getNum(), and scan() are also state machines.
+     * ```
+     * The `SkipWhite()`, `getNum()`, and `scan()` are also state machines.
      * Little machines make big machines.
      * This is an implicit approach opposed to table-driven (explicite) one.
      */
 
     /**
      * 7.7 Newlines
+     * -------------
      */
     newlines = whiteSpace.extend({
 
@@ -220,6 +241,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 7.8 Operators
+     * --------------
      */
     operators = newlines.extend({
 
@@ -263,6 +285,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 7.9 Lists, commas and command lines
+     * ------------------------------------
      */
     listsCommasAndCommandLines = operators.extend({
 
@@ -297,7 +320,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 7.10 Getting fancy
-     * 7.10.1
+     * -------------------
+     * ### 7.10.1 ###
      */
     gettingFancy = listsCommasAndCommandLines.extend({
 
@@ -313,7 +337,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 7.10.2 Returning codes
+    /**
+     * ### 7.10.2 Returning codes ###
+     */
     returningCodes = gettingFancy.extend({
 
         // Type declarations
@@ -375,8 +401,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 7.10.3 Cleanup with global
-     * getName(), getNum(), and getOp() becomes procedures,
+     * ### 7.10.3 Cleanup with global ###
+     * `getName()`, `getNum()`, and `getOp()` becomes procedures,
      * use globle variables (value and token) to eliminate the local copies.
      */
     cleanupWithGlobal = returningCodes.extend({
@@ -442,6 +468,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 7.11 Returning a character
+     * ---------------------------
      */
     returningACharacter = cleanupWithGlobal.extend({
 
@@ -538,10 +565,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 7.12 Distributed vs centralized scanners
+    /**
+     * 7.12 Distributed vs centralized scanners
+     * -----------------------------------------
+     */
 
-    // 7.13 Merging scanner and parser
-    // see file: 7.13-kiss.js
+    /**
+     * 7.13 Merging scanner and parser
+     * --------------------------------
+     * In file: 7.13-kiss.js
+     */
 
     // return main functions for executions
     return {

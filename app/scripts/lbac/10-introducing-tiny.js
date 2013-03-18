@@ -1,5 +1,6 @@
 /**
  * Chapter 10 Introducing "Tiny"
+ * ==============================
  */
 
 define(['./1.2-cradle', 'io'], function (cradle, io) {
@@ -24,18 +25,26 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         moreRelops,                     // 10.12
         inputOutput;                    // 10.13
 
-    // 10.1 Introduction
-
     /**
-     * 10.2 Getting started
-     * Top-level definition for TINY (similar to Pascal):
-     * <program> ::= PROGRAM <top-level decl> <main> '.'
+     * 10.1 Introduction
+     * ------------------
      */
 
     /**
-     * 10.2.1
+     * 10.2 Getting started
+     * ---------------------
+     * Top-level definition for TINY (similar to Pascal):
+     * ```
+     * <program> ::= PROGRAM <top-level decl> <main> '.'
+     * ```
+     */
+
+    /**
+     * ### 10.2.1 ###
+     * ```
      * <program> ::= PROGRAM .
-     * only accepted code: p.
+     * ```
+     * only accepted code: `p.`
      */
     gettingStarted = cradle.extend({
 
@@ -81,9 +90,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 10.2.2 The main program
+     * ### 10.2.2 The main program ###
+     * ```
      * <program> ::= PROGRAM BEGIN END '.'
-     * only accepted code: pbe.
+     * ```
+     * only accepted code: `pbe.`
      */
     theMainProgram = gettingStarted.extend({
 
@@ -107,11 +118,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.3 Declarations
+     * ------------------
+     * ```
      * <program> ::= PROGRAM <top-level decls> BEGIN END '.'
      * <top-level decls> ::= ( <data declaration> )*
      * <data declaration> ::= VAR <var-list>
-     *
-     * code example: pbe. or pvabe.
+     * ```
+     * code example: `pbe.` or `pvabe.`
      */
     declarations = theMainProgram.extend({
 
@@ -147,9 +160,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.4 Declarations and symbols
+     * ------------------------------
+     * ```
      * <data declaration> ::= VAR <var-list>
      * <var-list> ::= <ident>
-     * code example: pvxvyvzbe.
+     * ```
+     * code example: `pvxvyvzbe.`
      */
     declarationsAndSymbols = declarations.extend({
 
@@ -167,9 +183,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 10.4.2 Variable list
+     * ### 10.4.2 Variable list ###
+     * ```
      * <var-list> ::= <indent> (, <ident>)*
-     * code example: pvx,y,zbe.
+     * ```
+     * code example: `pvx,y,zbe.`
      */
     variableList = declarationsAndSymbols.extend({
 
@@ -187,13 +205,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.5 Initializers
+     * ------------------
+     * ```
      * <var-list> ::= <var> (, <var>)*
      * <var> ::= <ident> [ = <integer> ]
-     */
-
-    /**
-     * 10.5.1
-     * code example: pvx=5,y,z=3be.
+     * ```
+     * ### 10.5.1 ###
+     * code example: `pvx=5`, `y,z=3be.`
      */
     initializers = variableList.extend({
 
@@ -211,8 +229,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 10.5.2 Multi-digit integer
-     * code example: pvx=15,y,z=-23be.
+     * ### 10.5.2 Multi-digit integer ###
+     * code example: `pvx=15,y,z=-23be.`
      */
     multiDigitInteger = initializers.extend({
 
@@ -248,6 +266,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.6 The symbol table
+     * ----------------------
      */
     theSymbolTable = multiDigitInteger.extend({
 
@@ -288,11 +307,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.7 Executable statements
+     * ---------------------------
+     * ```
      * <main> ::= BEGIN <block> END
      * <block> ::= (<assignment>)*
+     * ```
+     * ### 10.7.1 ###
      */
-
-    // 10.7.1
     executableStatements = theSymbolTable.extend({
 
         // Parse and translate an assignment statement
@@ -319,7 +340,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 10.7.2 Code generation routines
+     * ### 10.7.2 Code generation routines ###
      */
     codeGenerationRoutines = executableStatements.extend({
 
@@ -391,7 +412,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 10.7.3 Assignment statement
+     * ### 10.7.3 Assignment statement ###
+     * ```
      * <assignment> ::= <ident> = <expression>
      * <expression> ::= <first term> ( <addop> <term> )*
      * <first term> ::= <first factor> <rest>
@@ -399,6 +421,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <rest> ::= ( <mulop> <factor> )*
      * <first factor> ::= [ <addop> ] <factor>
      * <factor> ::= <var> | <number> | ( <expression> )
+     * ```
      */
     assignmentStatement = codeGenerationRoutines.extend({
 
@@ -534,10 +557,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.8 Booleans
+     * --------------
      */
 
     /**
-     * 10.8.1 More code generation routines
+     * ### 10.8.1 More code generation routines ###
      */
     moreCodeGenerationRoutines = assignmentStatement.extend({
 
@@ -593,22 +617,24 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 10.8.2 Boolean expressions
-     * BNF for the boolean expressions:
+     * ### 10.8.2 Boolean expressions ###
+     * **BNF for the boolean expressions**
+     * ```
      * <bool-expr> ::= <bool-term> ( <orop> <bool-term> )*
      * <bool-term> ::= <not-factor> ( <andop> <not-factor> )*
      * <not-factor> ::= [ '!' ] <relation>
      * <relation> ::= <expression> [ <relop> <expression> ]
+     * ```
+     * code example: `pvx,y,zbx=z>ye.`
      *
-     * code example: pvx,y,zbx=z>ye.
      * which stands for:
-     * -----
+     * ```
      * PROGRAM
      * VAR X, Y, Z
      * BEGIN
      * X = Z > Y
      * END.
-     * -----
+     * ```
      */
     booleanExpressions = moreCodeGenerationRoutines.extend({
 
@@ -753,12 +779,14 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.9 Control structures
+     * ------------------------
+     * ```
      * <block> ::= ( <statement> )*
      * <statement> ::= <if> | <while> | <assignment>
      * <if> ::= IF <bool-expression> <block> [ ELSE <block> ] ENDIF
      * <while> ::= WHILE <bool-expression> <block> ENDWHILE
-     *
-     * So far: TINY version 0.1
+     * ```
+     * So far: **TINY version 0.1**
      */
     controlStructures = booleanExpressions.extend({
 
@@ -845,6 +873,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.10 Lexical scanning
+     * -----------------------
      */
     lexicalScanning = controlStructures.extend({
 
@@ -1074,11 +1103,20 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 10.11 Multi-character variable names
+    /**
+     * 10.11 Multi-character variable names
+     * ------------------------------------
+     * Skipped.
+     */
 
     /**
      * 10.12 More relops
-     * <, <= , =, <>, #, >, >=
+     * ------------------
+     * Some of the relops are indeed single characters,
+     * but others require two, such as `<=` and `>=`.
+     *
+     * We extend the relop set to include
+     * `<`, `<=`, `=`, `<>`, `#`, `>`, and `>=`.
      */
     moreRelops = lexicalScanning.extend({
 
@@ -1148,7 +1186,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.13 Input / Output
-     * Assuming a library call TINYLIB.LIB exists
+     * ---------------------
+     * Assuming a library call `TINYLIB.LIB` exists
      */
     inputOutput = moreRelops.extend({
 
@@ -1235,8 +1274,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 10.14 Conclusion
-    // TINY Version 1.0
+    /**
+     * 10.14 Conclusion
+     * -----------------
+     * So far, we have **TINY Version 1.0**
+     */
 
 
     // return main functions for executions

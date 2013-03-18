@@ -1,6 +1,7 @@
 /**
  * Chapter 9 A Top View
- * Program kiss
+ * =====================
+ * **Program KISS**
  */
 
 define(['./1.2-cradle', 'io'], function (cradle, io) {
@@ -12,26 +13,36 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         declarations,                   // 9.5
         theStructureOfC;                // 9.6
 
-    // 9.1 Introduction
+    /**
+     * 9.1 Introduction
+     * -----------------
+     */
 
     /**
      * 9.2 The top level
-     * In program design language (PDL):
+     * -----------------
+     * **In program design language (PDL)**
+     * ```
      * begin
      *     solve the problem
      * end
+     * ```
      */
 
     /**
      * 9.3 The structure of Pascal
-     * In BNF:
+     * ----------------------------
+     * **In BNF**
+     * ```
      * <program> ::= <program-header> <block> '.'
      * <program-header> ::= PROGRAM <ident>
      * <block> ::= <declarations> | <statements>
-     *
+     * ```
      * this section:
+     * ```
      * <program> ::= <program-header> '.'
      * <program-header> ::= PROGRAM <ident>
+     * ```
      */
     theStructureOfPascal = cradle.extend({
 
@@ -66,10 +77,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 9.4 Fleshing it out
-     * In BNF:
+     * --------------------
+     * **In BNF**
+     * ```
      * <program> ::= <program-header> <block> '.'
      * <program-header> ::= PROGRAM <ident>
      * <block> ::= <declarations> | <statements>
+     * ```
      */
     fleshingItOut = theStructureOfPascal.extend({
 
@@ -104,19 +118,23 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 9.5 Declarations
-     * The BNF for Pascal declarations is:
+     * -----------------
+     * **The BNF for Pascal declarations**
+     * ```
      * <declarations> ::= ( <label list>    |
      *                      <constant list> |
      *                      <type list>     |
      *                      <variable list> |
      *                      <procedure>     |
      *                      <function>        )*
-     *
-     * Statement part in BNF:
+     * ```
+     * **Statement part in BNF**
+     * ```
      * <statements> ::= <compound statement>
      * <compound statement> ::= BEGIN <statement> (';' <statement>)* END
-     *
-     * Procedure statements:
+     * ```
+     * **Procedure statements**
+     * ```
      * <statement> ::= <simple statement> | <structured statement>
      * <simple statement> ::= <assignment> | <procedure call> | null
      * <structured statement> ::= <compound statement> |
@@ -126,6 +144,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *                            <repeat statement>   |
      *                            <for statement>      |
      *                            <with statement>
+     * ```
      */
     declarations = fleshingItOut.extend({
 
@@ -198,29 +217,35 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 9.6 The structure of C
+     * -----------------------
      * At the top level, everything in C is a static declaration,
      * either of data or of a function.
+     * ```
      * <program> ::= ( <global declaration> )*
      * <global declaration> ::= <data declaration> |
      *                          <function>
-     *
-     * In Small C:
+     * ```
+     * **In Small C**
+     * ```
      * <global declaration> ::= '#' <preprocessor command>  |
      *                          'int' <data list>           |
      *                          'char' <data list>          |
      *                          '<ident> <function body>
-     *
-     * BNF for full C:
+     * ```
+     * **BNF for full C**
+     * ```
      * <program> ::= ( <top-level decl> )*
      * <top-level decl> ::= <function def> | <data decl>
      * <data decl> ::= [<class>] <type> <decl-list>
      * <function def> ::= [<class>] [<type>] <function decl>
-     *
-     * ambiguous for <data decl> and <function def> above,
+     * ```
+     * ambiguous for `<data decl>` and `<function def>` above,
      * we can transform it:
+     * ```
      * <top-level decl> ::= [<class>] <decl>
      * <decl> ::= <type> <typed decl> | <function decl>
      * <typed decl> ::= <data list> | <function decl>
+     * ```
      */
     theStructureOfC = cradle.extend({
 

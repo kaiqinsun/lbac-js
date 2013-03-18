@@ -3,7 +3,8 @@ require.config({
         jquery: '../components/jquery/jquery',
         bootstrap: 'vendor/bootstrap',
         cookie: '../components/jquery.cookie/jquery.cookie',
-        prettify: '../components/google-code-prettify/src/prettify'
+        prettify: '../components/google-code-prettify/src/prettify',
+        marked: '../components/marked/lib/marked'
     },
     shim: {
         bootstrap: {
@@ -27,7 +28,10 @@ require([
     $(document).ready(function () {
 
         var consoleId = 'console',
-            $c = $('#' + consoleId);
+            docId = 'doc',
+            codeId = 'code',
+            $c = $('#' + consoleId),
+            $d = $('#' + docId);
 
         // Click event handler on accordion menu
         function attachMenuClickHandler() {
@@ -58,7 +62,7 @@ require([
 
                     // scroll to the top of console
                     $('html, body').animate({
-                        scrollTop: $c.offset().top - 20
+                        scrollTop: $d.offset().top - 20
                     }, 'slow');
 
                     lbacCodeViewer.update(sectionTitle);
@@ -95,10 +99,10 @@ require([
                 return chapterTitle;
             }
 
-            // Default at 'Preparation'
+            // Default
             $('#ch0').collapse('show');
             $c.hide();
-            return 'Preparation';
+            return 'Prologue';
         }
 
         function init() {
@@ -109,7 +113,8 @@ require([
             title = restorePageState();
 
             lbacCodeViewer.init({
-                element: 'source-codes',
+                docElement: docId,
+                codeElement: codeId,
                 title: title
             });
         }

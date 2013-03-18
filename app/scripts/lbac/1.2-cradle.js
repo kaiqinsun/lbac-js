@@ -1,23 +1,33 @@
 /**
  * Chapter 1 Introduction
- */
-
-// 1.1 Introduction
-
-/**
+ * ======================
+ * 1.1 Introduction
+ * ----------------
+ * This series of articles is a tutorial on the theory and
+ * practice of developing language parsers and compilers.
+ * Before we are finished, we will have covered every aspect of
+ * compiler construction, designed a new programming language,
+ * and built a working compiler.
+ *
  * 1.2 The cradle
+ * --------------
+ * The `cradle` is a boiler plate that consists of some *I/O routines*,
+ * an *error-handling routine* and a *skeleton, null main program*.
  */
 
 define(['./object', 'io'], function (object, io) {
     'use strict';
 
-   /**
-    * const: TAB, CR, LF
-    * variable: look
-    * function: getChar, error, abort, expected,
-    *           match, isAlpha, isDigit, getName, getNum
-    *           emit, emitLn, init, main
-    */
+    /**
+     * **A short list of the cradle**
+     * ```
+     * const: TAB, CR, LF
+     * variable: look
+     * function: getChar, error, abort, expected,
+     *           match, isAlpha, isDigit, getName, getNum
+     *           emit, emitLn, init, main
+     * ```
+     */
     return object.extend({
 
         // Constant declarations

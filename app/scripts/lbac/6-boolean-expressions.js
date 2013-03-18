@@ -1,5 +1,6 @@
 /**
  * Chapter 6 Boolean Expressions
+ * =============================
  */
 
 define([
@@ -21,70 +22,86 @@ define([
         mergingWithControlConstructs,   // 6.7
         addingAssignments;              // 6.8
 
-    // 6.1 Introduction
+    /**
+     * 6.1 Introduction
+     * -----------------
+     */
 
-    // 6.2 The plan
+    /**
+     * 6.2 The plan
+     * -------------
+     */
 
-    // 6.3 The grammar
+    /**
+     * 6.3 The grammar
+     * ----------------
+     * **BNF syntax equations** for arithmetic expressions
+     * we have been implementing
+     * ```
+     * <expression> ::= <unary op> <term> [<addop> <term>]*
+     * <term>       ::= <factor> [<mulop> factor]*
+     * <factor>     :== <integer> | <variable> | (<expression>)
+     * ```
+     * It's better to write the *grammar* this way
+     * ```
+     * <expression>    ::= <term> [<addop> <term>]*
+     * <term>          ::= <signed factor> [<mulop> factor]*
+     * <signed factor> ::= [<addop>] <factor>
+     * <factor>        :== <integer> | <variable> | (<expression>)
+     * ```
+     * Analogous grammar for boolean algebra
+     * ```
+     * <b-expression> ::= <b-term> [<orop> <b-term>]*
+     * <b-term>       ::= <not-factor> [AND <not-factor>]*
+     * <not-factor>   ::= [NOT] <b-factor>
+     * <b-factor>     ::= <b-literal> | <b-variable> | (<b-expression>)
+     * ```
+     */
 
-    /** BNF syntax equations for arithmetic expressions
-     *  we have been implementing:
-     *  <expression> ::= <unary op> <term> [<addop> <term>]*
-     *  <term>       ::= <factor> [<mulop> factor]*
-     *  <factor>     :== <integer> | <variable> | (<expression>)
-     **/
-
-    /** It's better to write the grammar this way:
-     *  <expression>    ::= <term> [<addop> <term>]*
-     *  <term>          ::= <signed factor> [<mulop> factor]*
-     *  <signed factor> ::= [<addop>] <factor>
-     *  <factor>        :== <integer> | <variable> | (<expression>)
-     **/
-
-    /** Analogous grammar for boolean algebra
-     *  <b-expression> ::= <b-term> [<orop> <b-term>]*
-     *  <b-term>       ::= <not-factor> [AND <not-factor>]*
-     *  <not-factor>   ::= [NOT] <b-factor>
-     *  <b-factor>     ::= <b-literal> | <b-variable> | (<b-expression>)
-     **/
-
-    // 6.4 Relops
-
-    /** BNF for relational expressions
-     *  <relation> ::= <expression> <relop> <expression>
-     *  relops are any of =, <> (or !=), <, >, <=, and >=
-     **/
-
-    /** Expand the definition of a boolean factor to read:
-     *  <b-factor> ::= <b-literal>
-     *               | <b-variable>
-     *               | (<b-expression>) |
-     *               | <relation>
+    /**
+     * 6.4 Relops
+     * -----------
+     * **BNF for relational expressions**
+     * ```
+     * <relation> ::= <expression> <relop> <expression>
+     * ```
+     * where relops are any of `=`, `<>` (or `!=`), `<`, `>`, `<=`, and `>=`.
+     *
+     * Expand the definition of a boolean factor to read
+     * ```
+     * <b-factor> ::= <b-literal>
+     *              | <b-variable>
+     *              | (<b-expression>) |
+     *              | <relation>
+     * ```
      * The relops and the relation they define serve
      * to wed the two kinds of algebra.
-     **/
+     */
 
-    // 6.5 Fixing the grammar
-
-    /** BNF
-     *  <b-expression>  ::= <b-term> [<orop> <b-term>]*
-     *  <b-term>        ::= <not-factor> [AND <not-factor>]*
-     *  <not-factor>    ::= [NOT] <b-factor>
-     *  <b-factor>      ::= <b-literal> | <b-variable> | <relation>
+    /**
+     * 6.5 Fixing the grammar
+     * ----------------------
+     * **In BNF**
+     * ```
+     * <b-expression>  ::= <b-term> [<orop> <b-term>]*
+     * <b-term>        ::= <not-factor> [AND <not-factor>]*
+     * <not-factor>    ::= [NOT] <b-factor>
+     * <b-factor>      ::= <b-literal> | <b-variable> | <relation>
      *
-     *  <relation>      ::= <expression> [<relop> <expression>]
+     * <relation>      ::= <expression> [<relop> <expression>]
      *
-     *  <expression>    ::= <term> [<addop> <term>]*
-     *  <term>          ::= <signed factor> [<mulop> factor]*
-     *  <signed factor> ::= [<addop>] <factor>
-     *  <factor>        ::= <integer> | <variable> | (<b-expression>)
-     **/
+     * <expression>    ::= <term> [<addop> <term>]*
+     * <term>          ::= <signed factor> [<mulop> factor]*
+     * <signed factor> ::= [<addop>] <factor>
+     * <factor>        ::= <integer> | <variable> | (<b-expression>)
+     * ```
+     */
 
     /**
      * 6.6 The parser
+     * ---------------
+     * ### 6.6.1 ###
      */
-
-    // 6.6.1 The parser
     theParser = cradle.extend({
 
         // Recognize a boolean literal
@@ -113,9 +130,11 @@ define([
     });
 
     /**
-     * 6.6.2 Boolean literal
-     * In BNF
+     * ### 6.6.2 Boolean literal ###
+     * **In BNF**
+     * ```
      * <b-expression>  ::= <b-literal>
+     * ```
      */
     booleanLiteral = theParser.extend({
 
@@ -140,10 +159,12 @@ define([
     });
 
     /**
-     * 6.6.3 General expressions
-     * In BNF:
+     * ### 6.6.3 General expressions ###
+     * **In BNF**
+     * ```
      * <b-expression> ::= <b-term> [<orop> <b-term>]*
      * <b-term> ::= <b-literal>
+     * ```
      */
     generalExpressions = booleanLiteral.extend({
 
@@ -198,11 +219,13 @@ define([
     });
 
     /**
-     * 6.6.4 AND operation
-     * In BNF:
+     * ### 6.6.4 AND operation ###
+     * **In BNF**
+     * ```
      * <b-term> ::= <not-factor> [AND <not-factor>]*
      * <not-factor> :== <b-literal>
-     **/
+     * ```
+     */
     andOperation = generalExpressions.extend({
 
         // Parse and translate a boolean factor with NOT
@@ -232,10 +255,12 @@ define([
     });
 
     /**
-     * 6.6.5 NOT operation
-     * In BNF:
+     * ### 6.6.5 NOT operation ###
+     * **In BNF**
+     * ```
      * <not-factor> ::= [NOT] <b-factor>
      * <b-factor> ::= <b-literal>
+     * ```
      */
     notOperation = andOperation.extend({
 
@@ -266,9 +291,11 @@ define([
     });
 
     /**
-     * 6.6.6 Expand the factor
-     * In BNF:
+     * ### 6.6.6 Expand the factor ###
+     * **In BNF**
+     * ```
      * <b-factor> ::= <b-literal> | <relation>
+     * ```
      */
     expandTheFactor = notOperation.extend({
 
@@ -294,8 +321,10 @@ define([
     });
 
     /**
-     * 6.6.7 Full-blown relation
+     * ###6.6.7 Full-blown relation ###
+     * ```
      * <relation> ::= <expression> [<relop> <expression>]
+     * ```
      */
     fullBlownRelation = expandTheFactor.extend({
 
@@ -368,8 +397,9 @@ define([
     });
 
     /**
-     * 6.6.8 Merging with expressions
-     * After merging, the syntax in BNF:
+     * ### 6.6.8 Merging with expressions ###
+     * **After merging, the syntax in BNF**
+     * ```
      * ----- boolean expressions -----
      * <b-expression> ::= <b-term> [<orop> <b-term>]*
      * <b-term>       ::= <not-factor> [AND <not-factor>]*
@@ -381,6 +411,7 @@ define([
      * <term>         ::= <factor> |<mulop> <factor>|*
      * <factor>       ::= <number> | (<expression>) | <identifier>
      * <identifier>   ::= <variable> | <function>
+     * ```
      */
     //{
     mergingWithExpressions = $.extend(
@@ -402,10 +433,12 @@ define([
     //}
 
     /**
-     * 6.6.9 Change to latest expression syntax
+     * ### 6.6.9 Change to latest expression syntax ###
+     * ```
      * <expression>   ::= <term> [<addop> <term>]*
      * <term>         ::= <signed factor> [<mulop> <factor>]*
      * <factor>       ::= <number> | (<b-expression>) | <identifier>
+     * ```
      */
     changeToLatestExpressionSyntax = mergingWithExpressions.extend({
 
@@ -476,10 +509,12 @@ define([
     });
 
     /**
-     * 6.7 Merging with control constructs
+     * ### 6.7 Merging with control constructs ###
+     * ```
      * <program> ::= <block> END
      * <block> ::= [<statement>]*
      * <statement> ::= <control-statement> | <b-expression>
+     * ```
      */
     //{
     mergingWithControlConstructs = $.extend(
@@ -503,9 +538,11 @@ define([
     //}
 
     /**
-     * 6.8 Adding assignments
+     * ### 6.8 Adding assignments ###
+     * ```
      * <statement> ::= <control-statement> | <assignment>
      * <assignment> ::= <identifier> = <b-expression>
+     * ```
      */
     addingAssignments = mergingWithControlConstructs.extend({
 
@@ -591,7 +628,7 @@ define([
         // <relation> ::= <expression> [<relop> <expression>]
         fullBlownRelation: boundMain(fullBlownRelation),
 
-        /**
+        /*
          * 6.6.8 Merging with expressions
          * No new codes after merging, the syntax in BNF:
          * ----- boolean expressions -----
@@ -608,7 +645,7 @@ define([
          */
         mergingWithExpressions: boundMain(mergingWithExpressions),
 
-        /**
+        /*
          * 6.6.9 Change to latest expression syntax
          * <expression>   ::= <term> [<addop> <term>]*
          * <term>         ::= <signed factor> [<mulop> <factor>]*
@@ -631,15 +668,17 @@ define([
     };
 
     /**
-     * Final results of this chapter in BNF:
-     *
-     * ----- program -----
+     * Final results of this chapter in BNF
+     * -------------------------------------
+     * ### program ###
+     * ```
      * <program> ::= <block> END
      * <block> ::= [<statement>]*
      * <statement> ::= <if> | <while> | <loop> | <repeat> |<for> |
      *                 <do> | <break> | <assignment>
-     *
-     * ----- control statements -----
+     * ```
+     * ### control statements ###
+     * ```
      * <if statement> ::= IF <condition> <block> [ELSE <block>] ENDIF
      * <while statement> ::= WHILE <condition> <block> ENDWHILE
      * <loop statement> ::= LOOP <block> ENDLOOP
@@ -647,22 +686,26 @@ define([
      * <for statement> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
      * <do statement> ::= DO <expression> <block> ENDDO
      * <break statement> ::= BREAK
-     *
-     * ----- assignment statement -----
+     * ```
+     * ### assignment statement ###
+     * ```
      * <assignment statement> ::= <identifier> = <b-expression>
-     *
-     * ----- boolean expressions -----
+     * ```
+     * ### boolean expressions ###
+     * ```
      * <b-expression> ::= <b-term> [<orop> <b-term>]*
      * <b-term>       ::= <not-factor> [AND <not-factor>]*
      * <not-factor>   ::= [NOT] <b-factor>
      * <b-factor>     ::= <b-literal> | <relation>
      * <relation>     ::= <expression> [<relop> <expression>]
-     *
-     * ----- arithmetic expressions -----
+     * ```
+     * ### arithmetic expressions ###
+     * ```
      * <expression>   ::= <term> [<addop> <term>]*
      * <term>         ::= <signed factor> [<mulop> <factor>]*
      * <factor>       ::= <number> | (<b-expression>) | <identifier>
      * <identifier>   ::= <variable> | <function>
+     * ```
      */
 
 });

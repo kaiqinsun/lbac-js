@@ -1,5 +1,6 @@
 /**
  * Chapter 2 Expression Parsing
+ * ============================
  */
 
 define(['./1.2-cradle'], function (cradle) {
@@ -16,11 +17,26 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.1 Getting started
+     * -------------------
+     * The purpose of this chapter is for us to learn how to
+     * parse and translate mathematical expressions.
+     * An expression is the right-hand side of an equation, as in
+     * ```
      * x = 2 * y + 3 / (4 * z)
+     * ```
      */
 
     /**
      * 2.2 Single digits
+     * -----------------
+     * Let's start with the absolutely most simple case we can think of,
+     * an expression consisting of a single digit.
+     *
+     * **In Backus-Naur Form (BNF)**
+     * ```
+     * <expression> ::= <number>
+     * <number> ::= <digit>
+     * ```
      */
     singleDigits = cradle.extend({
 
@@ -39,8 +55,16 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.3 Binary expressions
-     * In BNF:
-     * <term> +/- <term>
+     * ----------------------
+     * Suppose we want to handle expressions of the form:
+     * `1 + 2` or `4 - 3`
+     *
+     * or in general,
+     * **in Backus-Naur Form (BNF)**
+     * ```
+     * <expression> ::= <term> +/- <term>
+     * <term> ::= <number>
+     * ```
      */
     binaryExpressions = singleDigits.extend({
 
@@ -84,8 +108,14 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.4 General expressions
-     * In BNF:
+     * -----------------------
+     * In the REAL world, an *expression* can consist of one
+     * or more *terms*, separated by *addops* (`+` or `-`).
+     *
+     * **In BNF**
+     * ```
      * <expression> ::= <term> |<addop> <term>|*
+     * ```
      */
     generalExpressions = binaryExpressions.extend({
 
@@ -109,7 +139,13 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.5 Using the stack
-     * to deal with complexity, such as 1 + (2 - (3 + (4 - 5)))
+     * -------------------
+     * To deal with complexity, such as `1 + (2 - (3 + (4 - 5)))`,
+     * we're going to run out of registers fast!
+     * The solution is to use stack instead.
+     *
+     * For 68000 assembler langugage, a push is written as `-(SP)`,
+     * and pop `(SP)+`
      */
     usingTheStack = binaryExpressions.extend({
 
@@ -148,8 +184,20 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.6 Multiplication and division
-     * In BNF:
+     * -------------------------------
+     * There is an implied operator *PRECEDENCE*, or *hierarchy*,
+     * associated with expressions, so that in an expression like
+     * ```
+     * 2 + 3 * 4
+     * ```
+     * we know that we’re supposed to multiply FIRST, then add.
+     * (See why we needed the stack?)
+     *
+     * **In BNF**
+     * ```
      * <term> ::= <factor> |<mulop> <factor>|*
+     * <factor> ::= <number>
+     * ```
      */
     multiplicationAndDivision = usingTheStack.extend({
 
@@ -195,12 +243,20 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.7 Parentheses
-     * a mechanism to force a desired operator precedence
+     * ---------------
+     * Parentheses are a mechanism to force a desired operator precedence.
+     * ```
      * 2 * (3 + 4);
-     * a mechanism for defining expressions of any degree of complexity
-     * (1 + 2)/((3 + 4) + (5 - 6))
-     * In BNF:
+     * ```
+     * They give us a mechanism for defining expressions of
+     * any degree of complexity.
+     * ```
+     * (1 + 2) / ((3 + 4) + (5 - 6))
+     * ```
+     * **In BNF**
+     * ```
      * <factor> ::= <number> | (<expression>)
+     * ```
      * This is where the recursion comes in.
      */
     parentheses = multiplicationAndDivision.extend({
@@ -220,11 +276,19 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.8 Unary minus
-     * e.g. -1, +3 or -(3-2), etc.
-     * solution: stick an imaginary leading zero in front of expressions
-     * of this type, so that -3 becomes 0 - 3.
+     * ---------------
+     * Try e.g. `-1`, `+3` or `-(3-2)`, etc. It doesn't work, does it?
+     * 
+     * **Solution**
      *
+     * The  easiest (although not necessarily the best) way is
+     * to stick an imaginary leading zero in front of expressions
+     * of this type, so that `-3` becomes `0 - 3`.
+     *
+     * **In BNF**
+     * ```
      * <expression> ::= [<unary op>] <term> [<addop> <term>]*
+     * ```
      */
     unaryMinus = parentheses.extend({
 
@@ -255,8 +319,10 @@ define(['./1.2-cradle'], function (cradle) {
 
     });
 
-    // 2.9 A word about optimization
-
+    /**
+     * 2.9 A word about optimization
+     * -----------------------------
+     */
 
     // return main functions for executions,
     // and the final unitaryMinus object for next chapter (ch. 3),
@@ -291,11 +357,13 @@ define(['./1.2-cradle'], function (cradle) {
     };
 
     /**
-     * Final results of this chapter in BNF:
-     * -----
+     * Final results of this chapter in BNF
+     * -------------------------------------
+     * ```
      * <expression> ::= [<unary op>] <term> [<addop> <term>]*
      * <term> ::= <factor> |<mulop> <factor>|*
      * <factor> ::= <number> | (<expression>)
+     * ```
      */
 
 });

@@ -36,12 +36,18 @@ module.exports = function (grunt) {
                 files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
                 tasks: ['compass']
             },
+            concat: {
+                files: ['<%= yeoman.app %>/scripts/lbac/*.js'],
+                tasks: ['concat']
+            },
             livereload: {
                 files: [
                     '<%= yeoman.app %>/*.html',
                     '{.tmp,<%= yeoman.app %>}/styles/{,*/}*.css',
                     '{.tmp,<%= yeoman.app %>}/scripts/{,*/}*.js',
-                    '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,webp}'
+                    '!<%= yeoman.app %>/scripts/lbac/*.js',
+                    '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,webp}',
+                    '.tmp/ajax/*'
                 ],
                 tasks: ['livereload']
             }
@@ -153,7 +159,7 @@ module.exports = function (grunt) {
         // not used since Uglify task does concat,
         // but still available if needed
         concat: {
-            all: {
+            ajax: {
                 files: [{
                     dest: '.tmp/ajax/lbac.src.txt',
                     src: [

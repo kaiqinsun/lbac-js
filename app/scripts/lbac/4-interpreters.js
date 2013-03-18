@@ -1,5 +1,6 @@
 /**
  * Chapter 4 Interpreters
+ * ======================
  */
 
 define(['./1.2-cradle', 'io'], function (cradle, io) {
@@ -10,23 +11,29 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         binaryExpressions,              // 4.2.2
         generalExpressions,             // 4.2.3
         multiDigitsNumber,              // 4.2.4
-        parentheses,                    // 4.2.5
+        factor,                    // 4.2.5
         variables,                      // 4.3.1
         assignmentStatements,           // 4.3.2
         multipleStatements,             // 4.3.3
         ioRoutines;                     // 4.3.4
 
-    // 4.1 Introduction
-
-    // 4.2 The interpreters
-
     /**
-     * 4.2 The interpreter
+     * 4.1 Introduction
+     * ----------------
      */
 
     /**
-     * 4.2.1 Single digits
+     * 4.2 The interpreters
+     * --------------------
+     */
+
+    /**
+     * ### 4.2.1 Single digits ###
+     * **In BNF notation**
+     * ```
      * <expression> ::= <number>
+     * <number> ::= <digit>
+     * ```
      */
     singleDigits = cradle.extend({
 
@@ -36,7 +43,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
-            num = +this.look;
+            num = +this.look;   // convert string to number
             this.getChar();
             return num;
         },
@@ -55,8 +62,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.2.2 Binary expressions
+     * ### 4.2.2 Binary expressions ###
+     * **In BNF notation**
+     * ```
      * <expression> ::= <number> |<addop> <number>|*
+     * ```
      */
     binaryExpressions = singleDigits.extend({
 
@@ -91,9 +101,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.2.3 General expressions
-     * <term> ::= <number> |<mulop> <number>|*
+     * ### 4.2.3 General expressions ###
+     * **In BNF notation**
+     * ```
      * <expression> ::= <term> |<addop> <term>|*
+     * <term> ::= <number> |<mulop> <number>|*
+     * ```
      */
     generalExpressions = binaryExpressions.extend({
 
@@ -141,7 +154,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.2.4 Multi-digits number
+     * ### 4.2.4 Multi-digits number ###
+     * Extend `getNum` to support multi-digit number.
      */
     multiDigitsNumber = generalExpressions.extend({
 
@@ -161,11 +175,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.2.5 Parentheses
+     * ### 4.2.5 Factor ###
+     * The next step is to install function `factor`.
+     *
+     * **In BNF notation**
+     * ```
      * <factor> ::= <number> | (<expression>)
      * <term> ::= <factor> |<mulop> <factor>|*
+     * ```
      */
-    parentheses = multiDigitsNumber.extend({
+    factor = multiDigitsNumber.extend({
 
         // Parse and translate a math factor
         factor: function () {
@@ -202,14 +221,17 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 4.3 A little philosophy
+     * -----------------------
      */
 
     /**
-     * 4.3.1 Variables
-     * In BNF notation:
+     * ### 4.3.1 Variables ###
+     * **In BNF notation**
+     * ```
      * <factor> ::= <number> | (<expression>) | <variable>
+     * ```
      */
-    variables = parentheses.extend({
+    variables = factor.extend({
 
         table: {},
 
@@ -249,9 +271,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.3.2 Assignment statements
-     * In BNF:
-     * <identifier> = <expression>
+     * ### 4.3.2 Assignment statements ###
+     * **In BNF notation**
+     * ```
+     * <assignment> ::= <identifier> = <expression>
+     * ```
      */
     assignmentStatements = variables.extend({
 
@@ -272,7 +296,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.3.3 Multiple statements
+     * ### 4.3.3 Multiple statements ###
      */
     multipleStatements = assignmentStatements.extend({
 
@@ -295,14 +319,15 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.3.4 I/O routines
+     * ### 4.3.4 I/O routines ###
      */
     ioRoutines = multipleStatements.extend({
 
         // Input routine
         input: function () {
             this.match('?');
-            //
+
+            // not implemented
         },
 
         // Output routine
@@ -349,7 +374,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
         // <factor> ::= <number> | (<expression>)
         // <term> ::= <factor> |<mulop> <factor>|*
-        parentheses: boundMain(parentheses),
+        factor: boundMain(factor),
 
         // <factor> ::= <number> | (<expression>) | <variable>
         variables: boundMain(variables),
