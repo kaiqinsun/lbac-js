@@ -1,23 +1,33 @@
 /**
  * Chapter 1 Introduction
- */
-
-// 1.1 Introduction
-
-/**
+ * ======================
+ * 1.1 Introduction
+ * ----------------
+ * This series of articles is a tutorial on the theory and
+ * practice of developing language parsers and compilers.
+ * Before we are finished, we will have covered every aspect of
+ * compiler construction, designed a new programming language,
+ * and built a working compiler.
+ *
  * 1.2 The cradle
+ * --------------
+ * The `cradle` is a boiler plate that consists of some *I/O routines*,
+ * an *error-handling routine* and a *skeleton, null main program*.
  */
 
 define(['./object', 'io'], function (object, io) {
     'use strict';
 
-   /**
-    * const: TAB, CR, LF
-    * variable: look
-    * function: getChar, error, abort, expected,
-    *           match, isAlpha, isDigit, getName, getNum
-    *           emit, emitLn, init, main
-    */
+    /**
+     * **A short list of the cradle**
+     * ```
+     * const: TAB, CR, LF
+     * variable: look
+     * function: getChar, error, abort, expected,
+     *           match, isAlpha, isDigit, getName, getNum
+     *           emit, emitLn, init, main
+     * ```
+     */
     return object.extend({
 
         // Constant declarations
@@ -116,6 +126,7 @@ define(['./object', 'io'], function (object, io) {
 });
 /**
  * Chapter 10 Introducing "Tiny"
+ * ==============================
  */
 
 define(['./1.2-cradle', 'io'], function (cradle, io) {
@@ -140,18 +151,26 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         moreRelops,                     // 10.12
         inputOutput;                    // 10.13
 
-    // 10.1 Introduction
-
     /**
-     * 10.2 Getting started
-     * Top-level definition for TINY (similar to Pascal):
-     * <program> ::= PROGRAM <top-level decl> <main> '.'
+     * 10.1 Introduction
+     * ------------------
      */
 
     /**
-     * 10.2.1
+     * 10.2 Getting started
+     * ---------------------
+     * Top-level definition for TINY (similar to Pascal):
+     * ```
+     * <program> ::= PROGRAM <top-level decl> <main> '.'
+     * ```
+     */
+
+    /**
+     * ### 10.2.1 ###
+     * ```
      * <program> ::= PROGRAM .
-     * only accepted code: p.
+     * ```
+     * only accepted code: `p.`
      */
     gettingStarted = cradle.extend({
 
@@ -197,9 +216,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 10.2.2 The main program
+     * ### 10.2.2 The main program ###
+     * ```
      * <program> ::= PROGRAM BEGIN END '.'
-     * only accepted code: pbe.
+     * ```
+     * only accepted code: `pbe.`
      */
     theMainProgram = gettingStarted.extend({
 
@@ -223,11 +244,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.3 Declarations
+     * ------------------
+     * ```
      * <program> ::= PROGRAM <top-level decls> BEGIN END '.'
      * <top-level decls> ::= ( <data declaration> )*
      * <data declaration> ::= VAR <var-list>
-     *
-     * code example: pbe. or pvabe.
+     * ```
+     * code example: `pbe.` or `pvabe.`
      */
     declarations = theMainProgram.extend({
 
@@ -263,9 +286,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.4 Declarations and symbols
+     * ------------------------------
+     * ```
      * <data declaration> ::= VAR <var-list>
      * <var-list> ::= <ident>
-     * code example: pvxvyvzbe.
+     * ```
+     * code example: `pvxvyvzbe.`
      */
     declarationsAndSymbols = declarations.extend({
 
@@ -283,9 +309,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 10.4.2 Variable list
+     * ### 10.4.2 Variable list ###
+     * ```
      * <var-list> ::= <indent> (, <ident>)*
-     * code example: pvx,y,zbe.
+     * ```
+     * code example: `pvx,y,zbe.`
      */
     variableList = declarationsAndSymbols.extend({
 
@@ -303,13 +331,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.5 Initializers
+     * ------------------
+     * ```
      * <var-list> ::= <var> (, <var>)*
      * <var> ::= <ident> [ = <integer> ]
-     */
-
-    /**
-     * 10.5.1
-     * code example: pvx=5,y,z=3be.
+     * ```
+     * ### 10.5.1 ###
+     * code example: `pvx=5`, `y,z=3be.`
      */
     initializers = variableList.extend({
 
@@ -327,8 +355,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 10.5.2 Multi-digit integer
-     * code example: pvx=15,y,z=-23be.
+     * ### 10.5.2 Multi-digit integer ###
+     * code example: `pvx=15,y,z=-23be.`
      */
     multiDigitInteger = initializers.extend({
 
@@ -364,6 +392,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.6 The symbol table
+     * ----------------------
      */
     theSymbolTable = multiDigitInteger.extend({
 
@@ -404,11 +433,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.7 Executable statements
+     * ---------------------------
+     * ```
      * <main> ::= BEGIN <block> END
      * <block> ::= (<assignment>)*
+     * ```
+     * ### 10.7.1 ###
      */
-
-    // 10.7.1
     executableStatements = theSymbolTable.extend({
 
         // Parse and translate an assignment statement
@@ -435,7 +466,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 10.7.2 Code generation routines
+     * ### 10.7.2 Code generation routines ###
      */
     codeGenerationRoutines = executableStatements.extend({
 
@@ -507,7 +538,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 10.7.3 Assignment statement
+     * ### 10.7.3 Assignment statement ###
+     * ```
      * <assignment> ::= <ident> = <expression>
      * <expression> ::= <first term> ( <addop> <term> )*
      * <first term> ::= <first factor> <rest>
@@ -515,6 +547,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <rest> ::= ( <mulop> <factor> )*
      * <first factor> ::= [ <addop> ] <factor>
      * <factor> ::= <var> | <number> | ( <expression> )
+     * ```
      */
     assignmentStatement = codeGenerationRoutines.extend({
 
@@ -650,10 +683,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.8 Booleans
+     * --------------
      */
 
     /**
-     * 10.8.1 More code generation routines
+     * ### 10.8.1 More code generation routines ###
      */
     moreCodeGenerationRoutines = assignmentStatement.extend({
 
@@ -709,22 +743,24 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 10.8.2 Boolean expressions
-     * BNF for the boolean expressions:
+     * ### 10.8.2 Boolean expressions ###
+     * **BNF for the boolean expressions**
+     * ```
      * <bool-expr> ::= <bool-term> ( <orop> <bool-term> )*
      * <bool-term> ::= <not-factor> ( <andop> <not-factor> )*
      * <not-factor> ::= [ '!' ] <relation>
      * <relation> ::= <expression> [ <relop> <expression> ]
+     * ```
+     * code example: `pvx,y,zbx=z>ye.`
      *
-     * code example: pvx,y,zbx=z>ye.
      * which stands for:
-     * -----
+     * ```
      * PROGRAM
      * VAR X, Y, Z
      * BEGIN
      * X = Z > Y
      * END.
-     * -----
+     * ```
      */
     booleanExpressions = moreCodeGenerationRoutines.extend({
 
@@ -869,12 +905,14 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.9 Control structures
+     * ------------------------
+     * ```
      * <block> ::= ( <statement> )*
      * <statement> ::= <if> | <while> | <assignment>
      * <if> ::= IF <bool-expression> <block> [ ELSE <block> ] ENDIF
      * <while> ::= WHILE <bool-expression> <block> ENDWHILE
-     *
-     * So far: TINY version 0.1
+     * ```
+     * So far: **TINY version 0.1**
      */
     controlStructures = booleanExpressions.extend({
 
@@ -961,6 +999,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.10 Lexical scanning
+     * -----------------------
      */
     lexicalScanning = controlStructures.extend({
 
@@ -1190,11 +1229,20 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 10.11 Multi-character variable names
+    /**
+     * 10.11 Multi-character variable names
+     * ------------------------------------
+     * Skipped.
+     */
 
     /**
      * 10.12 More relops
-     * <, <= , =, <>, #, >, >=
+     * ------------------
+     * Some of the relops are indeed single characters,
+     * but others require two, such as `<=` and `>=`.
+     *
+     * We extend the relop set to include
+     * `<`, `<=`, `=`, `<>`, `#`, `>`, and `>=`.
      */
     moreRelops = lexicalScanning.extend({
 
@@ -1264,7 +1312,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 10.13 Input / Output
-     * Assuming a library call TINYLIB.LIB exists
+     * ---------------------
+     * Assuming a library call `TINYLIB.LIB` exists
      */
     inputOutput = moreRelops.extend({
 
@@ -1351,8 +1400,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 10.14 Conclusion
-    // TINY Version 1.0
+    /**
+     * 10.14 Conclusion
+     * -----------------
+     * So far, we have **TINY Version 1.0**
+     */
 
 
     // return main functions for executions
@@ -1397,8 +1449,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
 });
 /**
- * Chapter 11 Lexical scan revisited - 11.6 Conclusion
- * Program Tiny v1.1
+ * 11.6 Conclusion
+ * ----------------
+ * **Program Tiny v1.1** concludes chapter 11 Lexical scan revisited.
  */
 
 define(['./object', 'io'], function (object, io) {
@@ -1807,9 +1860,11 @@ define(['./object', 'io'], function (object, io) {
         },
 
         /**
+         * ```
          * <expression> ::= <term> [<addop> <term>]*
          * <term> ::= <factor> [<mulop> <factor>]*
          * <factor> ::= <number> | (<b-expression>) | <variable>
+         * ```
          */
 
         // Parse and translate a math factor
@@ -2035,11 +2090,13 @@ define(['./object', 'io'], function (object, io) {
         },
 
         /**
+         * ```
          * <program> ::= <block> END
          * <block> ::= [<statement>]*
          * <statement> ::= <if> | <assignment>
          * <if stmt> ::= IF <condition> <block> [ELSE <block>] ENDIF
          * <assignment> ::= <identifier> = <expression>
+         * ```
          */
 
         // Recognize and translate an IF constructor
@@ -2193,6 +2250,7 @@ define(['./object', 'io'], function (object, io) {
 });
 /**
  * Chapter 12 Miscellany
+ * ======================
  */
 
 define(['./object', './11.6-tiny-1.1'], function (object, tiny_11) {
@@ -2201,19 +2259,33 @@ define(['./object', './11.6-tiny-1.1'], function (object, tiny_11) {
     var boundMain = object.boundMain,
         dealingWithSemicolons;          // 12.4
 
-    // 12.1 Introduction
+    /**
+     * 12.1 Introduction
+     * ------------------
+     */
 
-    // 12.2 Semicolons
+    /**
+     * 12.2 Semicolons
+     * ----------------
+     */
 
-    // 12.3 Syntactic sugar
+    /**
+     * 12.3 Syntactic sugar
+     * ---------------------
+     */
 
     /**
      * 12.4 Dealing with semicolons
-     * In Pascal, semicolon is a statement SEPARATOR:
+     * -----------------------------
+     * In **Pascal**, semicolon is a statement *SEPARATOR*
+     * ```
      * <block> ::= <statement> (';' <statement>)*
      * <statement> ::= <assignment> | <if> | <while> ... | null
-     * In C and Ada, semicolon is a statement TERMINATOR
+     * ```
+     * In **C** and **Ada**, semicolon is a statement *TERMINATOR*
+     * ```
      * <block> ::= ( <statement> ';' )*
+     * ```
      */
     dealingWithSemicolons = tiny_11.object.extend({
 
@@ -2287,6 +2359,7 @@ define(['./object', './11.6-tiny-1.1'], function (object, tiny_11) {
 });
 /**
  * Chapter 2 Expression Parsing
+ * ============================
  */
 
 define(['./1.2-cradle'], function (cradle) {
@@ -2303,11 +2376,26 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.1 Getting started
+     * -------------------
+     * The purpose of this chapter is for us to learn how to
+     * parse and translate mathematical expressions.
+     * An expression is the right-hand side of an equation, as in
+     * ```
      * x = 2 * y + 3 / (4 * z)
+     * ```
      */
 
     /**
      * 2.2 Single digits
+     * -----------------
+     * Let's start with the absolutely most simple case we can think of,
+     * an expression consisting of a single digit.
+     *
+     * **In Backus-Naur Form (BNF)**
+     * ```
+     * <expression> ::= <number>
+     * <number> ::= <digit>
+     * ```
      */
     singleDigits = cradle.extend({
 
@@ -2326,8 +2414,16 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.3 Binary expressions
-     * In BNF:
-     * <term> +/- <term>
+     * ----------------------
+     * Suppose we want to handle expressions of the form:
+     * `1 + 2` or `4 - 3`
+     *
+     * or in general,
+     * **in Backus-Naur Form (BNF)**
+     * ```
+     * <expression> ::= <term> +/- <term>
+     * <term> ::= <number>
+     * ```
      */
     binaryExpressions = singleDigits.extend({
 
@@ -2371,8 +2467,14 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.4 General expressions
-     * In BNF:
+     * -----------------------
+     * In the REAL world, an *expression* can consist of one
+     * or more *terms*, separated by *addops* (`+` or `-`).
+     *
+     * **In BNF**
+     * ```
      * <expression> ::= <term> |<addop> <term>|*
+     * ```
      */
     generalExpressions = binaryExpressions.extend({
 
@@ -2396,7 +2498,13 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.5 Using the stack
-     * to deal with complexity, such as 1 + (2 - (3 + (4 - 5)))
+     * -------------------
+     * To deal with complexity, such as `1 + (2 - (3 + (4 - 5)))`,
+     * we're going to run out of registers fast!
+     * The solution is to use stack instead.
+     *
+     * For 68000 assembler langugage, a push is written as `-(SP)`,
+     * and pop `(SP)+`
      */
     usingTheStack = binaryExpressions.extend({
 
@@ -2435,8 +2543,20 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.6 Multiplication and division
-     * In BNF:
+     * -------------------------------
+     * There is an implied operator *PRECEDENCE*, or *hierarchy*,
+     * associated with expressions, so that in an expression like
+     * ```
+     * 2 + 3 * 4
+     * ```
+     * we know that we’re supposed to multiply FIRST, then add.
+     * (See why we needed the stack?)
+     *
+     * **In BNF**
+     * ```
      * <term> ::= <factor> |<mulop> <factor>|*
+     * <factor> ::= <number>
+     * ```
      */
     multiplicationAndDivision = usingTheStack.extend({
 
@@ -2482,12 +2602,20 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.7 Parentheses
-     * a mechanism to force a desired operator precedence
+     * ---------------
+     * Parentheses are a mechanism to force a desired operator precedence.
+     * ```
      * 2 * (3 + 4);
-     * a mechanism for defining expressions of any degree of complexity
-     * (1 + 2)/((3 + 4) + (5 - 6))
-     * In BNF:
+     * ```
+     * They give us a mechanism for defining expressions of
+     * any degree of complexity.
+     * ```
+     * (1 + 2) / ((3 + 4) + (5 - 6))
+     * ```
+     * **In BNF**
+     * ```
      * <factor> ::= <number> | (<expression>)
+     * ```
      * This is where the recursion comes in.
      */
     parentheses = multiplicationAndDivision.extend({
@@ -2507,11 +2635,19 @@ define(['./1.2-cradle'], function (cradle) {
 
     /**
      * 2.8 Unary minus
-     * e.g. -1, +3 or -(3-2), etc.
-     * solution: stick an imaginary leading zero in front of expressions
-     * of this type, so that -3 becomes 0 - 3.
+     * ---------------
+     * Try e.g. `-1`, `+3` or `-(3-2)`, etc. It doesn't work, does it?
+     * 
+     * **Solution**
      *
+     * The  easiest (although not necessarily the best) way is
+     * to stick an imaginary leading zero in front of expressions
+     * of this type, so that `-3` becomes `0 - 3`.
+     *
+     * **In BNF**
+     * ```
      * <expression> ::= [<unary op>] <term> [<addop> <term>]*
+     * ```
      */
     unaryMinus = parentheses.extend({
 
@@ -2542,8 +2678,10 @@ define(['./1.2-cradle'], function (cradle) {
 
     });
 
-    // 2.9 A word about optimization
-
+    /**
+     * 2.9 A word about optimization
+     * -----------------------------
+     */
 
     // return main functions for executions,
     // and the final unitaryMinus object for next chapter (ch. 3),
@@ -2578,16 +2716,19 @@ define(['./1.2-cradle'], function (cradle) {
     };
 
     /**
-     * Final results of this chapter in BNF:
-     * -----
+     * Final results of this chapter in BNF
+     * -------------------------------------
+     * ```
      * <expression> ::= [<unary op>] <term> [<addop> <term>]*
      * <term> ::= <factor> |<mulop> <factor>|*
      * <factor> ::= <number> | (<expression>)
+     * ```
      */
 
 });
 /**
  * Chapter 3 More Expressions
+ * ==========================
  */
 
 define([
@@ -2603,13 +2744,37 @@ define([
         multiCharacterTokens,   // 3.6
         whiteSpace;             // 3.7
 
-    // 3.1 Introduction
+    /**
+     * 3.1 Introduction
+     * ----------------
+     * In this chapter we will extend what we've done to deal with
+     *
+     * - variables
+     * - function calls
+     * - assignment statements
+     * - multi-character tokens (variables/numbers)
+     * - white space
+     */
 
     /**
      * 3.2 Variables
-     * e.g. b * b + 4 * a * c
-     * In BNF notation:
+     * --------------
+     * Most expressions that we see in practice involve variables, such as
+     * ```
+     * b * b + 4 * a * c
+     * ```
+     * It probably won’t come as too much of a surprise that a variable is
+     * just another kind of factor.
+     *
+     * **In BNF notation**
+     * ```
      * <factor> ::= <number> | (<expression>) | <variable>
+     * ```
+     * The format for a load in 68000 is
+     * ```
+     * MOVE X(PC), D0
+     * ```
+     * where `X` is the variable name.
      */
     variables = expressionParsing.unaryMinusObject.extend({
 
@@ -2630,10 +2795,17 @@ define([
 
     /**
      * 3.3 Functions
-     * e.g. x(), C form with an empty parameter list
-     * In BNF:
+     * -------------
+     * We don’t yet have a mechanism for declaring types,
+     * so let’s use the **C rule** for now. We also don’t have a mechanism
+     * to deal with parameters, we can only handle empty lists,
+     * so for now our function calls will have the form `x()`.
+     *
+     * **In BNF**
+     * ```
      * <identifier> ::= <variable> | <function>
      * <factor> ::= <number> | (<expression>) | <identifier>
+     * ```
      */
     functions = variables.extend({
 
@@ -2666,7 +2838,8 @@ define([
 
     /**
      * 3.4 More on error handling
-     * assert that the expression should end with an end-of-line
+     * --------------------------
+     * Assert that the expression should end with an end-of-line.
      */
     moreOnErrorHandling = functions.extend({
 
@@ -2683,8 +2856,13 @@ define([
 
     /**
      * 3.5 Assignment statements
-     * In BNF:
-     * <assignment> ::= <identifier> = <expression>
+     * --------------------------
+     * Expressions *USUALLY* (but not always) appear in assignment statements.
+     *
+     * **In BNF**
+     * ```
+     * <assignment> ::= <ident> = <expression>
+     * ```
      */
     assignmentStatements = moreOnErrorHandling.extend({
 
@@ -2710,6 +2888,9 @@ define([
 
     /**
      * 3.6 Multi-character tokens
+     * --------------------------
+     * We can handle the multi-character tokens that we need by
+     * very slight and very local modifications to `getName`  and `getNum`.
      */
     multiCharacterTokens = assignmentStatements.extend({
 
@@ -2748,6 +2929,10 @@ define([
 
     /**
      * 3.7 White space
+     * ----------------
+     * Because we’ve been careful to use `getName`, `getNum`, and `match`
+     * for most of our input processing, it is only those three routines
+     * (plus `Init`) that we need to modify.
      */
     whiteSpace = multiCharacterTokens.extend({
 
@@ -2838,6 +3023,7 @@ define([
 });
 /**
  * Chapter 4 Interpreters
+ * ======================
  */
 
 define(['./1.2-cradle', 'io'], function (cradle, io) {
@@ -2848,23 +3034,29 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         binaryExpressions,              // 4.2.2
         generalExpressions,             // 4.2.3
         multiDigitsNumber,              // 4.2.4
-        parentheses,                    // 4.2.5
+        factor,                    // 4.2.5
         variables,                      // 4.3.1
         assignmentStatements,           // 4.3.2
         multipleStatements,             // 4.3.3
         ioRoutines;                     // 4.3.4
 
-    // 4.1 Introduction
-
-    // 4.2 The interpreters
-
     /**
-     * 4.2 The interpreter
+     * 4.1 Introduction
+     * ----------------
      */
 
     /**
-     * 4.2.1 Single digits
+     * 4.2 The interpreters
+     * --------------------
+     */
+
+    /**
+     * ### 4.2.1 Single digits ###
+     * **In BNF notation**
+     * ```
      * <expression> ::= <number>
+     * <number> ::= <digit>
+     * ```
      */
     singleDigits = cradle.extend({
 
@@ -2874,7 +3066,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
-            num = +this.look;
+            num = +this.look;   // convert string to number
             this.getChar();
             return num;
         },
@@ -2893,8 +3085,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.2.2 Binary expressions
+     * ### 4.2.2 Binary expressions ###
+     * **In BNF notation**
+     * ```
      * <expression> ::= <number> |<addop> <number>|*
+     * ```
      */
     binaryExpressions = singleDigits.extend({
 
@@ -2929,9 +3124,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.2.3 General expressions
-     * <term> ::= <number> |<mulop> <number>|*
+     * ### 4.2.3 General expressions ###
+     * **In BNF notation**
+     * ```
      * <expression> ::= <term> |<addop> <term>|*
+     * <term> ::= <number> |<mulop> <number>|*
+     * ```
      */
     generalExpressions = binaryExpressions.extend({
 
@@ -2979,7 +3177,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.2.4 Multi-digits number
+     * ### 4.2.4 Multi-digits number ###
+     * Extend `getNum` to support multi-digit number.
      */
     multiDigitsNumber = generalExpressions.extend({
 
@@ -2999,11 +3198,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.2.5 Parentheses
+     * ### 4.2.5 Factor ###
+     * The next step is to install function `factor`.
+     *
+     * **In BNF notation**
+     * ```
      * <factor> ::= <number> | (<expression>)
      * <term> ::= <factor> |<mulop> <factor>|*
+     * ```
      */
-    parentheses = multiDigitsNumber.extend({
+    factor = multiDigitsNumber.extend({
 
         // Parse and translate a math factor
         factor: function () {
@@ -3040,14 +3244,17 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 4.3 A little philosophy
+     * -----------------------
      */
 
     /**
-     * 4.3.1 Variables
-     * In BNF notation:
+     * ### 4.3.1 Variables ###
+     * **In BNF notation**
+     * ```
      * <factor> ::= <number> | (<expression>) | <variable>
+     * ```
      */
-    variables = parentheses.extend({
+    variables = factor.extend({
 
         table: {},
 
@@ -3087,9 +3294,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.3.2 Assignment statements
-     * In BNF:
-     * <identifier> = <expression>
+     * ### 4.3.2 Assignment statements ###
+     * **In BNF notation**
+     * ```
+     * <assignment> ::= <identifier> = <expression>
+     * ```
      */
     assignmentStatements = variables.extend({
 
@@ -3110,7 +3319,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.3.3 Multiple statements
+     * ### 4.3.3 Multiple statements ###
      */
     multipleStatements = assignmentStatements.extend({
 
@@ -3133,14 +3342,15 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 4.3.4 I/O routines
+     * ### 4.3.4 I/O routines ###
      */
     ioRoutines = multipleStatements.extend({
 
         // Input routine
         input: function () {
             this.match('?');
-            //
+
+            // not implemented
         },
 
         // Output routine
@@ -3187,7 +3397,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
         // <factor> ::= <number> | (<expression>)
         // <term> ::= <factor> |<mulop> <factor>|*
-        parentheses: boundMain(parentheses),
+        factor: boundMain(factor),
 
         // <factor> ::= <number> | (<expression>) | <variable>
         variables: boundMain(variables),
@@ -3203,6 +3413,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 });
 /**
  * Chapter 5 Control Constructs
+ * ============================
  */
 
 define(['./1.2-cradle', 'io'], function (cradle, io) {
@@ -3221,15 +3432,23 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         theDoStatement,             // 5.9
         theBreakStatement;          // 5.10
 
-    // 5.1 Introduction
+    /**
+     * 5.1 Introduction
+     * ----------------
+     */
 
     /**
      * 5.2 The plan
+     * -------------
      */
 
-    /*
-     * 5.2.1 One statement
+    /**
+     * ### 5.2.1 One statement ###
+     * **In BNF notation**
+     * ```
      * <program> ::= <statement>
+     * <statement> ::= <other>
+     * ```
      */
     oneStatement = cradle.extend({
 
@@ -3248,10 +3467,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 5.2.2 More than one statement
-     * In BNF:
+     * ### 5.2.2 More than one statement ###
+     * **In BNF notation**
+     * ```
      * <program> ::= <block> END
      * <block> ::= [<statement>]*
+     * ```
      */
     moreThanOneStatement = oneStatement.extend({
 
@@ -3281,6 +3502,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.3 Some groundwork
+     * --------------------
+     * Prepare two routines
+     *
+     * - `newLable` to generate label `Lnn',
+     *    where nn is a label number starting from zero.
+     * - `postLabel` to output the labels at the proper place.
      */
     someGroundwork = moreThanOneStatement.extend({
 
@@ -3308,16 +3535,20 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.4 The IF statement
-     * In BNF:
+     * ---------------------
+     * **In BNF**
+     * ```
      * <if> ::= IF <condition> <block> ENDIF
-     *
+     * ```
      * Output should be:
+     * ```
      *      <condition>
      *      BEQ L1      # branch if false
      *      <block>
      * L1:
-     *
-     * Syntax-directed translation:
+     * ```
+     * **Syntax-directed translation**
+     * ```
      * SYNTAX           ACTIONS
      * -------------------------------------------
      * IF
@@ -3327,6 +3558,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <block>
      * ENDIF          { postLabel(L) }
      * -------------------------------------------
+     * ```
+     * For the implementation, as usual,
+     * we will be using our single-character approach,
+     * with the character `i` for `IF`, and `e` for `ENDIF`
+     * (as well as `END` ... that dual nature causes no confusion).
      */
     theIfStatement = someGroundwork.extend({
 
@@ -3364,11 +3600,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 5.4.2 Add the ELSE clause
-     * BNF of the IF statement
+     * ### 5.4.2 Add the ELSE clause ###
+     * **BNF of the `IF` statement**
+     * ```
      * <if> ::= IF <condition> <block> [ELSE <block>] ENDIF
-     *
-     * Output should be:
+     * ```
+     * **Output** should be
+     * ```
      *      <condition>
      *      BEQ L1      # branch if false
      *      <block>
@@ -3376,8 +3614,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * L1:
      *      <block>
      * L2:
-     *
-     * Syntax-directed translation
+     * ```
+     * **Syntax-directed translation**
+     * ```
      *   SYNTAX           ACTIONS
      *   -------------------------------------------
      *   IF
@@ -3391,6 +3630,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *   <block>
      *   ENDIF          { postLabel(L2); }
      *   -------------------------------------------
+     * ```
      */
     addTheElseClause = theIfStatement.extend({
 
@@ -3433,17 +3673,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.5 The WHILE statement
-     * BNF of the WHILE statement
+     * ------------------------
+     * **BNF of the `WHILE` statement**
+     * ```
      * <while> ::= WHILE <condition> <block> ENDWHILE
-     *
+     * ```
      * Output should be:
+     * ```
      * L1:  <condition>
      *      BEQ L2
      *      <block>
      *      BRA L1
      * L2:
-     *
-     * Syntax-directed translation
+     * ```
+     * **Syntax-directed translation**
+     * ```
      * SYNTAX           ACTIONS
      * -------------------------------------------
      * WHILE          { L1 = newLabel;
@@ -3452,6 +3696,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <block>
      * ENDWHILE       { emit(BRA L1);
      *                  PostLabel(L2) }
+     * ```
      */
     theWhileStatement = addTheElseClause.extend({
 
@@ -3490,21 +3735,26 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.6 The LOOP statement
-     * BNF of the LOOP statement
+     * -----------------------
+     * **BNF** of the `LOOP` statement
+     * ```
      * <loop> ::= LOOP <block> ENDLOOP
-     *
-     * Output should be:
+     * ```
+     * **Output** should be:
+     * ```
      * L1:
      *      <block>
      *      BRA L1
-     *
-     * Syntax-directed translation
+     * ```
+     * **Syntax-directed translation**
+     * ```
      * SYNTAX           ACTIONS
      * -------------------------------------------
      * LOOP           { L = newLabel();
      *                  postLabel(L) }
      * <block>
      * ENDLOOP        { emit(BRA L) }
+     * ```
      */
     theLoopStatement = theWhileStatement.extend({
 
@@ -3542,16 +3792,20 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.7 The Repeat-Until statement
-     * BNF of the REPEAT statement
+     * -------------------------------
+     * **BNF of the `REPEAT` statement**
+     * ```
      * <repeat> ::= REPEAT <block> UNTIL <conditon>
-     *
-     * Output should be:
+     * ```
+     * **Output** should be:
+     * ```
      * L1:
      *      <block>
      *      <condition>
      *      BEQ L1
-     *
-     * Syntax-directed translation
+     * ```
+     * **Syntax-directed translation**
+     * ```
      * SYNTAX              ACTIONS
      * -------------------------------------------
      * REPEAT         { L = newLabel();
@@ -3559,6 +3813,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <block>
      * UNTIL
      * <condition>    { emit(BEQ L) }
+     * ```
      */
     theRepeatUntilStatement = theLoopStatement.extend({
 
@@ -3601,36 +3856,40 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.8 The FOR loop
-     * BNF of the FOR statement
+     * -----------------
+     * **BNF of the `FOR` statement**
+     * ```
      * <for> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
-     *
-     * equivalence to:
+     * ```
+     * The construct is equivalence to:
+     * ```
      *  <ident> = <expr1>
      *  temp = <expr2>
      *  WHILE <ident> <= temp
      *  <block>
      *  ENDWHILE
-     *
-     * translated code:
-     *
-     *      <ident>             get name of loop counter
-     *      <expr1>             get initial value
-     *      LEA <ident>(PC),A0  address the loop counter
-     *      SUBQ #1, D0         predecrement it
-     *      MOVE D0, (A0)       save it
-     *      <expr2>             get upper limit
-     *      MOVE D0, -(SP)      save it on stack
+     * ```
+     * The translated code came out like this:
+     * ```
+     *      <ident>               get name of loop counter
+     *      <expr1>               get initial value
+     *      LEA <ident>(PC),A0    address the loop counter
+     *      SUBQ #1, D0           predecrement it
+     *      MOVE D0, (A0)         save it
+     *      <expr2>               get upper limit
+     *      MOVE D0, -(SP)        save it on stack
      * L1:
-     *      LEA <ident>(PC), A0 address loop counter
-     *      MOVE (A0), D0       fetch it to D0
-     *      ADDQ #1, D0         bump the counter
-     *      MOVE D0, (A0)       save new value
-     *      CMP (SP), D0        check for range
-     *      BLE L2              skip out if D0 > (SP)
+     *      LEA <ident>(PC), A0   address loop counter
+     *      MOVE (A0), D0         fetch it to D0
+     *      ADDQ #1, D0           bump the counter
+     *      MOVE D0, (A0)         save new value
+     *      CMP (SP), D0          check for range
+     *      BLE L2                skip out if D0 > (SP)
      *      <block>
-     *      BRA L1              loop for next pass
+     *      BRA L1                loop for next pass
      * L2:
-     *      ADDQ #2, SP         clean up the stack
+     *      ADDQ #2, SP           clean up the stack
+     * ```
      */
     theForLoop = theRepeatUntilStatement.extend({
 
@@ -3702,7 +3961,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.9 The DO statement
-     * BNF of the DO statement
+     * ----------------------
+     * **BNF of the `DO` statement**
+     * ```
      * <do> ::= DO <expr> <block> ENDDO
      *
      * translated code:
@@ -3714,8 +3975,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *      <block>
      *      MOVE (SP)+, D0      # pop D0
      *      DBRA D0, L1
-     *
-     * Syntax-directed translation
+     * ```
+     * **Syntax-directed translation**
+     * ```
      * SYNTAX           ACTIONS
      * -------------------------------------------
      * DO             { emit(SUBQ #1,D0);
@@ -3725,6 +3987,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <block>
      * ENDDO          { emit(MOVE (SP)+,D0);
      *                  emit(DBRA D0,L) }
+     * ```
      */
     theDoStatement = theForLoop.extend({
 
@@ -3775,8 +4038,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 5.10 The BREAK statement
-     * In BNF:
+     * -------------------------
+     * **In BNF**
+     * ```
      * <break> ::= BREAK
+     * ```
      */
     theBreakStatement = theDoStatement.extend({
 
@@ -3981,16 +4247,18 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     };
 
     /**
-     * Final results of this chapter in BNF:
-     *
-     * ----- program -----
+     * Final results of this chapter in BNF
+     * ------------------------------------
+     * ### program ###
+     * ```
      * <program> ::= <block> END
      * <block> ::= [<statement>]*
      * <statement> ::= <if> | <while> | <loop> | <repeat> |
      *                 <for> | <do> | <break> |
      *                 <other>
-     *
-     * ----- control statements -----
+     * ```
+     * ### control statements ###
+     * ```
      * <if statement> ::= IF <condition> <block> [ELSE <block>] ENDIF
      * <while statement> ::= WHILE <condition> <block> ENDWHILE
      * <loop statement> ::= LOOP <block> ENDLOOP
@@ -3998,11 +4266,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <for statement> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
      * <do statement> ::= DO <expression> <block> ENDDO
      * <break statement> ::= BREAK
+     * ```
      */
 
 });
 /**
  * Chapter 6 Boolean Expressions
+ * =============================
  */
 
 define([
@@ -4024,70 +4294,86 @@ define([
         mergingWithControlConstructs,   // 6.7
         addingAssignments;              // 6.8
 
-    // 6.1 Introduction
+    /**
+     * 6.1 Introduction
+     * -----------------
+     */
 
-    // 6.2 The plan
+    /**
+     * 6.2 The plan
+     * -------------
+     */
 
-    // 6.3 The grammar
+    /**
+     * 6.3 The grammar
+     * ----------------
+     * **BNF syntax equations** for arithmetic expressions
+     * we have been implementing
+     * ```
+     * <expression> ::= <unary op> <term> [<addop> <term>]*
+     * <term>       ::= <factor> [<mulop> factor]*
+     * <factor>     :== <integer> | <variable> | (<expression>)
+     * ```
+     * It's better to write the *grammar* this way
+     * ```
+     * <expression>    ::= <term> [<addop> <term>]*
+     * <term>          ::= <signed factor> [<mulop> factor]*
+     * <signed factor> ::= [<addop>] <factor>
+     * <factor>        :== <integer> | <variable> | (<expression>)
+     * ```
+     * Analogous grammar for boolean algebra
+     * ```
+     * <b-expression> ::= <b-term> [<orop> <b-term>]*
+     * <b-term>       ::= <not-factor> [AND <not-factor>]*
+     * <not-factor>   ::= [NOT] <b-factor>
+     * <b-factor>     ::= <b-literal> | <b-variable> | (<b-expression>)
+     * ```
+     */
 
-    /** BNF syntax equations for arithmetic expressions
-     *  we have been implementing:
-     *  <expression> ::= <unary op> <term> [<addop> <term>]*
-     *  <term>       ::= <factor> [<mulop> factor]*
-     *  <factor>     :== <integer> | <variable> | (<expression>)
-     **/
-
-    /** It's better to write the grammar this way:
-     *  <expression>    ::= <term> [<addop> <term>]*
-     *  <term>          ::= <signed factor> [<mulop> factor]*
-     *  <signed factor> ::= [<addop>] <factor>
-     *  <factor>        :== <integer> | <variable> | (<expression>)
-     **/
-
-    /** Analogous grammar for boolean algebra
-     *  <b-expression> ::= <b-term> [<orop> <b-term>]*
-     *  <b-term>       ::= <not-factor> [AND <not-factor>]*
-     *  <not-factor>   ::= [NOT] <b-factor>
-     *  <b-factor>     ::= <b-literal> | <b-variable> | (<b-expression>)
-     **/
-
-    // 6.4 Relops
-
-    /** BNF for relational expressions
-     *  <relation> ::= <expression> <relop> <expression>
-     *  relops are any of =, <> (or !=), <, >, <=, and >=
-     **/
-
-    /** Expand the definition of a boolean factor to read:
-     *  <b-factor> ::= <b-literal>
-     *               | <b-variable>
-     *               | (<b-expression>) |
-     *               | <relation>
+    /**
+     * 6.4 Relops
+     * -----------
+     * **BNF for relational expressions**
+     * ```
+     * <relation> ::= <expression> <relop> <expression>
+     * ```
+     * where relops are any of `=`, `<>` (or `!=`), `<`, `>`, `<=`, and `>=`.
+     *
+     * Expand the definition of a boolean factor to read
+     * ```
+     * <b-factor> ::= <b-literal>
+     *              | <b-variable>
+     *              | (<b-expression>) |
+     *              | <relation>
+     * ```
      * The relops and the relation they define serve
      * to wed the two kinds of algebra.
-     **/
+     */
 
-    // 6.5 Fixing the grammar
-
-    /** BNF
-     *  <b-expression>  ::= <b-term> [<orop> <b-term>]*
-     *  <b-term>        ::= <not-factor> [AND <not-factor>]*
-     *  <not-factor>    ::= [NOT] <b-factor>
-     *  <b-factor>      ::= <b-literal> | <b-variable> | <relation>
+    /**
+     * 6.5 Fixing the grammar
+     * ----------------------
+     * **In BNF**
+     * ```
+     * <b-expression>  ::= <b-term> [<orop> <b-term>]*
+     * <b-term>        ::= <not-factor> [AND <not-factor>]*
+     * <not-factor>    ::= [NOT] <b-factor>
+     * <b-factor>      ::= <b-literal> | <b-variable> | <relation>
      *
-     *  <relation>      ::= <expression> [<relop> <expression>]
+     * <relation>      ::= <expression> [<relop> <expression>]
      *
-     *  <expression>    ::= <term> [<addop> <term>]*
-     *  <term>          ::= <signed factor> [<mulop> factor]*
-     *  <signed factor> ::= [<addop>] <factor>
-     *  <factor>        ::= <integer> | <variable> | (<b-expression>)
-     **/
+     * <expression>    ::= <term> [<addop> <term>]*
+     * <term>          ::= <signed factor> [<mulop> factor]*
+     * <signed factor> ::= [<addop>] <factor>
+     * <factor>        ::= <integer> | <variable> | (<b-expression>)
+     * ```
+     */
 
     /**
      * 6.6 The parser
+     * ---------------
+     * ### 6.6.1 ###
      */
-
-    // 6.6.1 The parser
     theParser = cradle.extend({
 
         // Recognize a boolean literal
@@ -4116,9 +4402,11 @@ define([
     });
 
     /**
-     * 6.6.2 Boolean literal
-     * In BNF
+     * ### 6.6.2 Boolean literal ###
+     * **In BNF**
+     * ```
      * <b-expression>  ::= <b-literal>
+     * ```
      */
     booleanLiteral = theParser.extend({
 
@@ -4143,10 +4431,12 @@ define([
     });
 
     /**
-     * 6.6.3 General expressions
-     * In BNF:
+     * ### 6.6.3 General expressions ###
+     * **In BNF**
+     * ```
      * <b-expression> ::= <b-term> [<orop> <b-term>]*
      * <b-term> ::= <b-literal>
+     * ```
      */
     generalExpressions = booleanLiteral.extend({
 
@@ -4201,11 +4491,13 @@ define([
     });
 
     /**
-     * 6.6.4 AND operation
-     * In BNF:
+     * ### 6.6.4 AND operation ###
+     * **In BNF**
+     * ```
      * <b-term> ::= <not-factor> [AND <not-factor>]*
      * <not-factor> :== <b-literal>
-     **/
+     * ```
+     */
     andOperation = generalExpressions.extend({
 
         // Parse and translate a boolean factor with NOT
@@ -4235,10 +4527,12 @@ define([
     });
 
     /**
-     * 6.6.5 NOT operation
-     * In BNF:
+     * ### 6.6.5 NOT operation ###
+     * **In BNF**
+     * ```
      * <not-factor> ::= [NOT] <b-factor>
      * <b-factor> ::= <b-literal>
+     * ```
      */
     notOperation = andOperation.extend({
 
@@ -4269,9 +4563,11 @@ define([
     });
 
     /**
-     * 6.6.6 Expand the factor
-     * In BNF:
+     * ### 6.6.6 Expand the factor ###
+     * **In BNF**
+     * ```
      * <b-factor> ::= <b-literal> | <relation>
+     * ```
      */
     expandTheFactor = notOperation.extend({
 
@@ -4297,8 +4593,10 @@ define([
     });
 
     /**
-     * 6.6.7 Full-blown relation
+     * ###6.6.7 Full-blown relation ###
+     * ```
      * <relation> ::= <expression> [<relop> <expression>]
+     * ```
      */
     fullBlownRelation = expandTheFactor.extend({
 
@@ -4371,8 +4669,9 @@ define([
     });
 
     /**
-     * 6.6.8 Merging with expressions
-     * After merging, the syntax in BNF:
+     * ### 6.6.8 Merging with expressions ###
+     * **After merging, the syntax in BNF**
+     * ```
      * ----- boolean expressions -----
      * <b-expression> ::= <b-term> [<orop> <b-term>]*
      * <b-term>       ::= <not-factor> [AND <not-factor>]*
@@ -4384,6 +4683,7 @@ define([
      * <term>         ::= <factor> |<mulop> <factor>|*
      * <factor>       ::= <number> | (<expression>) | <identifier>
      * <identifier>   ::= <variable> | <function>
+     * ```
      */
     //{
     mergingWithExpressions = $.extend(
@@ -4405,10 +4705,12 @@ define([
     //}
 
     /**
-     * 6.6.9 Change to latest expression syntax
+     * ### 6.6.9 Change to latest expression syntax ###
+     * ```
      * <expression>   ::= <term> [<addop> <term>]*
      * <term>         ::= <signed factor> [<mulop> <factor>]*
      * <factor>       ::= <number> | (<b-expression>) | <identifier>
+     * ```
      */
     changeToLatestExpressionSyntax = mergingWithExpressions.extend({
 
@@ -4479,10 +4781,12 @@ define([
     });
 
     /**
-     * 6.7 Merging with control constructs
+     * ### 6.7 Merging with control constructs ###
+     * ```
      * <program> ::= <block> END
      * <block> ::= [<statement>]*
      * <statement> ::= <control-statement> | <b-expression>
+     * ```
      */
     //{
     mergingWithControlConstructs = $.extend(
@@ -4506,9 +4810,11 @@ define([
     //}
 
     /**
-     * 6.8 Adding assignments
+     * ### 6.8 Adding assignments ###
+     * ```
      * <statement> ::= <control-statement> | <assignment>
      * <assignment> ::= <identifier> = <b-expression>
+     * ```
      */
     addingAssignments = mergingWithControlConstructs.extend({
 
@@ -4594,7 +4900,7 @@ define([
         // <relation> ::= <expression> [<relop> <expression>]
         fullBlownRelation: boundMain(fullBlownRelation),
 
-        /**
+        /*
          * 6.6.8 Merging with expressions
          * No new codes after merging, the syntax in BNF:
          * ----- boolean expressions -----
@@ -4611,7 +4917,7 @@ define([
          */
         mergingWithExpressions: boundMain(mergingWithExpressions),
 
-        /**
+        /*
          * 6.6.9 Change to latest expression syntax
          * <expression>   ::= <term> [<addop> <term>]*
          * <term>         ::= <signed factor> [<mulop> <factor>]*
@@ -4634,15 +4940,17 @@ define([
     };
 
     /**
-     * Final results of this chapter in BNF:
-     *
-     * ----- program -----
+     * Final results of this chapter in BNF
+     * -------------------------------------
+     * ### program ###
+     * ```
      * <program> ::= <block> END
      * <block> ::= [<statement>]*
      * <statement> ::= <if> | <while> | <loop> | <repeat> |<for> |
      *                 <do> | <break> | <assignment>
-     *
-     * ----- control statements -----
+     * ```
+     * ### control statements ###
+     * ```
      * <if statement> ::= IF <condition> <block> [ELSE <block>] ENDIF
      * <while statement> ::= WHILE <condition> <block> ENDWHILE
      * <loop statement> ::= LOOP <block> ENDLOOP
@@ -4650,27 +4958,32 @@ define([
      * <for statement> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
      * <do statement> ::= DO <expression> <block> ENDDO
      * <break statement> ::= BREAK
-     *
-     * ----- assignment statement -----
+     * ```
+     * ### assignment statement ###
+     * ```
      * <assignment statement> ::= <identifier> = <b-expression>
-     *
-     * ----- boolean expressions -----
+     * ```
+     * ### boolean expressions ###
+     * ```
      * <b-expression> ::= <b-term> [<orop> <b-term>]*
      * <b-term>       ::= <not-factor> [AND <not-factor>]*
      * <not-factor>   ::= [NOT] <b-factor>
      * <b-factor>     ::= <b-literal> | <relation>
      * <relation>     ::= <expression> [<relop> <expression>]
-     *
-     * ----- arithmetic expressions -----
+     * ```
+     * ### arithmetic expressions ###
+     * ```
      * <expression>   ::= <term> [<addop> <term>]*
      * <term>         ::= <signed factor> [<mulop> <factor>]*
      * <factor>       ::= <number> | (<b-expression>) | <identifier>
      * <identifier>   ::= <variable> | <function>
+     * ```
      */
 
 });
 /**
  * Chapter 7 Lexical Scanning
+ * ===========================
  */
 
 define(['./1.2-cradle', 'io'], function (cradle, io) {
@@ -4688,47 +5001,65 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         cleanupWithGlobal,                  // 7.10.3
         returningACharacter;                // 7.11
 
-    // 7.1 Introduction
-
-    // 7.2 Lexical scanning
     /**
-     * Compiler:
+     * 7.1 Introduction
+     * -----------------
+     */
+
+    /**
+     * 7.2 Lexical scanning
+     * ----------------------
+     * **Compiler**
+     * ```
      * Text editor -> [stream of input characters]
      * -> Lexical scanner -> [stream of input tokens]
      * -> Parser (could be in one module) -> [object code]
+     * ```
      *
-     * Chomsky Hierarchy of grammars:
+     * **Chomsky Hierarchy of grammars**
+     * ```
      * Type 0: Unrestricted (e.g. English)
      * Type 1: Context-Sensitive (older, e.g. Fortran)
      * Type 2: Context-Free (modern)
      * Type 3: Regular (modern)
-     *
-     * Parser for
+     * ```
+     * **Parser** for
+     * ```
      * Type 3 - Regular grammar: an abstract machine called
-     * the state machine (finite automaton)
+     *          the state machine (finite automaton)
      * Type 2 - Context-free: push-down automaton
-     * (a state machine augmented by a stack)
+     *          (a state machine augmented by a stack)
+     * ```
+     * **Regular expression** (lower-level of real, practical grammars)
      *
-     * Regular expression (lower-level of real, practical grammars)
-     * e.g. <identifier> ::= <letter> [<letter> | <digit>]*
-     *
-     * Lexical scanning is lower-level parsing
+     * e.g.
+     * ```
+     * <identifier> ::= <letter> [<letter> | <digit>]*
+     * ```
+     * Lexical scanning is lower-level parsing.
      */
 
     /**
      * 7.3 State machines and alternatives
+     * ------------------------------------
+     * - **Regular expressions** can be parsed by a state machine.
      *
-     * Regular expressions can be parsed by a state machine.
-     * State machine: integers (current state), table of actions, input chars
+     * - **State machine:** integers (current state), table of
+     *   actions, input chars
      *
-     * LEX output: a state machine + table of actions crspd. to input grammar
-     * YACC output: a canned table-driven parser + table crspd. to lang syntax
+     * - **LEX output:** a state machine + table of actions crspd.
+     *   to input grammar
+     * - **YACC output:** a canned table-driven parser + table crspd.
+     *   to lang syntax
      */
 
     /**
      * 7.4 Some experiments in scanning
+     * ---------------------------------
+     * ```
      * <identifier> ::= <letter> [<letter> | <digit>]*
      * <number> ::= [<digit>]+
+     * ```
      */
     someExperimentsInScanning = cradle.extend({
 
@@ -4773,6 +5104,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 7.5 White space
+     * ----------------
      */
     whiteSpace = someExperimentsInScanning.extend({
 
@@ -4846,11 +5178,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 7.6 State machines
+     * -------------------
+     * The `getName()` does indeed implement a state machine.
      *
-     * getName() does indeed implement a state machine.
-     *
-     * Syntax diagram (railroad-track diagram):
-     *
+     * **Syntax diagram (railroad-track diagram)**
+     * ```
      *          |-----> Other---------------------------> Error
      *          |
      *  Start -------> Letter ---------------> Other -----> Finish
@@ -4859,14 +5191,15 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *          |<----- Letter <---------|
      *          |                        |
      *          |<----- Digit  <----------
-     *
-     * SkipWhite(), getNum(), and scan() are also state machines.
+     * ```
+     * The `SkipWhite()`, `getNum()`, and `scan()` are also state machines.
      * Little machines make big machines.
      * This is an implicit approach opposed to table-driven (explicite) one.
      */
 
     /**
      * 7.7 Newlines
+     * -------------
      */
     newlines = whiteSpace.extend({
 
@@ -4891,6 +5224,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 7.8 Operators
+     * --------------
      */
     operators = newlines.extend({
 
@@ -4934,6 +5268,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 7.9 Lists, commas and command lines
+     * ------------------------------------
      */
     listsCommasAndCommandLines = operators.extend({
 
@@ -4968,7 +5303,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 7.10 Getting fancy
-     * 7.10.1
+     * -------------------
+     * ### 7.10.1 ###
      */
     gettingFancy = listsCommasAndCommandLines.extend({
 
@@ -4984,7 +5320,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 7.10.2 Returning codes
+    /**
+     * ### 7.10.2 Returning codes ###
+     */
     returningCodes = gettingFancy.extend({
 
         // Type declarations
@@ -5046,8 +5384,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 7.10.3 Cleanup with global
-     * getName(), getNum(), and getOp() becomes procedures,
+     * ### 7.10.3 Cleanup with global ###
+     * `getName()`, `getNum()`, and `getOp()` becomes procedures,
      * use globle variables (value and token) to eliminate the local copies.
      */
     cleanupWithGlobal = returningCodes.extend({
@@ -5113,6 +5451,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 7.11 Returning a character
+     * ---------------------------
      */
     returningACharacter = cleanupWithGlobal.extend({
 
@@ -5209,10 +5548,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 7.12 Distributed vs centralized scanners
+    /**
+     * 7.12 Distributed vs centralized scanners
+     * -----------------------------------------
+     */
 
-    // 7.13 Merging scanner and parser
-    // see file: 7.13-kiss.js
+    /**
+     * 7.13 Merging scanner and parser
+     * --------------------------------
+     * In file: 7.13-kiss.js
+     */
 
     // return main functions for executions
     return {
@@ -5232,10 +5577,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 });
 /**
  * Chapter 7.13 Merging Scanner and Parser
+ * ---------------------------------------
  * Program kiss
  */
 
-define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
+define(['./object', 'io'], function (object, io) {
     'use strict';
 
     var boundMain = object.boundMain,
@@ -5245,7 +5591,14 @@ define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
 
 
     /**
-     * 7.13.1 Judicious copying
+     * 7.13 Merging scanner and parser
+     * --------------------------------
+     * ### 7.13.1 Judicious copying ###
+     * All the elements of the program to parse this subset, using 
+     * single-character tokens, exist already in our previous programs.
+     *
+     * **A short list of the program KISS**
+     * ```
      * const: TAB, CR, LF
      * variable: look, lCount
      * function: getChar, error, abort, expected,
@@ -5257,6 +5610,7 @@ define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
      *           expression, condition
      *           doIf, assignment, block, doProgram,
      *           init, main
+     * ```
      */
     judiciousCopying = object.extend({
 
@@ -5401,19 +5755,23 @@ define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
 
         /**
          * Improving arithmetic expressions:
-         * in 2.8
+         * ----------------------------------
+         * **in 2.8**
+         * ```
          * <expression> ::= [<unary op>] <term> [<addop> <term>]*
          * <term> ::= <factor> |<mulop> <factor>|*
          * <factor> ::= <number> | (<expression>)
-         *
-         * in 6.6.9
+         * ```
+         * ** in 6.6.9**
+         * ```
          * <expression>   ::= <term> [<addop> <term>]*
          * <term>         ::= <signed factor> [<mulop> factor]*
          * <signed factor> ::= [<addop>] <factor>
          * <factor>       ::= <number> | (<b-expression>) | <identifier>
          * <identifier>   ::= <variable> | <function>
-         *
+         * ```
          * this version (only first term allows <signed factor>)
+         * ```
          * <expression> ::= <first term> [<addop> <term>]*
          * <first term> ::= <signed factor> <term 1>
          * <term> ::= <factor> <term 1>
@@ -5421,6 +5779,7 @@ define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
          * <signed factor> ::= [<addop>] <factor>
          * <factor>       ::= <number> | (<expression>) | <identifier>
          * <identifier>   ::= <variable> | <function>
+         * ```
          */
 
         // Parse and translate an identifier
@@ -5544,11 +5903,13 @@ define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
         },
 
         /**
+         * ```
          * <program> ::= <block> END
          * <block> ::= [<statement>]*
          * <statement> ::= <if> | <assignment>
          * <if stmt> ::= IF <condition> <block> [ELSE <block>] ENDIF
          * <assignment> ::= <identifier> = <expression>
+         * ```
          */
 
         // Parse and translate a boolean condition
@@ -5629,7 +5990,9 @@ define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
 
     });
 
-    // 7.13.2 Merging scanner and parser
+    /**
+     * ### 7.13.2 Merging scanner and parser ###
+     */
     mergingScannerAndParser = judiciousCopying.extend({
 
         // Variable declarations
@@ -5796,8 +6159,72 @@ define(['./object', './1.2-cradle', 'io'], function (object, cradle, io) {
 
 });
 /**
+ * Chapter 8 A Little Philosophy
+ * ==============================
+ *
+ * 8.1 Introduction
+ * -----------------
+ * Some general thoughts concerning the usefulness of what we’ve been doing.
+ *
+ * 8.2 The road home
+ * -----------------
+ * To round out the series, we still have a few items to cover.
+ * These include:
+ *
+ * - Procedure calls, with and without parameters
+ * - Local and global variables
+ * - Basic types, such as character and integer types
+ * - Arrays
+ * - Strings
+ * - User-defined types and structures
+ * - Tree-structured parsers and intermediate languages
+ * - Optimization
+ *
+ * Two languages you will see in installments to come:
+ *
+ * - **TINY** A minimal, but usable language on the order of
+ *   *Tiny BASIC* or *Tiny C*. It won’t be very practical,
+ *   but it will have enough power to let you write and run real programs
+ *   that do something worthwhile.
+ *
+ * - **KISS** The language I’m building for my own use.
+ *   KISS is intended to be a systems programming language.
+ *   It won’t have strong typing or fancy data structures,
+ *   but it will support most of the things to do with
+ *   a higher order language (HOL).
+ *
+ * 8.3 Why is it so simple?
+ * ------------------------
+ * Just to make sure you get the message here, let me state it flat out:
+ * > USING THE TECHNIQUES WE’VE USED HERE, IT IS POSSIBLE TO BUILD
+ * > A PRODUCTIONQUALITY, WORKING COMPILER WITHOUT ADDING A LOT OF
+ * > COMPLEXITY TO WHAT WE’VE ALREADY DONE.
+ *
+ * The areas that I think have led to complexity in the past:
+ *
+ * - Limited RAM forcing multiple passes
+ * - Batch processing
+ * - Large programs
+ * - Emphasis on efficiency
+ * - Limited instruction sets
+ * - Desire for generality
+ *
+ * 8.4 Conclusion
+ * ---------------
+ * So far, we’ve only looked at pieces of compilers,
+ * and while we have many of the makings of a complete language,
+ * we haven’t talked about how to put it all together.
+ * That will be the subject of our next two installments.
+ * Then we’ll press on into the new subjects listed at section 8.2.
+ */
+
+{
+    'No code in this chapter';
+}
+/**
  * Chapter 9 A Top View
- * Program kiss
+ * =====================
+ * **Program KISS**
  */
 
 define(['./1.2-cradle', 'io'], function (cradle, io) {
@@ -5809,26 +6236,36 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         declarations,                   // 9.5
         theStructureOfC;                // 9.6
 
-    // 9.1 Introduction
+    /**
+     * 9.1 Introduction
+     * -----------------
+     */
 
     /**
      * 9.2 The top level
-     * In program design language (PDL):
+     * -----------------
+     * **In program design language (PDL)**
+     * ```
      * begin
      *     solve the problem
      * end
+     * ```
      */
 
     /**
      * 9.3 The structure of Pascal
-     * In BNF:
+     * ----------------------------
+     * **In BNF**
+     * ```
      * <program> ::= <program-header> <block> '.'
      * <program-header> ::= PROGRAM <ident>
      * <block> ::= <declarations> | <statements>
-     *
+     * ```
      * this section:
+     * ```
      * <program> ::= <program-header> '.'
      * <program-header> ::= PROGRAM <ident>
+     * ```
      */
     theStructureOfPascal = cradle.extend({
 
@@ -5863,10 +6300,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 9.4 Fleshing it out
-     * In BNF:
+     * --------------------
+     * **In BNF**
+     * ```
      * <program> ::= <program-header> <block> '.'
      * <program-header> ::= PROGRAM <ident>
      * <block> ::= <declarations> | <statements>
+     * ```
      */
     fleshingItOut = theStructureOfPascal.extend({
 
@@ -5901,19 +6341,23 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 9.5 Declarations
-     * The BNF for Pascal declarations is:
+     * -----------------
+     * **The BNF for Pascal declarations**
+     * ```
      * <declarations> ::= ( <label list>    |
      *                      <constant list> |
      *                      <type list>     |
      *                      <variable list> |
      *                      <procedure>     |
      *                      <function>        )*
-     *
-     * Statement part in BNF:
+     * ```
+     * **Statement part in BNF**
+     * ```
      * <statements> ::= <compound statement>
      * <compound statement> ::= BEGIN <statement> (';' <statement>)* END
-     *
-     * Procedure statements:
+     * ```
+     * **Procedure statements**
+     * ```
      * <statement> ::= <simple statement> | <structured statement>
      * <simple statement> ::= <assignment> | <procedure call> | null
      * <structured statement> ::= <compound statement> |
@@ -5923,6 +6367,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *                            <repeat statement>   |
      *                            <for statement>      |
      *                            <with statement>
+     * ```
      */
     declarations = fleshingItOut.extend({
 
@@ -5995,29 +6440,35 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * 9.6 The structure of C
+     * -----------------------
      * At the top level, everything in C is a static declaration,
      * either of data or of a function.
+     * ```
      * <program> ::= ( <global declaration> )*
      * <global declaration> ::= <data declaration> |
      *                          <function>
-     *
-     * In Small C:
+     * ```
+     * **In Small C**
+     * ```
      * <global declaration> ::= '#' <preprocessor command>  |
      *                          'int' <data list>           |
      *                          'char' <data list>          |
      *                          '<ident> <function body>
-     *
-     * BNF for full C:
+     * ```
+     * **BNF for full C**
+     * ```
      * <program> ::= ( <top-level decl> )*
      * <top-level decl> ::= <function def> | <data decl>
      * <data decl> ::= [<class>] <type> <decl-list>
      * <function def> ::= [<class>] [<type>] <function decl>
-     *
-     * ambiguous for <data decl> and <function def> above,
+     * ```
+     * ambiguous for `<data decl>` and `<function def>` above,
      * we can transform it:
+     * ```
      * <top-level decl> ::= [<class>] <decl>
      * <decl> ::= <type> <typed decl> | <function decl>
      * <typed decl> ::= <data list> | <function decl>
+     * ```
      */
     theStructureOfC = cradle.extend({
 
@@ -6190,13 +6641,38 @@ define([
     };
 
 });
-/* Base object for prototypal inheritance and utilities */
+/**
+ * Prologue
+ * ========
+ * This is a JavaScript port of **Let's Build a Compiler**,
+ * *a non-technical introduction to compiler construction*,
+ * written from 1988 to 1995 by Jack W. Crenshaw.
+ * Please refer to the [original context][original]
+ * or alternatively a [LaTeX typeset PDF version][latex].
+ *
+ * [original]: http://compilers.iecc.com/crenshaw/
+ * [latex]: http://www.stack.nl/~marcov/compiler.pdf
+ *
+ * The JavaScript code was ported section by section based on
+ * *prototypal inheritance*.
+ * It aims to be as similar to the [original Pascal version][original]
+ * as possible.
+ * A tiny console is provided with necessary I/O routines and
+ * for user interactions.
+ *
+ * The base object
+ * ------------
+ * The base `object` defined here provides the `object.extend` method
+ * for *prototypal inheritance* and some other helper functions.
+ *
+ */
+
 define(['jquery'], function ($) {
     'use strict';
 
     return {
 
-        // Extend method for prototyal inheritance
+        // Extend method used for prototyal inheritance
         extend: function (obj) {
             var newObj = Object.create(this),
                 prop;
@@ -6209,12 +6685,16 @@ define(['jquery'], function ($) {
             return newObj;
         },
 
-        // get the binded main function
+        /**
+         * Helper functions
+         */
+
+        // get the bound main function
         boundMain: function (obj) {
             return obj.main.bind(obj);
         },
 
-        // Helper, covert an array to an object to work as enum
+        // Convert an array to an object to work as enum
         // e.g. enumerate([a, b]) => { a: 0, b: 1 }
         enumerate: function (arr, start) {
             var result = Object.create(null);
@@ -6230,6 +6710,7 @@ define(['jquery'], function ($) {
 });
 /**
  * Chapter 11 Lexical Scan Revisited
+ * ==================================
  */
 
 define(['./1.2-cradle', 'io'], function (cradle, io) {
@@ -6239,13 +6720,25 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         theSolution,                // 11.4.1
         singleCharacterOperators;   // 11.4.2
 
-    // 11.1 Introduction
+    /**
+     * 11.1 Introduction
+     * ------------------
+     */
 
-    // 11.2 background
+    /**
+     * 11.2 background
+     * ----------------
+     */
 
-    // 11.3 The problem
+    /**
+     * 11.3 The problem
+     * -----------------
+     */
 
-    // 11.4 The solution
+    /**
+     * 11.4 The solution
+     * ------------------
+     */
     theSolution = cradle.extend({
 
         // Recognize an alphanumeric character
@@ -6329,8 +6822,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * 11.4.2 Single-character operators
-     * e.g. (a+b)*(c+d), problem of op: ')*(' is fixed.
+     * ### 11.4.2 Single-character operators ###
+     * e.g. `(a+b)*(c+d)`, problem of op: `)*(` is fixed.
      */
     singleCharacterOperators = theSolution.extend({
 
@@ -6357,10 +6850,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     });
 
-    // 11.5 Fixing up the compiler
+    /**
+     * 11.5 Fixing up the compiler
+     * ----------------------------
+     */
 
-    // 11.6 Conclusion
-    // in file: 11.6-tiny-1.1.js
+    /**
+     * 11.6 Conclusion
+     * ----------------
+     * in file: `11.6-tiny-1.1.js`
+     */
 
 
     // return main functions for executions
