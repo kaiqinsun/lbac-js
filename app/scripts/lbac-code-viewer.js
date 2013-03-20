@@ -156,18 +156,18 @@ define(['jquery', 'prettify', 'marked'], function ($, prettify, marked) {
         $doc: null,
         $code: null,
 
-        init: function (data) {
+        init: function (settings) {
             var that = this,
-                title = data.title,
+                title = settings.title,
                 path = location.pathname.replace('index.html', '');
 
-            this.$code = $('#' + data.codeElement);
-            this.$doc = $('#' + data.docElement);
+            this.$code = $('#' + settings.codeElement);
+            this.$doc = $('#' + settings.docElement);
 
             $.ajax({
                 url: path + 'ajax/lbac.src.txt',
-                success: function (data) {
-                    that.codeLines = data.split('\n');
+                success: function (settings) {
+                    that.codeLines = settings.split('\n');
                     that.$code.show();
                     that.update(title);
                 }

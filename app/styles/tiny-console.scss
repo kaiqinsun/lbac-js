@@ -18,8 +18,8 @@ $consolePromptColor: darken($consoleBorder, 55%);
 .tiny-console {
     background-color: $consoleBackground;
     height: 500px;
-    border: 2px solid $consoleBorder;
-    padding: 15px 20px;
+    border: 1px solid $consoleBorder;
+    padding: 10px;
     border-radius: 5px;
     box-shadow: 0px 0px 9px $consoleBorder;
     overflow: auto;

@@ -284,7 +284,8 @@
                 <div id="ch10" class="accordion-body collapse">
                 <ul class="accordion-inner nav nav-tabs nav-stacked">
                     <li class="disabled"><a href="#">10.1 Introduction</a></li>
-                    <li><a href="#">10.2 Getting started</a></li>
+                    <li class="disabled"><a href="#">10.2 Getting started</a></li>
+                    <li><a href="#">10.2.1 First step</a></li>
                     <li><a href="#">10.2.2 The main program</a></li>
                     <li><a href="#">10.3 Declarations</a></li>
                     <li><a href="#">10.4 Declarations and symbols</a></li>
@@ -319,7 +320,7 @@
                 <div id="ch11" class="accordion-body collapse">
                 <ul class="accordion-inner nav nav-tabs nav-stacked">
                     <li class="disabled"><a href="#">11.1 Introduction</a></li>
-                    <li class="disabled"><a href="#">11.2 background</a></li>
+                    <li class="disabled"><a href="#">11.2 Background</a></li>
                     <li class="disabled"><a href="#">11.3 The problem</a></li>
                     <li><a href="#">11.4 The solution</a></li>
                     <li><a href="#">11.4.2 Single-character operators</a></li>
@@ -420,9 +421,17 @@
 
         <article class="span8">
             <div id="doc"></div>
-            <div id="console"></div>
+            <div id="editor-area">
+                <textarea id="editor" class="input-block-level" placeholder="Please enter your code, and hit Run on the right to execute..."></textarea>
+                <button id="run-button" class="btn">Run</button>
+            </div>
+            <div id="console-area">
+                <div id="console"></div>
+                <button id="show-editor-button" class="btn">Show Editor</button>
+            </div>
             <pre id="code" class="prettyprint" style="display: none;"></pre>
         </article>
+        </div>
 
     </div><!--/row-->
 

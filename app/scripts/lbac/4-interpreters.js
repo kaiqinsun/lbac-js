@@ -65,7 +65,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ### 4.2.2 Binary expressions ###
      * **In BNF notation**
      * ```
-     * <expression> ::= <number> |<addop> <number>|*
+     * <expression> ::= <number> [<addop> <number>]*
      * ```
      */
     binaryExpressions = singleDigits.extend({
@@ -104,8 +104,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ### 4.2.3 General expressions ###
      * **In BNF notation**
      * ```
-     * <expression> ::= <term> |<addop> <term>|*
-     * <term> ::= <number> |<mulop> <number>|*
+     * <expression> ::= <term> [<addop> <term>]*
+     * <term> ::= <number> [<mulop> <number>]*
      * ```
      */
     generalExpressions = binaryExpressions.extend({
@@ -181,7 +181,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * **In BNF notation**
      * ```
      * <factor> ::= <number> | (<expression>)
-     * <term> ::= <factor> |<mulop> <factor>|*
+     * <term> ::= <factor> [<mulop> <factor>]*
      * ```
      */
     factor = multiDigitsNumber.extend({
@@ -362,18 +362,18 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         // <expression> ::= <number>
         singleDigits: boundMain(singleDigits),
 
-        // <expression> ::= <number> |<addop> <number>|*
+        // <expression> ::= <number> [<addop> <number>]*
         binaryExpressions: boundMain(binaryExpressions),
 
-        // <term> ::= <number> |<mulop> <number>|*
-        // <expression> ::= <term> |<addop> <term>|*
+        // <term> ::= <number> [<mulop> <number>]*
+        // <expression> ::= <term> [<addop> <term>]*
         generalExpressions: boundMain(generalExpressions),
 
         // Multi-digits number
         multiDigitsNumber: boundMain(multiDigitsNumber),
 
         // <factor> ::= <number> | (<expression>)
-        // <term> ::= <factor> |<mulop> <factor>|*
+        // <term> ::= <factor> [<mulop> <factor>]*
         factor: boundMain(factor),
 
         // <factor> ::= <number> | (<expression>) | <variable>

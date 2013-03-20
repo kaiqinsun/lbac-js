@@ -19,7 +19,7 @@ define(['./1.2-cradle'], function (cradle) {
      * 2.1 Getting started
      * -------------------
      * The purpose of this chapter is for us to learn how to
-     * parse and translate mathematical expressions.
+     * *parse* and *translate* **mathematical expressions**.
      * An expression is the right-hand side of an equation, as in
      * ```
      * x = 2 * y + 3 / (4 * z)
@@ -114,7 +114,7 @@ define(['./1.2-cradle'], function (cradle) {
      *
      * **In BNF**
      * ```
-     * <expression> ::= <term> |<addop> <term>|*
+     * <expression> ::= <term> [<addop> <term>]*
      * ```
      */
     generalExpressions = binaryExpressions.extend({
@@ -195,7 +195,7 @@ define(['./1.2-cradle'], function (cradle) {
      *
      * **In BNF**
      * ```
-     * <term> ::= <factor> |<mulop> <factor>|*
+     * <term> ::= <factor> [<mulop> <factor>]*
      * <factor> ::= <number>
      * ```
      */
@@ -246,7 +246,7 @@ define(['./1.2-cradle'], function (cradle) {
      * ---------------
      * Parentheses are a mechanism to force a desired operator precedence.
      * ```
-     * 2 * (3 + 4);
+     * 2 * (3 + 4)
      * ```
      * They give us a mechanism for defining expressions of
      * any degree of complexity.
@@ -335,14 +335,14 @@ define(['./1.2-cradle'], function (cradle) {
         // <expression> ::= <term> <addop> <term>
         binaryExpressions: boundMain(binaryExpressions),
 
-        // <expression> ::= <term> |<addop> <term>|*
+        // <expression> ::= <term> [<addop> <term>]*
         generalExpressions: boundMain(generalExpressions),
 
         // Use the stack instead of registers to serve for complexity
         usingTheStack: boundMain(usingTheStack),
 
         // <factor> ::= <number>
-        // <term> ::= <factor> |<mulop> <factor>|*
+        // <term> ::= <factor> [<mulop> <factor>]*
         multiplicationAndDivision: boundMain(multiplicationAndDivision),
 
         // <factor> ::= <number> | (<expression>)
@@ -361,7 +361,7 @@ define(['./1.2-cradle'], function (cradle) {
      * -------------------------------------
      * ```
      * <expression> ::= [<unary op>] <term> [<addop> <term>]*
-     * <term> ::= <factor> |<mulop> <factor>|*
+     * <term> ::= <factor> [<mulop> <factor>]*
      * <factor> ::= <number> | (<expression>)
      * ```
      */

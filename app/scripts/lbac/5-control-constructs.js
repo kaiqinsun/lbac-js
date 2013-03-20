@@ -36,6 +36,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <program> ::= <statement>
      * <statement> ::= <other>
      * ```
+     * code example: `a`
      */
     oneStatement = cradle.extend({
 
@@ -60,6 +61,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <program> ::= <block> END
      * <block> ::= [<statement>]*
      * ```
+     * code example: `abc`
      */
     moreThanOneStatement = oneStatement.extend({
 
@@ -92,7 +94,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * --------------------
      * Prepare two routines
      *
-     * - `newLable` to generate label `Lnn',
+     * - `newLable` to generate label **Lnn**,
      *    where nn is a label number starting from zero.
      * - `postLabel` to output the labels at the proper place.
      */
@@ -146,10 +148,38 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ENDIF          { postLabel(L) }
      * -------------------------------------------
      * ```
-     * For the implementation, as usual,
+     * On the **68000** the condition flags are set
+     * whenever any data is moved or calculated.
+     * If the data is a 0000 (corresponding to a false condition),
+     * the zero flag will be set.
+     * The code for **branch on zero** is `BEQ`.
+     * So for our purposes here,
+     * ```
+     * BEQ <=> Branch if false
+     * BNE <=> Branch if true
+     * ```
+     * It’s the nature of the beast that most of the branches we see
+     * will be `BEQ`’s... we’ll be branching *AROUND* the code
+     * that’s supposed to be executed when the condition is true.
+     *
+     * For the **implementation**, as usual,
      * we will be using our single-character approach,
      * with the character `i` for `IF`, and `e` for `ENDIF`
      * (as well as `END` ... that dual nature causes no confusion).
+     *
+     * code example: `aibcedhe`,
+     *
+     * which stands for
+     * ```
+     * <block A>                a
+     * IF <condition>           i
+     *     <block B>            b
+     *     <block C>            c
+     * ENDIF                    e
+     * <block D>                d
+     * <block H>                h
+     * END                      e
+     * ```
      */
     theIfStatement = someGroundwork.extend({
 
@@ -218,6 +248,19 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *   ENDIF          { postLabel(L2); }
      *   -------------------------------------------
      * ```
+     * Try something like `aiblcede`
+     *
+     * which stands for
+     * ```
+     * <block A>            a
+     * IF <condition>       i
+     *     <block B>        b
+     * ELSE                 l
+     *     <block C>        c
+     * ENDIF                e
+     * <block D>            d
+     * END                  e
+     * ```
      */
     addTheElseClause = theIfStatement.extend({
 
@@ -284,6 +327,63 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ENDWHILE       { emit(BRA L1);
      *                  PostLabel(L2) }
      * ```
+     * OK, try the **new program**, such as `awbece` which stands for
+     * ```
+     * <block A>                a
+     * WHILE <condition>        w
+     *     <block B>            b
+     * ENDWHILE                 e
+     * <block C>                c
+     * END                      e
+     * ```
+     * Note that this time, the <condition> code is *INSIDE* the upper label,
+     * which is just where we wanted it.
+     *
+     * Try some **nested loops**, for example `awbwcedefe` which stands for
+     * ```
+     * <block A>                a
+     * WHILE <condition>        w
+     *     <block B>            b
+     *     WHILE <condition>    w
+     *         <block C>        c
+     *     ENDWHILE             e
+     *     <block D>            d
+     * ENDWHILE                 e
+     * <block F>                f
+     * END                      e
+     * ```
+     * Try some **loops within `IF`’s**, for example`aibwcedlfege`
+     * which stands for
+     * ```
+     * <block A>                a
+     * IF <condition>           i
+     *     <block B>            b
+     *     WHILE <condition>    w
+     *         <block C>        c
+     *     ENDWHILE             e
+     *     <block D>            d
+     * ELSE                     l
+     *     <block F>            f
+     * ENDIF                    e
+     * <block G>                g
+     * END                      e
+     * ```
+     * and some **`IF`’s within loops**, for example `awbicedefe`
+     * which stands for
+     * ```
+     * <block A>                a
+     * WHILE <condition>        w
+     *     <block B>            b
+     *     IF <condition>       i
+     *         <block C>        c
+     *     ENDIF                e
+     *     <block D>            d
+     * ENDWHILE                 e
+     * <block F>                f
+     * END                      e
+     * ```
+     * If you get a bit confused as to what you should type,
+     * don’t be discouraged: you write bugs in other languages, too, don’t you?
      */
     theWhileStatement = addTheElseClause.extend({
 
@@ -341,6 +441,17 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *                  postLabel(L) }
      * <block>
      * ENDLOOP        { emit(BRA L) }
+     * ```
+     * Code example `apbece`
+     *
+     * which stands for
+     * ```
+     * <block A>                a
+     * LOOP                     p
+     *     <block B>            b
+     * ENDLOOP                  e
+     * <block C>                c
+     * END                      e
      * ```
      */
     theLoopStatement = theWhileStatement.extend({
@@ -400,6 +511,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <block>
      * UNTIL
      * <condition>    { emit(BEQ L) }
+     * ```
+     * code example `arbuce`
+     * which stands for
+     * ```
+     * <block A>                a
+     * REPEAT                   r
+     *     <block B>            b
+     * UNTIL                    u
+     * <block C>                c
+     * END                      e
      * ```
      */
     theRepeatUntilStatement = theLoopStatement.extend({
@@ -476,6 +597,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *      BRA L1                loop for next pass
      * L2:
      *      ADDQ #2, SP           clean up the stack
+     * ```
+     * code example `afi=bece`
+     * which stands for
+     * ```
+     * <block A>                    a
+     * FOR I = <expr1> TO <expr2>   fi=
+     *     <block B>                b
+     * ENDFOR                       e
+     * <block C>                    c
+     * END                          e
      * ```
      */
     theForLoop = theRepeatUntilStatement.extend({
@@ -575,6 +706,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ENDDO          { emit(MOVE (SP)+,D0);
      *                  emit(DBRA D0,L) }
      * ```
+     * code example `adbece`
+     * which stands for
+     * ```
+     * <block A>                a
+     * DO                       d
+     *     <block B>            b
+     * ENDDO                    e
+     * <block C>                c
+     * END                      e
+     * ```
      */
     theDoStatement = theForLoop.extend({
 
@@ -588,6 +729,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.postLabel(label);
             this.emitLn('MOVE D0, -(SP)');
             this.block();
+            this.match('e');
             this.emitLn('MOVE (SP)+, D0');
             this.emitLn('DBRA D0, ' + label);
         },
@@ -629,6 +771,20 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * **In BNF**
      * ```
      * <break> ::= BREAK
+     * ```
+     * code example `apcibegehe`
+     * which stands for
+     * ```
+     * <block A>                a
+     * LOOP                     p
+     *     <block C>            c
+     *     IF <condition>       i
+     *         BREAK            b
+     *     ENDIF                e
+     *     <block G>            g
+     * ENDLOOP                  e
+     * <block H>                h
+     * END                      e
      * ```
      */
     theBreakStatement = theDoStatement.extend({

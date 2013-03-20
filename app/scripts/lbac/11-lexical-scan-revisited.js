@@ -16,7 +16,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      */
 
     /**
-     * 11.2 background
+     * 11.2 Background
      * ----------------
      */
 

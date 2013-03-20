@@ -30,7 +30,9 @@ require([
         var consoleId = 'console',
             docId = 'doc',
             codeId = 'code',
-            $c = $('#' + consoleId),
+            editorId = 'editor',
+            runButtonId = 'run-button',
+            $ca = $('#console-area'),
             $d = $('#' + docId);
 
         // Click event handler on accordion menu
@@ -39,7 +41,7 @@ require([
             // Chapter toggle button
             $('#accordion2 .accordion-toggle').click(function () {
                 var chapterTitle = $(this).text().trim();
-                $c.slideUp();   // hide console
+                $ca.slideUp();   // hide console
                 lbacCodeViewer.update(chapterTitle);
 
                 // save the menu state with cookie
@@ -55,7 +57,7 @@ require([
                     success;
 
                 evt.preventDefault();
-                $c.slideDown(); // show console
+                $ca.slideDown(); // show console
                 success = lbacConsole.update(chapterTitle, sectionTitle);
 
                 if (success) {
@@ -95,21 +97,37 @@ require([
                 }
 
                 // Hide console if no section selected
-                $c.hide();
+                $ca.hide();
                 return chapterTitle;
             }
 
             // Default
             $('#ch0').collapse('show');
-            $c.hide();
+            $ca.hide();
             return 'Prologue';
+        }
+
+        function attachEditorButton() {
+            var $btn = $('#show-editor-button'),
+                $e = $('#editor-area');
+
+            $btn.fadeIn('slow');
+            $btn.click(function () {
+                var $this = $(this);
+                if ($this.html() === 'Show Editor') {
+                    $e.slideDown();
+                    $this.html('Hide Editor');
+                } else {
+                    $e.slideUp();
+                    $this.html('Show Editor');
+                }
+            });
         }
 
         function init() {
             var title;
 
-            lbacConsole.init(consoleId);
-            attachMenuClickHandler();
+            lbacConsole.init(consoleId, editorId, runButtonId);
             title = restorePageState();
 
             lbacCodeViewer.init({
@@ -117,6 +135,11 @@ require([
                 codeElement: codeId,
                 title: title
             });
+            setTimeout(function () {
+                $ca.slideDown();
+            }, 1000);
+            attachMenuClickHandler();
+            attachEditorButton();
         }
 
         init();

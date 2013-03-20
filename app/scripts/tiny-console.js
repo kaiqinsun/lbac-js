@@ -314,16 +314,19 @@
                 prompt: '>>>'
             }, options);
 
-            function addEditor($console) {
-                var $runButton = $('<button/>').text('Run'),
-                    $editor = $('<textarea/>');
+            // experimental
+            function addEditor(editorElement, runButtonElement, $console) {
+                var $runButton = $('#' + runButtonElement),
+                    $editor = $('#' + editorElement);
 
-                $console.after($editor, $runButton);
+                if (!$editor || !$runButton) {
+                    return;
+                }
 
                 $runButton.click(function () {
                     var data =  $console.data('tinyConsole');
-                    data.$input.text(' \n' + $editor.val());
-                    data.stream.update(' ' + $editor.val());
+                    // data.$input.text(' ' + $editor.val());
+                    data.stream.update(' ' + $editor.val() + '\n');
                     data.history.update();
                     try {
                         data.execute();
@@ -440,6 +443,7 @@
                                     this.content.push(streamWithoutLF);
                                 }
                                 this.position = this.content.length;
+                                consoleData.target.scrollTop(consoleData.target.prop('scrollHeight'));
                             },
 
                             scrollUp: function () {
@@ -449,6 +453,7 @@
                                 this.position -= 1;
                                 $input.text(this.content[this.position]);
                                 setCaretToEnd($input);
+                                consoleData.target.scrollTop(consoleData.target.prop('scrollHeight'));
                             },
 
                             scrollDown: function () {
@@ -458,6 +463,7 @@
                                 this.position += 1;
                                 $input.text(this.content[this.position]);
                                 setCaretToEnd($input);
+                                consoleData.target.scrollTop(consoleData.target.prop('scrollHeight'));
                             }
                         }
                     };
@@ -477,7 +483,7 @@
                     $this.data('tinyConsole', consoleData);
 
                     // exprimental
-                    // addEditor($this);
+                    addEditor(settings.editorElement, settings.runButtonElement, $this);
 
                 }
             });

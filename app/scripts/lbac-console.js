@@ -38,10 +38,12 @@ define([
     return {
 
         // Initialize tiny console
-        init: function initConsole(consoleId) {
+        init: function initConsole(consoleId, editorId, runButtonId) {
             $c = $('#' + consoleId);
 
             $c.tinyConsole({
+                editorElement: editorId,
+                runButtonElement: runButtonId,
                 // width: '80%',
                 height: 350,
                 // prompt: 'hi there>',

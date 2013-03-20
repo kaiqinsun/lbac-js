@@ -1,7 +1,7 @@
 $lightGreen: #E9FBF2;
 $darkGreen: darken($lightGreen, 80%);
 
-$heroUnitBackground: $lightGreen; 
+$heroUnitBackground: $lightGreen;
 $heroUnitHeadingColor: $darkGreen;
 $heroUnitLeadColor: $darkGreen;
 $iconSpritePath: "../images/glyphicons-halflings.png";
@@ -51,7 +51,7 @@ $iconWhiteSpritePath: "../images/glyphicons-halflings-white.png";
 
 #doc {
     margin-bottom: 20px;
-    
+
     h1, h2, h3 {
         margin-top: 0;
         color: #000;
@@ -72,8 +72,37 @@ $iconWhiteSpritePath: "../images/glyphicons-halflings-white.png";
     }
 }
 
-#console {
+#show-editor {
+    display: none;
+}
+
+#editor-area {
+    display: none;
+    position: relative;
+    #editor {
+        resize: vertical;
+        height: 150px;
+        font-family: $monoFontFamily;
+    }
+    #run-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+}
+
+#console-area {
+    display: none;
+    position: relative;
     margin-bottom: 20px;
+    #show-editor-button {
+        position: absolute;
+        top: 1px;
+        right: 1px;
+    }
+    #console {
+        resize: vertical;
+    }
 }
 
 .footer {

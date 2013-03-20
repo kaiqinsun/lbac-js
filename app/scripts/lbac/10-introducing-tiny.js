@@ -7,7 +7,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     'use strict';
 
     var boundMain = cradle.boundMain,
-        gettingStarted,                 // 10.2.1
+        firstStep,                      // 10.2.1
         theMainProgram,                 // 10.2.2
         declarations,                   // 10.3
         declarationsAndSymbols,         // 10.4.1
@@ -40,13 +40,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      */
 
     /**
-     * ### 10.2.1 ###
+     * ### 10.2.1 First step ###
      * ```
      * <program> ::= PROGRAM .
      * ```
-     * only accepted code: `p.`
+     * At this point TINY will only accept code: `p.`, a null program.
      */
-    gettingStarted = cradle.extend({
+    firstStep = cradle.extend({
 
         // Parse and translate a program
         prog: function () {
@@ -91,12 +91,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * ### 10.2.2 The main program ###
+     * The next step is to process the code for the main program.
+     * The Pascal BEGIN-block is chosen
      * ```
      * <program> ::= PROGRAM BEGIN END '.'
      * ```
-     * only accepted code: `pbe.`
+     * and the TINY now only accept code: `pbe.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM
+     * BEGIN
+     * END.
+     * ```
      */
-    theMainProgram = gettingStarted.extend({
+    theMainProgram = firstStep.extend({
 
         // Parse and translate a program
         prog: function () {
@@ -121,10 +130,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ------------------
      * ```
      * <program> ::= PROGRAM <top-level decls> BEGIN END '.'
-     * <top-level decls> ::= ( <data declaration> )*
+     * <top-level decls> ::= (<data declaration>)*
      * <data declaration> ::= VAR <var-list>
      * ```
-     * code example: `pbe.` or `pvabe.`
+     * code example: `pbe.` or `pvxvybe.`
+     *
+     * which, the later, stands for
+     * ```
+     * PROGRAM
+     * VAR X
+     * VAR Y
+     * BEGIN
+     * END.
+     * ```
+     * At this point, Decl is just a stub.
+     * It generates no code, and it doesn’t process a list.
      */
     declarations = theMainProgram.extend({
 
@@ -161,11 +181,26 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 10.4 Declarations and symbols
      * ------------------------------
+     * A real compiler would issue assembler directives
+     * to allocate storage for the variables.
+     * It’s about time we actually produced some code.
+     *
+     * The **BNF** is the same as the previous section.
      * ```
      * <data declaration> ::= VAR <var-list>
      * <var-list> ::= <ident>
      * ```
-     * code example: `pvxvyvzbe.`
+     * try the code example: `pvxvyvzbe.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM
+     * VAR X
+     * VAR Y
+     * VAR Y
+     * BEGIN
+     * END.
+     * ```
      */
     declarationsAndSymbols = declarations.extend({
 
@@ -184,10 +219,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * ### 10.4.2 Variable list ###
+     * We haven’t really parsed the correct syntax for a data declaration,
+     * since it involves a variable list.
+     * Our version only permits a single variable. That’s easy to fix
      * ```
      * <var-list> ::= <indent> (, <ident>)*
      * ```
      * code example: `pvx,y,zbe.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM
+     * VAR X, Y, Z
+     * BEGIN
+     * END.
+     * ```
      */
     variableList = declarationsAndSymbols.extend({
 
@@ -208,10 +254,19 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ------------------
      * ```
      * <var-list> ::= <var> (, <var>)*
-     * <var> ::= <ident> [ = <integer> ]
+     * <var> ::= <ident> [= <integer>]
      * ```
      * ### 10.5.1 ###
-     * code example: `pvx=5`, `y,z=3be.`
+     * code example: `pva=1vx=5,y,z=3be.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM
+     * VAR A = 1
+     * VAR X = 5, Y, Z = 3
+     * BEGIN
+     * END.
+     * ```
      */
     initializers = variableList.extend({
 
@@ -230,7 +285,19 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * ### 10.5.2 Multi-digit integer ###
-     * code example: `pvx=15,y,z=-23be.`
+     * Use multi-digit version of `getNum` and
+     * now we should be able to initialize variables
+     * with negative and/or multi-digit values.
+     *
+     * Code example: `pvx=15,y,z=-23be.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM
+     * VAR X = 15, Y, Z = -23
+     * BEGIN
+     * END.
+     * ```
      */
     multiDigitInteger = initializers.extend({
 
@@ -308,11 +375,29 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 10.7 Executable statements
      * ---------------------------
+     * The BNF definition given earlier for the main program included
+     * a statement block, which we have so far ignored
      * ```
      * <main> ::= BEGIN <block> END
+     * ```
+     * For now, we can just consider a block to be
+     * a series of assignment statements
+     * ```
      * <block> ::= (<assignment>)*
      * ```
      * ### 10.7.1 ###
+     * Null assignment
+     *
+     * code example `pvxbxe.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM          p
+     * VAR X            vx
+     * BEGIN            b
+     *     X            x
+     * END.             e.
+     * ```
      */
     executableStatements = theSymbolTable.extend({
 
@@ -415,12 +500,24 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ### 10.7.3 Assignment statement ###
      * ```
      * <assignment> ::= <ident> = <expression>
-     * <expression> ::= <first term> ( <addop> <term> )*
+     * <expression> ::= <first term> (<addop> <term>)*
      * <first term> ::= <first factor> <rest>
      * <term> ::= <factor> <rest>
-     * <rest> ::= ( <mulop> <factor> )*
-     * <first factor> ::= [ <addop> ] <factor>
-     * <factor> ::= <var> | <number> | ( <expression> )
+     * <rest> ::= (<mulop> <factor>)*
+     * <first factor> ::= [<addop>] <factor>
+     * <factor> ::= <var> | <number> | (<expression>)
+     * ```
+     *
+     * Code example `pvx,y=-1bx=-22*(3-8)y=x+15e.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM
+     * VAR X, Y = -1
+     * BEGIN
+     *     X = -22 * (3 - 8)
+     *     Y = X + 15
+     * END.
      * ```
      */
     assignmentStatement = codeGenerationRoutines.extend({
@@ -620,10 +717,10 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ### 10.8.2 Boolean expressions ###
      * **BNF for the boolean expressions**
      * ```
-     * <bool-expr> ::= <bool-term> ( <orop> <bool-term> )*
-     * <bool-term> ::= <not-factor> ( <andop> <not-factor> )*
-     * <not-factor> ::= [ '!' ] <relation>
-     * <relation> ::= <expression> [ <relop> <expression> ]
+     * <bool-expr>  ::= <bool-term> (<orop> <bool-term>)*
+     * <bool-term>  ::= <not-factor> (<andop> <not-factor>)*
+     * <not-factor> ::= ['!'] <relation>
+     * <relation>   ::= <expression> [<relop> <expression>]
      * ```
      * code example: `pvx,y,zbx=z>ye.`
      *
@@ -632,7 +729,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * PROGRAM
      * VAR X, Y, Z
      * BEGIN
-     * X = Z > Y
+     *     X = Z > Y
      * END.
      * ```
      */
@@ -786,7 +883,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <if> ::= IF <bool-expression> <block> [ ELSE <block> ] ENDIF
      * <while> ::= WHILE <bool-expression> <block> ENDWHILE
      * ```
-     * So far: **TINY version 0.1**
+     * So far, we have **TINY version 0.1**
+     *
+     * Code example `pvc=1,sbwc<11s=s+cc=c+1ee.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM                  p
+     * VAR C = 1, S             vc=1,s
+     * BEGIN                    b
+     *     WHILE C < 11         wc<11
+     *         S = S + C        s=s+c
+     *         C = C + 1        c=c+1
+     *     ENDWHILE             e
+     * END.                     e.
+     * ```
      */
     controlStructures = booleanExpressions.extend({
 
@@ -1285,7 +1396,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     return {
 
         // 10.2.1
-        gettingStarted: boundMain(gettingStarted),
+        firstStep: boundMain(firstStep),
         // 10.2.2
         theMainProgram: boundMain(theMainProgram),
         // 10.3
