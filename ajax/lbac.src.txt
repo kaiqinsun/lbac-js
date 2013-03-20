@@ -133,7 +133,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     'use strict';
 
     var boundMain = cradle.boundMain,
-        gettingStarted,                 // 10.2.1
+        firstStep,                      // 10.2.1
         theMainProgram,                 // 10.2.2
         declarations,                   // 10.3
         declarationsAndSymbols,         // 10.4.1
@@ -166,13 +166,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      */
 
     /**
-     * ### 10.2.1 ###
+     * ### 10.2.1 First step ###
      * ```
      * <program> ::= PROGRAM .
      * ```
-     * only accepted code: `p.`
+     * At this point TINY will only accept code: `p.`, a null program.
      */
-    gettingStarted = cradle.extend({
+    firstStep = cradle.extend({
 
         // Parse and translate a program
         prog: function () {
@@ -217,12 +217,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * ### 10.2.2 The main program ###
+     * The next step is to process the code for the main program.
+     * The Pascal BEGIN-block is chosen
      * ```
      * <program> ::= PROGRAM BEGIN END '.'
      * ```
-     * only accepted code: `pbe.`
+     * and the TINY now only accept code: `pbe.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM
+     * BEGIN
+     * END.
+     * ```
      */
-    theMainProgram = gettingStarted.extend({
+    theMainProgram = firstStep.extend({
 
         // Parse and translate a program
         prog: function () {
@@ -247,10 +256,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ------------------
      * ```
      * <program> ::= PROGRAM <top-level decls> BEGIN END '.'
-     * <top-level decls> ::= ( <data declaration> )*
+     * <top-level decls> ::= (<data declaration>)*
      * <data declaration> ::= VAR <var-list>
      * ```
-     * code example: `pbe.` or `pvabe.`
+     * code example: `pbe.` or `pvxvybe.`
+     *
+     * which, the later, stands for
+     * ```
+     * PROGRAM
+     * VAR X
+     * VAR Y
+     * BEGIN
+     * END.
+     * ```
+     * At this point, Decl is just a stub.
+     * It generates no code, and it doesn’t process a list.
      */
     declarations = theMainProgram.extend({
 
@@ -287,11 +307,26 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 10.4 Declarations and symbols
      * ------------------------------
+     * A real compiler would issue assembler directives
+     * to allocate storage for the variables.
+     * It’s about time we actually produced some code.
+     *
+     * The **BNF** is the same as the previous section.
      * ```
      * <data declaration> ::= VAR <var-list>
      * <var-list> ::= <ident>
      * ```
-     * code example: `pvxvyvzbe.`
+     * try the code example: `pvxvyvzbe.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM
+     * VAR X
+     * VAR Y
+     * VAR Y
+     * BEGIN
+     * END.
+     * ```
      */
     declarationsAndSymbols = declarations.extend({
 
@@ -310,10 +345,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * ### 10.4.2 Variable list ###
+     * We haven’t really parsed the correct syntax for a data declaration,
+     * since it involves a variable list.
+     * Our version only permits a single variable. That’s easy to fix
      * ```
      * <var-list> ::= <indent> (, <ident>)*
      * ```
      * code example: `pvx,y,zbe.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM
+     * VAR X, Y, Z
+     * BEGIN
+     * END.
+     * ```
      */
     variableList = declarationsAndSymbols.extend({
 
@@ -334,10 +380,19 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ------------------
      * ```
      * <var-list> ::= <var> (, <var>)*
-     * <var> ::= <ident> [ = <integer> ]
+     * <var> ::= <ident> [= <integer>]
      * ```
      * ### 10.5.1 ###
-     * code example: `pvx=5`, `y,z=3be.`
+     * code example: `pva=1vx=5,y,z=3be.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM
+     * VAR A = 1
+     * VAR X = 5, Y, Z = 3
+     * BEGIN
+     * END.
+     * ```
      */
     initializers = variableList.extend({
 
@@ -356,7 +411,19 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * ### 10.5.2 Multi-digit integer ###
-     * code example: `pvx=15,y,z=-23be.`
+     * Use multi-digit version of `getNum` and
+     * now we should be able to initialize variables
+     * with negative and/or multi-digit values.
+     *
+     * Code example: `pvx=15,y,z=-23be.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM
+     * VAR X = 15, Y, Z = -23
+     * BEGIN
+     * END.
+     * ```
      */
     multiDigitInteger = initializers.extend({
 
@@ -434,11 +501,29 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 10.7 Executable statements
      * ---------------------------
+     * The BNF definition given earlier for the main program included
+     * a statement block, which we have so far ignored
      * ```
      * <main> ::= BEGIN <block> END
+     * ```
+     * For now, we can just consider a block to be
+     * a series of assignment statements
+     * ```
      * <block> ::= (<assignment>)*
      * ```
      * ### 10.7.1 ###
+     * Null assignment
+     *
+     * code example `pvxbxe.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM          p
+     * VAR X            vx
+     * BEGIN            b
+     *     X            x
+     * END.             e.
+     * ```
      */
     executableStatements = theSymbolTable.extend({
 
@@ -541,12 +626,24 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ### 10.7.3 Assignment statement ###
      * ```
      * <assignment> ::= <ident> = <expression>
-     * <expression> ::= <first term> ( <addop> <term> )*
+     * <expression> ::= <first term> (<addop> <term>)*
      * <first term> ::= <first factor> <rest>
      * <term> ::= <factor> <rest>
-     * <rest> ::= ( <mulop> <factor> )*
-     * <first factor> ::= [ <addop> ] <factor>
-     * <factor> ::= <var> | <number> | ( <expression> )
+     * <rest> ::= (<mulop> <factor>)*
+     * <first factor> ::= [<addop>] <factor>
+     * <factor> ::= <var> | <number> | (<expression>)
+     * ```
+     *
+     * Code example `pvx,y=-1bx=-22*(3-8)y=x+15e.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM
+     * VAR X, Y = -1
+     * BEGIN
+     *     X = -22 * (3 - 8)
+     *     Y = X + 15
+     * END.
      * ```
      */
     assignmentStatement = codeGenerationRoutines.extend({
@@ -746,10 +843,10 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ### 10.8.2 Boolean expressions ###
      * **BNF for the boolean expressions**
      * ```
-     * <bool-expr> ::= <bool-term> ( <orop> <bool-term> )*
-     * <bool-term> ::= <not-factor> ( <andop> <not-factor> )*
-     * <not-factor> ::= [ '!' ] <relation>
-     * <relation> ::= <expression> [ <relop> <expression> ]
+     * <bool-expr>  ::= <bool-term> (<orop> <bool-term>)*
+     * <bool-term>  ::= <not-factor> (<andop> <not-factor>)*
+     * <not-factor> ::= ['!'] <relation>
+     * <relation>   ::= <expression> [<relop> <expression>]
      * ```
      * code example: `pvx,y,zbx=z>ye.`
      *
@@ -758,7 +855,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * PROGRAM
      * VAR X, Y, Z
      * BEGIN
-     * X = Z > Y
+     *     X = Z > Y
      * END.
      * ```
      */
@@ -912,7 +1009,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <if> ::= IF <bool-expression> <block> [ ELSE <block> ] ENDIF
      * <while> ::= WHILE <bool-expression> <block> ENDWHILE
      * ```
-     * So far: **TINY version 0.1**
+     * So far, we have **TINY version 0.1**
+     *
+     * Code example `pvc=1,sbwc<11s=s+cc=c+1ee.`
+     *
+     * which stands for
+     * ```
+     * PROGRAM                  p
+     * VAR C = 1, S             vc=1,s
+     * BEGIN                    b
+     *     WHILE C < 11         wc<11
+     *         S = S + C        s=s+c
+     *         C = C + 1        c=c+1
+     *     ENDWHILE             e
+     * END.                     e.
+     * ```
      */
     controlStructures = booleanExpressions.extend({
 
@@ -1411,7 +1522,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     return {
 
         // 10.2.1
-        gettingStarted: boundMain(gettingStarted),
+        firstStep: boundMain(firstStep),
         // 10.2.2
         theMainProgram: boundMain(theMainProgram),
         // 10.3
@@ -2378,7 +2489,7 @@ define(['./1.2-cradle'], function (cradle) {
      * 2.1 Getting started
      * -------------------
      * The purpose of this chapter is for us to learn how to
-     * parse and translate mathematical expressions.
+     * *parse* and *translate* **mathematical expressions**.
      * An expression is the right-hand side of an equation, as in
      * ```
      * x = 2 * y + 3 / (4 * z)
@@ -2473,7 +2584,7 @@ define(['./1.2-cradle'], function (cradle) {
      *
      * **In BNF**
      * ```
-     * <expression> ::= <term> |<addop> <term>|*
+     * <expression> ::= <term> [<addop> <term>]*
      * ```
      */
     generalExpressions = binaryExpressions.extend({
@@ -2554,7 +2665,7 @@ define(['./1.2-cradle'], function (cradle) {
      *
      * **In BNF**
      * ```
-     * <term> ::= <factor> |<mulop> <factor>|*
+     * <term> ::= <factor> [<mulop> <factor>]*
      * <factor> ::= <number>
      * ```
      */
@@ -2605,7 +2716,7 @@ define(['./1.2-cradle'], function (cradle) {
      * ---------------
      * Parentheses are a mechanism to force a desired operator precedence.
      * ```
-     * 2 * (3 + 4);
+     * 2 * (3 + 4)
      * ```
      * They give us a mechanism for defining expressions of
      * any degree of complexity.
@@ -2694,14 +2805,14 @@ define(['./1.2-cradle'], function (cradle) {
         // <expression> ::= <term> <addop> <term>
         binaryExpressions: boundMain(binaryExpressions),
 
-        // <expression> ::= <term> |<addop> <term>|*
+        // <expression> ::= <term> [<addop> <term>]*
         generalExpressions: boundMain(generalExpressions),
 
         // Use the stack instead of registers to serve for complexity
         usingTheStack: boundMain(usingTheStack),
 
         // <factor> ::= <number>
-        // <term> ::= <factor> |<mulop> <factor>|*
+        // <term> ::= <factor> [<mulop> <factor>]*
         multiplicationAndDivision: boundMain(multiplicationAndDivision),
 
         // <factor> ::= <number> | (<expression>)
@@ -2720,7 +2831,7 @@ define(['./1.2-cradle'], function (cradle) {
      * -------------------------------------
      * ```
      * <expression> ::= [<unary op>] <term> [<addop> <term>]*
-     * <term> ::= <factor> |<mulop> <factor>|*
+     * <term> ::= <factor> [<mulop> <factor>]*
      * <factor> ::= <number> | (<expression>)
      * ```
      */
@@ -3088,7 +3199,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ### 4.2.2 Binary expressions ###
      * **In BNF notation**
      * ```
-     * <expression> ::= <number> |<addop> <number>|*
+     * <expression> ::= <number> [<addop> <number>]*
      * ```
      */
     binaryExpressions = singleDigits.extend({
@@ -3127,8 +3238,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ### 4.2.3 General expressions ###
      * **In BNF notation**
      * ```
-     * <expression> ::= <term> |<addop> <term>|*
-     * <term> ::= <number> |<mulop> <number>|*
+     * <expression> ::= <term> [<addop> <term>]*
+     * <term> ::= <number> [<mulop> <number>]*
      * ```
      */
     generalExpressions = binaryExpressions.extend({
@@ -3204,7 +3315,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * **In BNF notation**
      * ```
      * <factor> ::= <number> | (<expression>)
-     * <term> ::= <factor> |<mulop> <factor>|*
+     * <term> ::= <factor> [<mulop> <factor>]*
      * ```
      */
     factor = multiDigitsNumber.extend({
@@ -3385,18 +3496,18 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         // <expression> ::= <number>
         singleDigits: boundMain(singleDigits),
 
-        // <expression> ::= <number> |<addop> <number>|*
+        // <expression> ::= <number> [<addop> <number>]*
         binaryExpressions: boundMain(binaryExpressions),
 
-        // <term> ::= <number> |<mulop> <number>|*
-        // <expression> ::= <term> |<addop> <term>|*
+        // <term> ::= <number> [<mulop> <number>]*
+        // <expression> ::= <term> [<addop> <term>]*
         generalExpressions: boundMain(generalExpressions),
 
         // Multi-digits number
         multiDigitsNumber: boundMain(multiDigitsNumber),
 
         // <factor> ::= <number> | (<expression>)
-        // <term> ::= <factor> |<mulop> <factor>|*
+        // <term> ::= <factor> [<mulop> <factor>]*
         factor: boundMain(factor),
 
         // <factor> ::= <number> | (<expression>) | <variable>
@@ -3449,6 +3560,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <program> ::= <statement>
      * <statement> ::= <other>
      * ```
+     * code example: `a`
      */
     oneStatement = cradle.extend({
 
@@ -3473,6 +3585,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <program> ::= <block> END
      * <block> ::= [<statement>]*
      * ```
+     * code example: `abc`
      */
     moreThanOneStatement = oneStatement.extend({
 
@@ -3505,7 +3618,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * --------------------
      * Prepare two routines
      *
-     * - `newLable` to generate label `Lnn',
+     * - `newLable` to generate label **Lnn**,
      *    where nn is a label number starting from zero.
      * - `postLabel` to output the labels at the proper place.
      */
@@ -3559,10 +3672,38 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ENDIF          { postLabel(L) }
      * -------------------------------------------
      * ```
-     * For the implementation, as usual,
+     * On the **68000** the condition flags are set
+     * whenever any data is moved or calculated.
+     * If the data is a 0000 (corresponding to a false condition),
+     * the zero flag will be set.
+     * The code for **branch on zero** is `BEQ`.
+     * So for our purposes here,
+     * ```
+     * BEQ <=> Branch if false
+     * BNE <=> Branch if true
+     * ```
+     * It’s the nature of the beast that most of the branches we see
+     * will be `BEQ`’s... we’ll be branching *AROUND* the code
+     * that’s supposed to be executed when the condition is true.
+     *
+     * For the **implementation**, as usual,
      * we will be using our single-character approach,
      * with the character `i` for `IF`, and `e` for `ENDIF`
      * (as well as `END` ... that dual nature causes no confusion).
+     *
+     * code example: `aibcedhe`,
+     *
+     * which stands for
+     * ```
+     * <block A>                a
+     * IF <condition>           i
+     *     <block B>            b
+     *     <block C>            c
+     * ENDIF                    e
+     * <block D>                d
+     * <block H>                h
+     * END                      e
+     * ```
      */
     theIfStatement = someGroundwork.extend({
 
@@ -3631,6 +3772,19 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *   ENDIF          { postLabel(L2); }
      *   -------------------------------------------
      * ```
+     * Try something like `aiblcede`
+     *
+     * which stands for
+     * ```
+     * <block A>            a
+     * IF <condition>       i
+     *     <block B>        b
+     * ELSE                 l
+     *     <block C>        c
+     * ENDIF                e
+     * <block D>            d
+     * END                  e
+     * ```
      */
     addTheElseClause = theIfStatement.extend({
 
@@ -3697,6 +3851,63 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ENDWHILE       { emit(BRA L1);
      *                  PostLabel(L2) }
      * ```
+     * OK, try the **new program**, such as `awbece` which stands for
+     * ```
+     * <block A>                a
+     * WHILE <condition>        w
+     *     <block B>            b
+     * ENDWHILE                 e
+     * <block C>                c
+     * END                      e
+     * ```
+     * Note that this time, the <condition> code is *INSIDE* the upper label,
+     * which is just where we wanted it.
+     *
+     * Try some **nested loops**, for example `awbwcedefe` which stands for
+     * ```
+     * <block A>                a
+     * WHILE <condition>        w
+     *     <block B>            b
+     *     WHILE <condition>    w
+     *         <block C>        c
+     *     ENDWHILE             e
+     *     <block D>            d
+     * ENDWHILE                 e
+     * <block F>                f
+     * END                      e
+     * ```
+     * Try some **loops within `IF`’s**, for example`aibwcedlfege`
+     * which stands for
+     * ```
+     * <block A>                a
+     * IF <condition>           i
+     *     <block B>            b
+     *     WHILE <condition>    w
+     *         <block C>        c
+     *     ENDWHILE             e
+     *     <block D>            d
+     * ELSE                     l
+     *     <block F>            f
+     * ENDIF                    e
+     * <block G>                g
+     * END                      e
+     * ```
+     * and some **`IF`’s within loops**, for example `awbicedefe`
+     * which stands for
+     * ```
+     * <block A>                a
+     * WHILE <condition>        w
+     *     <block B>            b
+     *     IF <condition>       i
+     *         <block C>        c
+     *     ENDIF                e
+     *     <block D>            d
+     * ENDWHILE                 e
+     * <block F>                f
+     * END                      e
+     * ```
+     * If you get a bit confused as to what you should type,
+     * don’t be discouraged: you write bugs in other languages, too, don’t you?
      */
     theWhileStatement = addTheElseClause.extend({
 
@@ -3754,6 +3965,17 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *                  postLabel(L) }
      * <block>
      * ENDLOOP        { emit(BRA L) }
+     * ```
+     * Code example `apbece`
+     *
+     * which stands for
+     * ```
+     * <block A>                a
+     * LOOP                     p
+     *     <block B>            b
+     * ENDLOOP                  e
+     * <block C>                c
+     * END                      e
      * ```
      */
     theLoopStatement = theWhileStatement.extend({
@@ -3813,6 +4035,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <block>
      * UNTIL
      * <condition>    { emit(BEQ L) }
+     * ```
+     * code example `arbuce`
+     * which stands for
+     * ```
+     * <block A>                a
+     * REPEAT                   r
+     *     <block B>            b
+     * UNTIL                    u
+     * <block C>                c
+     * END                      e
      * ```
      */
     theRepeatUntilStatement = theLoopStatement.extend({
@@ -3889,6 +4121,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *      BRA L1                loop for next pass
      * L2:
      *      ADDQ #2, SP           clean up the stack
+     * ```
+     * code example `afi=bece`
+     * which stands for
+     * ```
+     * <block A>                    a
+     * FOR I = <expr1> TO <expr2>   fi=
+     *     <block B>                b
+     * ENDFOR                       e
+     * <block C>                    c
+     * END                          e
      * ```
      */
     theForLoop = theRepeatUntilStatement.extend({
@@ -3988,6 +4230,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ENDDO          { emit(MOVE (SP)+,D0);
      *                  emit(DBRA D0,L) }
      * ```
+     * code example `adbece`
+     * which stands for
+     * ```
+     * <block A>                a
+     * DO                       d
+     *     <block B>            b
+     * ENDDO                    e
+     * <block C>                c
+     * END                      e
+     * ```
      */
     theDoStatement = theForLoop.extend({
 
@@ -4001,6 +4253,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.postLabel(label);
             this.emitLn('MOVE D0, -(SP)');
             this.block();
+            this.match('e');
             this.emitLn('MOVE (SP)+, D0');
             this.emitLn('DBRA D0, ' + label);
         },
@@ -4042,6 +4295,20 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * **In BNF**
      * ```
      * <break> ::= BREAK
+     * ```
+     * code example `apcibegehe`
+     * which stands for
+     * ```
+     * <block A>                a
+     * LOOP                     p
+     *     <block C>            c
+     *     IF <condition>       i
+     *         BREAK            b
+     *     ENDIF                e
+     *     <block G>            g
+     * ENDLOOP                  e
+     * <block H>                h
+     * END                      e
      * ```
      */
     theBreakStatement = theDoStatement.extend({
@@ -6726,7 +6993,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      */
 
     /**
-     * 11.2 background
+     * 11.2 Background
      * ----------------
      */
 
