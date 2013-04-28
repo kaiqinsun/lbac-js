@@ -142,9 +142,9 @@ define(['./1.2-cradle'], function (cradle) {
      * -------------------
      * To deal with complexity, such as `1 + (2 - (3 + (4 - 5)))`,
      * we're going to run out of registers fast!
-     * The solution is to use stack instead.
+     * The solution is to use the stack instead.
      *
-     * For 68000 assembler langugage, a push is written as `-(SP)`,
+     * For M68000 assembler langugage, a push is written as `-(SP)`,
      * and pop `(SP)+`
      */
     usingTheStack = binaryExpressions.extend({

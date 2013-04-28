@@ -100,9 +100,10 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *
      * which stands for
      * ```
-     * PROGRAM
-     * BEGIN
-     * END.
+     * PROGRAM                  p
+     * BEGIN                    b
+     * END                      e
+     * .                        .
      * ```
      */
     theMainProgram = firstStep.extend({
@@ -137,11 +138,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *
      * which, the later, stands for
      * ```
-     * PROGRAM
-     * VAR X
-     * VAR Y
-     * BEGIN
-     * END.
+     * PROGRAM                  p
+     * VAR X                    vx
+     * VAR Y                    vy
+     * BEGIN                    b
+     * END                      e
+     * .                        .
      * ```
      * At this point, Decl is just a stub.
      * It generates no code, and it doesn’t process a list.
@@ -194,12 +196,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *
      * which stands for
      * ```
-     * PROGRAM
-     * VAR X
-     * VAR Y
-     * VAR Y
-     * BEGIN
-     * END.
+     * PROGRAM                  p
+     * VAR X                    vx
+     * VAR Y                    vy
+     * VAR Z                    yz
+     * BEGIN                    b
+     * END                      e
+     * .                        .
      * ```
      */
     declarationsAndSymbols = declarations.extend({
@@ -229,10 +232,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *
      * which stands for
      * ```
-     * PROGRAM
-     * VAR X, Y, Z
-     * BEGIN
-     * END.
+     * PROGRAM                  p
+     * VAR X, Y, Z              vx,y,z
+     * BEGIN                    b
+     * END                      e
+     * .                        .
      * ```
      */
     variableList = declarationsAndSymbols.extend({
@@ -257,15 +261,18 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <var> ::= <ident> [= <integer>]
      * ```
      * ### 10.5.1 ###
-     * code example: `pva=1vx=5,y,z=3be.`
+     * code example: `pva=1vx=5,y=3,zbe.`
      *
      * which stands for
      * ```
-     * PROGRAM
-     * VAR A = 1
-     * VAR X = 5, Y, Z = 3
-     * BEGIN
-     * END.
+     * PROGRAM                  p
+     * VAR A = 1                va=1
+     * VAR X = 5,               vx=5,
+     *     Y = 3,               y=3,
+     *     Z                    z
+     * BEGIN                    b
+     * END                      e
+     * .                        .
      * ```
      */
     initializers = variableList.extend({
@@ -293,10 +300,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *
      * which stands for
      * ```
-     * PROGRAM
-     * VAR X = 15, Y, Z = -23
-     * BEGIN
-     * END.
+     * PROGRAM                  p
+     * VAR X = 15, Y, Z = -23   vx=15,y,z=-23
+     * BEGIN                    b
+     * END                      e
+     * .                        .
      * ```
      */
     multiDigitInteger = initializers.extend({
@@ -392,11 +400,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *
      * which stands for
      * ```
-     * PROGRAM          p
-     * VAR X            vx
-     * BEGIN            b
-     *     X            x
-     * END.             e.
+     * PROGRAM                  p
+     * VAR X                    vx
+     * BEGIN                    b
+     *     X                    x
+     * END                      e
+     * .                        .
      * ```
      */
     executableStatements = theSymbolTable.extend({
@@ -512,12 +521,14 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *
      * which stands for
      * ```
-     * PROGRAM
-     * VAR X, Y = -1
-     * BEGIN
-     *     X = -22 * (3 - 8)
-     *     Y = X + 15
-     * END.
+     * PROGRAM                  p
+     * VAR X,                   vx,
+     *     Y = -1               y=-1
+     * BEGIN                    b
+     *     X = -22 * (3 - 8)    x=-22*(3-8)
+     *     Y = X + 15           y=x+15
+     * END                      e
+     * .                        .
      * ```
      */
     assignmentStatement = codeGenerationRoutines.extend({
@@ -726,11 +737,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *
      * which stands for:
      * ```
-     * PROGRAM
-     * VAR X, Y, Z
-     * BEGIN
-     *     X = Z > Y
-     * END.
+     * PROGRAM                  p
+     * VAR X, Y, Z              vx,y,z
+     * BEGIN                    b
+     *     X = Z > Y            x=z>y
+     * END                      e
+     * .                        .
      * ```
      */
     booleanExpressions = moreCodeGenerationRoutines.extend({

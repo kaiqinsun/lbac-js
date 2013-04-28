@@ -34,7 +34,7 @@ define(['./object', './11.6-tiny-1.1'], function (object, tiny_11) {
      * ```
      * In **C** and **Ada**, semicolon is a statement *TERMINATOR*
      * ```
-     * <block> ::= ( <statement> ';' )*
+     * <block> ::= (<statement> ';')*
      * ```
      */
     dealingWithSemicolons = tiny_11.object.extend({

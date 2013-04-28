@@ -12,17 +12,7 @@ $iconWhiteSpritePath: "../images/glyphicons-halflings-white.png";
 @import 'vendor/prettify';
 @import 'tiny-console';
 
-@media (max-width: 980px) {
-    // Enable use of floated navbar text
-    .navbar-text.pull-right {
-        float: none;
-        padding-left: 5px;
-        padding-right: 5px;
-    }
-}
-
 .hero-unit {
-    // background-color: $lightGreen;
     h1 {
         font-size: 2em;
     }
@@ -49,31 +39,43 @@ $iconWhiteSpritePath: "../images/glyphicons-halflings-white.png";
     }
 }
 
-#doc {
-    margin-bottom: 20px;
 
+.btn-toolbar {
+    display: none;
+}
+
+#doc {
     h1, h2, h3 {
         margin-top: 0;
         color: #000;
     }
-
     h1 {
         font-size: 24px;
     }
-
     h2 {
         font-size: 20px;
-        // border-bottom: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
     }
-
     h3 {
         font-size: 18px;
-        // border-bottom: 1px solid #ccc;
     }
 }
 
-#show-editor {
-    display: none;
+.dropdown-menu {
+    min-width: 55px;
+    i {
+        display: inline-block;
+        width: 14px;
+        padding-right: 8px;
+    }
+    > li > a {
+        padding-left: 10px;
+    }
+}
+
+#control-buttons {
+    margin: 15px 0;
+    float: right;
 }
 
 #editor-area {
@@ -91,18 +93,10 @@ $iconWhiteSpritePath: "../images/glyphicons-halflings-white.png";
     }
 }
 
-#console-area {
+#console {
     display: none;
-    position: relative;
     margin-bottom: 20px;
-    #show-editor-button {
-        position: absolute;
-        top: 1px;
-        right: 1px;
-    }
-    #console {
-        resize: vertical;
-    }
+    resize: vertical;
 }
 
 .footer {

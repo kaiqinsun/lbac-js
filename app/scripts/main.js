@@ -32,16 +32,17 @@ require([
             codeId = 'code',
             editorId = 'editor',
             runButtonId = 'run-button',
-            $ca = $('#console-area'),
-            $d = $('#' + docId);
+            $c = $('#' + consoleId),
+            $d = $('#' + docId),
+            consoleIsHidden = false;
 
-        // Click event handler on accordion menu
+        // Click event handlers of accordion menu
         function attachMenuClickHandler() {
 
             // Chapter toggle button
             $('#accordion2 .accordion-toggle').click(function () {
                 var chapterTitle = $(this).text().trim();
-                $ca.slideUp();   // hide console
+                $c.slideUp();   // hide console
                 lbacCodeViewer.update(chapterTitle);
 
                 // save the menu state with cookie
@@ -57,7 +58,9 @@ require([
                     success;
 
                 evt.preventDefault();
-                $ca.slideDown(); // show console
+                if (!consoleIsHidden) {
+                    $c.slideDown(); // show console
+                }
                 success = lbacConsole.update(chapterTitle, sectionTitle);
 
                 if (success) {
@@ -74,6 +77,72 @@ require([
                     $.cookie('sectionTitle', sectionTitle, { expires: 60 });
                 }
             });
+        }
+
+        // click event handlers of control dropdown menu
+        function attachControlMenuHandler() {
+            var $editorControl = $('#editor-control'),
+                $consoleControl = $('#console-control'),
+                $consoleControlButton = $('#console-control-button'),
+                $ea = $('#editor-area'),
+                iconName = 'icon-bell';
+
+            function manageClass($target, $control) {
+                $('i', $control).removeClass(iconName);
+                $('i', $target).addClass(iconName);
+            }
+
+            $('a', $editorControl).click(function (e) {
+                var $this = $(this),
+                    text = $this.text();
+
+                e.preventDefault();
+                if (text === 'Show') {
+                    $ea.slideDown();
+                } else if (text === 'Hide') {
+                    $ea.slideUp();
+                } else {
+
+                    // auto
+                    // to be implemented
+                }
+                manageClass($this, $editorControl);
+            });
+
+            $('a', $consoleControl).click(function (e) {
+                var $this = $(this),
+                    text = $this.text();
+
+                e.preventDefault();
+                if (text === 'Hide') {
+                    $c.slideUp();
+                    consoleIsHidden = true;
+                } else {
+
+                    // auto
+                    $c.slideDown();
+                    consoleIsHidden = false;
+                }
+                manageClass($this, $consoleControl);
+            });
+
+            // toggle console
+            $consoleControlButton.click(function () {
+                if (consoleIsHidden) {
+                    $c.slideDown();
+                    consoleIsHidden = false;
+                    console.log($('i', $consoleControl).eq(0));
+                    console.log($('i', $consoleControl).eq(1));
+                    $('i', $consoleControl).eq(0).addClass(iconName);
+                    $('i', $consoleControl).eq(1).removeClass(iconName);
+                } else {
+                    $c.slideUp();
+                    consoleIsHidden = true;
+                    $('i', $consoleControl).eq(1).addClass(iconName);
+                    $('i', $consoleControl).eq(0).removeClass(iconName);
+                }
+            });
+
         }
 
         // restore the page state using cookie
@@ -97,31 +166,14 @@ require([
                 }
 
                 // Hide console if no section selected
-                $ca.hide();
+                $c.hide();
                 return chapterTitle;
             }
 
             // Default
             $('#ch0').collapse('show');
-            $ca.hide();
+            $c.hide();
             return 'Prologue';
-        }
-
-        function attachEditorButton() {
-            var $btn = $('#show-editor-button'),
-                $e = $('#editor-area');
-
-            $btn.fadeIn('slow');
-            $btn.click(function () {
-                var $this = $(this);
-                if ($this.html() === 'Show Editor') {
-                    $e.slideDown();
-                    $this.html('Hide Editor');
-                } else {
-                    $e.slideUp();
-                    $this.html('Show Editor');
-                }
-            });
         }
 
         function init() {
@@ -136,10 +188,11 @@ require([
                 title: title
             });
             setTimeout(function () {
-                $ca.slideDown();
-            }, 1000);
+                $('.btn-toolbar').show();
+                $c.slideDown();
+            }, 1500);
             attachMenuClickHandler();
-            attachEditorButton();
+            attachControlMenuHandler();
         }
 
         init();

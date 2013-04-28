@@ -13,21 +13,20 @@
  * --------------
  * The `cradle` is a boiler plate that consists of some *I/O routines*,
  * an *error-handling routine* and a *skeleton, null main program*.
+ *
+ * **A short list of the cradle**
+ * ```
+ * const:    TAB, CR, LF
+ * variable: look
+ * function: getChar, error, abort, expected,
+ *           match, isAlpha, isDigit, getName, getNum
+ *           emit, emitLn, init, main
+ * ```
  */
 
 define(['./object', 'io'], function (object, io) {
     'use strict';
 
-    /**
-     * **A short list of the cradle**
-     * ```
-     * const: TAB, CR, LF
-     * variable: look
-     * function: getChar, error, abort, expected,
-     *           match, isAlpha, isDigit, getName, getNum
-     *           emit, emitLn, init, main
-     * ```
-     */
     return object.extend({
 
         // Constant declarations
