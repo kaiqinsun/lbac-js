@@ -1,0 +1,68 @@
+#info {
+    display: none;
+    text-align: center;
+    line-height: 160%;
+}
+
+#top-pager, #bottom-pager {
+    a {
+        margin: 3px 0;
+        padding: 4px 10px;
+    }
+    .disabled a {
+        color: #aaa;
+        box-shadow: 0 0 6px #ccc;
+        outline: 0;
+    }
+}
+
+#doc {
+    margin-bottom: 20px;
+    h1, h2, h3 {
+        margin-top: 0;
+        color: #285;
+        &:first-child {
+            float: left;
+            width: 80%;
+        }
+    }
+    h1 {
+        font-size: 24px;
+    }
+    h2 {
+        font-size: 20px;
+        border-bottom: 1px solid #ccc;
+    }
+    h3 {
+        font-size: 18px;
+    }
+}
+
+#editor-area {
+    display: none;
+    position: relative;
+    #editor {
+        resize: vertical;
+        height: 150px;
+        font-family: $monoFontFamily;
+    }
+    #run-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+}
+
+#console {
+    display: none;
+    margin-bottom: 20px;
+    resize: vertical;
+}
+
+#code-area {
+    display: none;
+    h1 {
+        font-size: 20px;
+        color: #285;
+    }
+}

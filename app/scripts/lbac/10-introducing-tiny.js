@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * Chapter 10 Introducing "Tiny"
  * ==============================
@@ -6,8 +8,7 @@
 define(['./1.2-cradle', 'io'], function (cradle, io) {
     'use strict';
 
-    var boundMain = cradle.boundMain,
-        firstStep,                      // 10.2.1
+    var firstStep,                      // 10.2.1
         theMainProgram,                 // 10.2.2
         declarations,                   // 10.3
         declarationsAndSymbols,         // 10.4.1
@@ -86,7 +87,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 this.abort('Unexpected data after "."');
             }
         }
-
     });
 
     /**
@@ -123,7 +123,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.match('e');
             this.epilog();
         }
-
     });
 
     /**
@@ -177,7 +176,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.doMain();
             this.match('.');
         }
-
     });
 
     /**
@@ -217,7 +215,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         alloc: function (name) {
             io.writeLn(name, ':', this.TAB, 'DC 0');
         }
-
     });
 
     /**
@@ -250,7 +247,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 this.alloc(this.getName());
             }
         }
-
     });
 
     /**
@@ -287,7 +283,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 io.writeLn('0');
             }
         }
-
     });
 
     /**
@@ -336,7 +331,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 io.writeLn('0');
             }
         }
-
     });
 
     /**
@@ -377,7 +371,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.symbolTable = {};  // <--
             this.getChar();
         }
-
     });
 
     /**
@@ -430,7 +423,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.match('e');
             this.epilog();
         }
-
     });
 
     /**
@@ -502,7 +494,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
         undefinedd: function (name) {
             this.abort('Undefined Identifier ' + name);
         }
-
     });
 
     /**
@@ -660,7 +651,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.expression();
             this.store(name);
         }
-
     });
 
     /**
@@ -721,7 +711,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.emitLn('SGT D0');
             this.emitLn('EXT D0');
         }
-
     });
 
     /**
@@ -883,7 +872,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.boolExpression();  // <--
             this.store(name);
         }
-
     });
 
     /**
@@ -991,7 +979,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.lCount = 0;
             this.getChar();
         }
-
     });
 
     /**
@@ -1223,7 +1210,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.getChar();
             this.scan();
         }
-
     });
 
     /**
@@ -1304,7 +1290,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 this.setGreater();
             }
         }
-
     });
 
     /**
@@ -1394,9 +1379,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 this.scan();
             }
         }
-
     });
-
     /**
      * 10.14 Conclusion
      * -----------------
@@ -1404,44 +1387,41 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      */
 
 
-    // return main functions for executions
     return {
 
         // 10.2.1
-        firstStep: boundMain(firstStep),
+        firstStep: firstStep,
         // 10.2.2
-        theMainProgram: boundMain(theMainProgram),
+        theMainProgram: theMainProgram,
         // 10.3
-        declarations: boundMain(declarations),
+        declarations: declarations,
         // 10.4.1
-        declarationsAndSymbols: boundMain(declarationsAndSymbols),
+        declarationsAndSymbols: declarationsAndSymbols,
         // 10.4.2
-        variableList: boundMain(variableList),
+        variableList: variableList,
         // 10.5.1
-        initializers: boundMain(initializers),
+        initializers: initializers,
         // 10.5.2
-        multiDigitInteger: boundMain(multiDigitInteger),
+        multiDigitInteger: multiDigitInteger,
         // 10.6
-        theSymbolTable: boundMain(theSymbolTable),
+        theSymbolTable: theSymbolTable,
         // 10.7.1
-        executableStatements: boundMain(executableStatements),
+        executableStatements: executableStatements,
         // 10.7.2
-        codeGenerationRoutines: boundMain(codeGenerationRoutines),
+        codeGenerationRoutines: codeGenerationRoutines,
         // 10.7.3
-        assignmentStatement: boundMain(assignmentStatement),
+        assignmentStatement: assignmentStatement,
         // 10.8.1
-        moreCodeGenerationRoutines: boundMain(moreCodeGenerationRoutines),
+        moreCodeGenerationRoutines: moreCodeGenerationRoutines,
         // 10.8.2
-        booleanExpressions: boundMain(booleanExpressions),
+        booleanExpressions: booleanExpressions,
         // 10.9
-        controlStructures: boundMain(controlStructures),
+        controlStructures: controlStructures,
         //10.10
-        lexicalScanning: boundMain(lexicalScanning),
+        lexicalScanning: lexicalScanning,
         // 10.12
-        moreRelops: boundMain(moreRelops),
+        moreRelops: moreRelops,
         // 10.13
-        inputOutput: boundMain(inputOutput)
-
+        inputOutput: inputOutput
     };
-
 });

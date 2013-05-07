@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * Chapter 7 Lexical Scanning
  * ===========================
@@ -6,8 +8,7 @@
 define(['./1.2-cradle', 'io'], function (cradle, io) {
     'use strict';
 
-    var boundMain = cradle.boundMain,
-        enumerate = cradle.enumerate,
+    var enumerate = cradle.enumerate,
         someExperimentsInScanning,          // 7.4
         whiteSpace,                         // 7.5
         newlines,                           // 7.7
@@ -116,7 +117,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.init();
             io.writeLn(this.getName());
         }
-
     });
 
     /**
@@ -190,7 +190,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 io.writeLn(token);
             } while (token !== this.LF);
         }
-
     });
 
     /**
@@ -236,7 +235,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 io.writeLn(token);
             } while (token !== '.');
         }
-
     });
 
     /**
@@ -280,7 +278,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.skipWhite();
             return result;
         }
-
     });
 
     /**
@@ -315,7 +312,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.skipComma();   // <--
             return result;
         }
-
     });
 
     /**
@@ -334,7 +330,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             var token = io.readLn();
             io.writeLn(this.keywordType[token]);
         }
-
     });
 
     /**
@@ -397,7 +392,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 io.writeLn(this.value);
             } while (this.token !== this.symType.endSym);
         }
-
     });
 
     /**
@@ -463,7 +457,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
             this.skipWhite();
         }
-
     });
 
     /**
@@ -562,7 +555,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 io.writeLn(this.value);
             } while (this.value !== 'END');
         }
-
     });
 
     /**
@@ -576,19 +568,17 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * In file: 7.13-kiss.js
      */
 
-    // return main functions for executions
+
     return {
-
-        someExperimentsInScanning: boundMain(someExperimentsInScanning),
-        whiteSpace: boundMain(whiteSpace),
-        newlines: boundMain(newlines),
-        operators: boundMain(operators),
-        listsCommasAndCommandLines: boundMain(listsCommasAndCommandLines),
-        gettingFancy: boundMain(gettingFancy),
-        returningCodes: boundMain(returningCodes),
-        cleanupWithGlobal: boundMain(cleanupWithGlobal),
-        returningACharacter: boundMain(returningACharacter)
-
+        someExperimentsInScanning: someExperimentsInScanning,
+        whiteSpace: whiteSpace,
+        newlines: newlines,
+        operators: operators,
+        listsCommasAndCommandLines: listsCommasAndCommandLines,
+        gettingFancy: gettingFancy,
+        returningCodes: returningCodes,
+        cleanupWithGlobal: cleanupWithGlobal,
+        returningACharacter: returningACharacter
     };
 
 });

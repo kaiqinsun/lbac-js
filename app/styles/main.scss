@@ -11,8 +11,11 @@ $iconWhiteSpritePath: "../images/glyphicons-halflings-white.png";
 @import 'sass-bootstrap/lib/responsive';
 @import 'vendor/prettify';
 @import 'tiny-console';
+@import 'menu';
+@import 'content';
+@import 'setting';
 
-.hero-unit {
+#header {
     h1 {
         font-size: 2em;
     }
@@ -23,83 +26,17 @@ $iconWhiteSpritePath: "../images/glyphicons-halflings-white.png";
     }
 }
 
-.accordion {
-    .disabled {
-        pointer-events: none;
-    }
-    .accordion-group {
-        margin-bottom: 0;
-    }
-    .accordion-toggle {
-        text-align: left;
-    }
-    .accordion-inner {
-        margin: 0;
-        padding: 0;
-    }
+#loading {
+    display: block;
+    margin: 150px auto;
 }
 
+#main-container {
+    margin: 0 10px;
+}
 
-.btn-toolbar {
+#footer {
     display: none;
-}
-
-#doc {
-    h1, h2, h3 {
-        margin-top: 0;
-        color: #000;
-    }
-    h1 {
-        font-size: 24px;
-    }
-    h2 {
-        font-size: 20px;
-        border-bottom: 1px solid #ccc;
-    }
-    h3 {
-        font-size: 18px;
-    }
-}
-
-.dropdown-menu {
-    min-width: 55px;
-    i {
-        display: inline-block;
-        width: 14px;
-        padding-right: 8px;
-    }
-    > li > a {
-        padding-left: 10px;
-    }
-}
-
-#control-buttons {
-    margin: 15px 0;
-    float: right;
-}
-
-#editor-area {
-    display: none;
-    position: relative;
-    #editor {
-        resize: vertical;
-        height: 150px;
-        font-family: $monoFontFamily;
-    }
-    #run-button {
-        position: absolute;
-        top: 0;
-        right: 0;
-    }
-}
-
-#console {
-    display: none;
-    margin-bottom: 20px;
-    resize: vertical;
-}
-
-.footer {
     color: $darkGreen;
     background-color: $lightGreen;
     border-top: 1px solid darken($lightGreen, 10%);

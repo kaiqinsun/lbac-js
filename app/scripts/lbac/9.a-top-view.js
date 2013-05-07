@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * Chapter 9 A Top View
  * =====================
@@ -7,8 +9,7 @@
 define(['./1.2-cradle', 'io'], function (cradle, io) {
     'use strict';
 
-    var boundMain = cradle.boundMain,
-        theStructureOfPascal,           // 9.3
+    var theStructureOfPascal,           // 9.3
         fleshingItOut,                  // 9.4
         declarations,                   // 9.5
         theStructureOfC;                // 9.6
@@ -72,7 +73,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.init();
             this.prog();
         }
-
     });
 
     /**
@@ -113,7 +113,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.match('.');
             this.epilog(name);
         }
-
     });
 
     /**
@@ -212,7 +211,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
             this.match('e');
         }
-
     });
 
     /**
@@ -359,17 +357,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                     this.showType[this.typ], 'data ', name);
             this.match(';');
         }
-
     });
 
-    // return main functions for executions
+
     return {
-
-        theStructureOfPascal: boundMain(theStructureOfPascal),
-        fleshingItOut: boundMain(fleshingItOut),
-        declarations: boundMain(declarations),
-        theStructureOfC: boundMain(theStructureOfC)
-
+        theStructureOfPascal: theStructureOfPascal,
+        fleshingItOut: fleshingItOut,
+        declarations: declarations,
+        theStructureOfC: theStructureOfC
     };
-
 });

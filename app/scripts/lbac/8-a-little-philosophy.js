@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * Chapter 8 A Little Philosophy
  * ==============================

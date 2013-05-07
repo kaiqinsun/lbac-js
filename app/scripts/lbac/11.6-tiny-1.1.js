@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * 11.6 Conclusion
  * ----------------
@@ -7,10 +9,7 @@
 define(['./object', 'io'], function (object, io) {
     'use strict';
 
-    var boundMain = object.boundMain,
-        program;
-
-    program = object.extend({
+    var program = object.extend({
 
         // Constant declarations
         TAB: '\t',
@@ -787,13 +786,12 @@ define(['./object', 'io'], function (object, io) {
             this.matchString('END');
             this.epilog();
         }
-
     });
 
     // return main functions for executions
     // and the program itself for chapter 12
     return {
-        run: boundMain(program),
+        run: program,
         object: program
     };
 

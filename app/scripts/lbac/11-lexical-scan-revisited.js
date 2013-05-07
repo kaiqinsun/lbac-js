@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * Chapter 11 Lexical Scan Revisited
  * ==================================
@@ -6,8 +8,7 @@
 define(['./1.2-cradle', 'io'], function (cradle, io) {
     'use strict';
 
-    var boundMain = cradle.boundMain,
-        theSolution,                // 11.4.1
+    var theSolution,                // 11.4.1
         singleCharacterOperators;   // 11.4.2
 
     /**
@@ -108,7 +109,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 io.writeLn(this.token, ' ', this.value);
             } while (this.token !== '.');
         }
-
     });
 
     /**
@@ -137,7 +137,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 this.expected('"' + str + '"');
             }
         }
-
     });
 
     /**
@@ -152,12 +151,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      */
 
 
-    // return main functions for executions
     return {
-
-        theSolution: boundMain(theSolution),
-        singleCharacterOperators: boundMain(singleCharacterOperators)
-
+        theSolution: theSolution,
+        singleCharacterOperators: singleCharacterOperators
     };
 
 });

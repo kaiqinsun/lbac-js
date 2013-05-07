@@ -1,5 +1,5 @@
 {
-   "name" : "mypackage",
-   "version" : "0.7.0",
+   "name" : "lbac",
+   "version" : "0.0.12",
    "main" : "./lib/main",
 }

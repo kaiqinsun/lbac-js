@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * Chapter 6 Boolean Expressions
  * =============================
@@ -9,8 +11,7 @@ define([
 ], function (cradle, moreExpressions, controlConstructs, $, io) {
     'use strict';
 
-    var boundMain = cradle.boundMain,
-        theParser,                      // 6.6.1
+    var theParser,                      // 6.6.1
         booleanLiteral,                 // 6.6.2
         generalExpressions,             // 6.6.3
         andOperation,                   // 6.6.4
@@ -126,7 +127,6 @@ define([
             this.init();
             io.writeLn(this.getBoolean());
         }
-
     });
 
     /**
@@ -155,7 +155,6 @@ define([
             this.init();
             this.boolExpression();
         }
-
     });
 
     /**
@@ -215,7 +214,6 @@ define([
                 }
             }
         }
-
     });
 
     /**
@@ -251,7 +249,6 @@ define([
                 this.emitLn('AND (SP)+, D0');
             }
         }
-
     });
 
     /**
@@ -287,7 +284,6 @@ define([
                 this.boolFactor();
             }
         }
-
     });
 
     /**
@@ -317,7 +313,6 @@ define([
                 this.relation();
             }
         }
-
     });
 
     /**
@@ -393,7 +388,6 @@ define([
         expression: function () {
             this.emitLn('<Expression' + this.getName() + '>');
         }
-
     });
 
     /**
@@ -426,9 +420,8 @@ define([
 
         // 3.5
         {
-            expression : moreExpressions.assignmentStatementsObject.expression
+            expression : moreExpressions.assignmentStatements.expression
         }
-
     );
     //}
 
@@ -505,11 +498,11 @@ define([
                 this.emitLn('MOVE #' + this.getNum() + ' ,D0');
             }
         }
-
     });
 
     /**
-     * ### 6.7 Merging with control constructs ###
+     * 6.7 Merging with control constructs
+     * ------------------------------------
      * ```
      * <program> ::= <block> END
      * <block> ::= [<statement>]*
@@ -533,12 +526,12 @@ define([
             expression: changeToLatestExpressionSyntax.expression,
             other: changeToLatestExpressionSyntax.boolExpression
         }
-
     );
     //}
 
     /**
-     * ### 6.8 Adding assignments ###
+     * 6.8 Adding assignments
+     * -----------------------
      * ```
      * <statement> ::= <control-statement> | <assignment>
      * <assignment> ::= <identifier> = <b-expression>
@@ -598,38 +591,37 @@ define([
             this.emitLn('LEA ' + name + '(PC), A0');
             this.emitLn('MOVE D0, (A0)');
         }
-
     });
 
-    // return main functions for executions
+
     return {
 
         // 6.6
-        theParser: boundMain(theParser),
+        theParser: theParser,
 
         // <b-expression>  ::= <b-literal>
-        booleanLiteral: boundMain(booleanLiteral),
+        booleanLiteral: booleanLiteral,
 
         // <b-expression> ::= <b-term> [<orop> <b-term>]*
         // <b-term> ::= <b-literal>
-        generalExpressions: boundMain(generalExpressions),
+        generalExpressions: generalExpressions,
 
         // <b-term> ::= <not-factor> [AND <not-factor>]*
         // <not-factor> :== <b-literal>
-        andOperation: boundMain(andOperation),
+        andOperation: andOperation,
 
         // <not-factor> ::= [NOT] <b-factor>
         // <b-factor> ::= <b-literal>
-        notOperation: boundMain(notOperation),
+        notOperation: notOperation,
 
         // <b-factor> ::= <b-literal> | <relation>
-        expandTheFactor: boundMain(expandTheFactor),
+        expandTheFactor: expandTheFactor,
 
         // <relation> ::= <expression> [<relop> <expression>]
-        fullBlownRelation: boundMain(fullBlownRelation),
+        fullBlownRelation: fullBlownRelation,
 
         /*
-         * 6.6.8 Merging with expressions
+         * 6.6.8
          * No new codes after merging, the syntax in BNF:
          * ----- boolean expressions -----
          * <b-expression> ::= <b-term> [<orop> <b-term>]*
@@ -643,28 +635,27 @@ define([
          * <factor>       ::= <number> | (<expression>) | <identifier>
          * <identifier>   ::= <variable> | <function>
          */
-        mergingWithExpressions: boundMain(mergingWithExpressions),
+        mergingWithExpressions: mergingWithExpressions,
 
         /*
-         * 6.6.9 Change to latest expression syntax
+         * 6.6.9
          * <expression>   ::= <term> [<addop> <term>]*
          * <term>         ::= <signed factor> [<mulop> <factor>]*
          * <factor>       ::= <number> | (<b-expression>) | <identifier>
          */
         changeToLatestExpressionSyntax:
-                boundMain(changeToLatestExpressionSyntax),
+                changeToLatestExpressionSyntax,
 
         // 6.7
         // <program> ::= <block> END
         // <block> ::= [<statement>]*
         // <statement> ::= <control-statement> | <b-expression>
-        mergingWithControlConstructs: boundMain(mergingWithControlConstructs),
+        mergingWithControlConstructs: mergingWithControlConstructs,
 
         // 6.8
         // <statement> ::= <control-statement> | <assignment>
         // <assignment> ::= <identifier> = <b-expression>
-        addingAssignments: boundMain(addingAssignments)
-
+        addingAssignments: addingAssignments
     };
 
     /**
@@ -707,5 +698,4 @@ define([
      * <identifier>   ::= <variable> | <function>
      * ```
      */
-
 });

@@ -1,15 +1,14 @@
+/* global define */
+
 /**
  * Chapter 3 More Expressions
  * ==========================
  */
 
-define([
-    './object', './2-expression-parsing'
-], function (object, expressionParsing) {
+define(['./2-expression-parsing'], function (expressionParsing) {
     'use strict';
 
-    var boundMain = object.boundMain,
-        variables,              // 3.2
+    var variables,              // 3.2
         functions,              // 3.3
         moreOnErrorHandling,    // 3.4
         assignmentStatements,   // 3.5
@@ -48,7 +47,7 @@ define([
      * ```
      * where `X` is the variable name.
      */
-    variables = expressionParsing.unaryMinusObject.extend({
+    variables = expressionParsing.unaryMinus.extend({
 
         // Parse and translate a math factor
         factor: function () {
@@ -62,7 +61,6 @@ define([
                 this.emitLn('MOVE #' + this.getNum() + ' ,D0');
             }
         }
-
     });
 
     /**
@@ -105,7 +103,6 @@ define([
                 this.emitLn('MOVE #' + this.getNum() + ', D0');
             }
         }
-
     });
 
     /**
@@ -123,7 +120,6 @@ define([
                 this.expected('Newline');   // <--
             }
         }
-
     });
 
     /**
@@ -155,7 +151,6 @@ define([
                 this.expected('Newline');
             }
         }
-
     });
 
     /**
@@ -196,7 +191,6 @@ define([
             }
             return value;   // <--
         }
-
     });
 
     /**
@@ -263,33 +257,26 @@ define([
             this.getChar();
             this.skipWhite();   // <--
         }
-
     });
 
-    // return main functions for executions
-    // and the final assignmentStatementsObject object for chapter 6.
+
     return {
 
         // <factor> ::= <number> | (<expression>) | <variable>
-        variables: boundMain(variables),
+        variables: variables,
 
         // <identifier> ::= <variable> | <function>
         // <factor> ::= <number> | (<expression>) | <identifier>
-        functions: boundMain(functions),
+        functions: functions,
 
         // Assert that the expression should end with an end-of-line
-        moreOnErrorHandling: boundMain(moreOnErrorHandling),
+        moreOnErrorHandling: moreOnErrorHandling,
 
         // <identifier> = <expression>
-        assignmentStatements: boundMain(assignmentStatements),
+        assignmentStatements: assignmentStatements,
 
-        multiCharacterTokens: boundMain(multiCharacterTokens),
+        multiCharacterTokens: multiCharacterTokens,
 
-        whiteSpace: boundMain(whiteSpace),
-
-        // Export the object for chapter 6
-        assignmentStatementsObject: assignmentStatements
-
+        whiteSpace: whiteSpace
     };
-
 });

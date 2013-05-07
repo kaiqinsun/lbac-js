@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * Chapter 2 Expression Parsing
  * ============================
@@ -6,8 +8,7 @@
 define(['./1.2-cradle'], function (cradle) {
     'use strict';
 
-    var boundMain = cradle.boundMain,
-        singleDigits,               // 2.2
+    var singleDigits,               // 2.2
         binaryExpressions,          // 2.3
         generalExpressions,         // 2.4
         usingTheStack,              // 2.5
@@ -50,7 +51,6 @@ define(['./1.2-cradle'], function (cradle) {
             this.init();
             this.expression();
         }
-
     });
 
     /**
@@ -103,7 +103,6 @@ define(['./1.2-cradle'], function (cradle) {
                 this.expected('Addop');
             }
         }
-
     });
 
     /**
@@ -134,7 +133,6 @@ define(['./1.2-cradle'], function (cradle) {
                 }
             }
         }
-
     });
 
     /**
@@ -179,7 +177,6 @@ define(['./1.2-cradle'], function (cradle) {
                 }
             }
         }
-
     });
 
     /**
@@ -238,7 +235,6 @@ define(['./1.2-cradle'], function (cradle) {
                 }
             }
         }
-
     });
 
     /**
@@ -271,14 +267,13 @@ define(['./1.2-cradle'], function (cradle) {
                 this.emitLn('MOVE #' + this.getNum() + ' ,D0');
             }
         }
-
     });
 
     /**
      * 2.8 Unary minus
      * ---------------
      * Try e.g. `-1`, `+3` or `-(3-2)`, etc. It doesn't work, does it?
-     * 
+     *
      * **Solution**
      *
      * The  easiest (although not necessarily the best) way is
@@ -316,7 +311,6 @@ define(['./1.2-cradle'], function (cradle) {
                 }
             }
         }
-
     });
 
     /**
@@ -324,36 +318,31 @@ define(['./1.2-cradle'], function (cradle) {
      * -----------------------------
      */
 
-    // return main functions for executions,
-    // and the final unitaryMinus object for next chapter (ch. 3),
+
     return {
 
         // <expression> ::= <number>
-        singleDigits: boundMain(singleDigits),
+        singleDigits: singleDigits,
 
         // <term> ::= <number>
         // <expression> ::= <term> <addop> <term>
-        binaryExpressions: boundMain(binaryExpressions),
+        binaryExpressions: binaryExpressions,
 
         // <expression> ::= <term> [<addop> <term>]*
-        generalExpressions: boundMain(generalExpressions),
+        generalExpressions: generalExpressions,
 
         // Use the stack instead of registers to serve for complexity
-        usingTheStack: boundMain(usingTheStack),
+        usingTheStack: usingTheStack,
 
         // <factor> ::= <number>
         // <term> ::= <factor> [<mulop> <factor>]*
-        multiplicationAndDivision: boundMain(multiplicationAndDivision),
+        multiplicationAndDivision: multiplicationAndDivision,
 
         // <factor> ::= <number> | (<expression>)
-        parentheses: boundMain(parentheses),
+        parentheses: parentheses,
 
         // <expression> ::= <unary op> <term> [<addop> <term>]*
-        unaryMinus: boundMain(unaryMinus),
-
-        // Export the object for the next chapter
-        unaryMinusObject: unaryMinus
-
+        unaryMinus: unaryMinus
     };
 
     /**
@@ -365,5 +354,4 @@ define(['./1.2-cradle'], function (cradle) {
      * <factor> ::= <number> | (<expression>)
      * ```
      */
-
 });

@@ -1,17 +1,10 @@
 {
     "node": true,
     "browser": true,
-    "jquery": true,
-    "predef": [
-        "define"
-    ],
-
     "es5": true,
     "esnext": true,
     "bitwise": true,
-
-    "camelcase": false,
-
+    "camelcase": true,
     "curly": true,
     "eqeqeq": true,
     "immed": true,

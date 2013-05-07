@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * Chapter 7.13 Merging Scanner and Parser
  * ---------------------------------------
@@ -7,8 +9,7 @@
 define(['./object', 'io'], function (object, io) {
     'use strict';
 
-    var boundMain = object.boundMain,
-        enumerate = object.enumerate,
+    var enumerate = object.enumerate,
         judiciousCopying,           // 7.13.1
         mergingScannerAndParser;    // 7.13.2
 
@@ -17,7 +18,7 @@ define(['./object', 'io'], function (object, io) {
      * 7.13 Merging scanner and parser
      * --------------------------------
      * ### 7.13.1 Judicious copying ###
-     * All the elements of the program to parse this subset, using 
+     * All the elements of the program to parse this subset, using
      * single-character tokens, exist already in our previous programs.
      *
      * **A short list of the program KISS**
@@ -410,7 +411,6 @@ define(['./object', 'io'], function (object, io) {
             this.init();
             this.doProgram();
         }
-
     });
 
     /**
@@ -568,16 +568,11 @@ define(['./object', 'io'], function (object, io) {
             this.matchString('END');    // <--
             this.emitLn('END');
         }
-
     });
 
 
-    // return main functions for executions
     return {
-
-        judiciousCopying: boundMain(judiciousCopying),
-        mergingScannerAndParser: boundMain(mergingScannerAndParser)
-
+        judiciousCopying: judiciousCopying,
+        mergingScannerAndParser: mergingScannerAndParser
     };
-
 });

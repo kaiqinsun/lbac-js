@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * Chapter 4 Interpreters
  * ======================
@@ -6,12 +8,11 @@
 define(['./1.2-cradle', 'io'], function (cradle, io) {
     'use strict';
 
-    var boundMain = cradle.boundMain,
-        singleDigits,                   // 4.2.1
+    var singleDigits,                   // 4.2.1
         binaryExpressions,              // 4.2.2
         generalExpressions,             // 4.2.3
         multiDigitsNumber,              // 4.2.4
-        factor,                    // 4.2.5
+        factor,                         // 4.2.5
         variables,                      // 4.3.1
         assignmentStatements,           // 4.3.2
         multipleStatements,             // 4.3.3
@@ -58,7 +59,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.init();
             io.writeLn(this.expression());
         }
-
     });
 
     /**
@@ -97,7 +97,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
             return value;
         }
-
     });
 
     /**
@@ -150,7 +149,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
             return value;
         }
-
     });
 
     /**
@@ -171,7 +169,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
             return value;
         }
-
     });
 
     /**
@@ -216,7 +213,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
             return value;
         }
-
     });
 
     /**
@@ -267,7 +263,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
             return value;
         }
-
     });
 
     /**
@@ -292,7 +287,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.assignment();  // <--
             io.writeLn(this.table.A);
         }
-
     });
 
     /**
@@ -315,7 +309,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 this.newLine();
             } while (this.look !== '.');
         }
-
     });
 
     /**
@@ -353,38 +346,35 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 this.newLine();
             } while (this.look !== '.');
         }
-
     });
 
-    // return main functions for executions
+
     return {
 
         // <expression> ::= <number>
-        singleDigits: boundMain(singleDigits),
+        singleDigits: singleDigits,
 
         // <expression> ::= <number> [<addop> <number>]*
-        binaryExpressions: boundMain(binaryExpressions),
+        binaryExpressions: binaryExpressions,
 
         // <term> ::= <number> [<mulop> <number>]*
         // <expression> ::= <term> [<addop> <term>]*
-        generalExpressions: boundMain(generalExpressions),
+        generalExpressions: generalExpressions,
 
         // Multi-digits number
-        multiDigitsNumber: boundMain(multiDigitsNumber),
+        multiDigitsNumber: multiDigitsNumber,
 
         // <factor> ::= <number> | (<expression>)
         // <term> ::= <factor> [<mulop> <factor>]*
-        factor: boundMain(factor),
+        factor: factor,
 
         // <factor> ::= <number> | (<expression>) | <variable>
-        variables: boundMain(variables),
+        variables: variables,
 
-        assignmentStatements: boundMain(assignmentStatements),
+        assignmentStatements: assignmentStatements,
 
-        multipleStatements: boundMain(multipleStatements),
+        multipleStatements: multipleStatements,
 
-        ioRoutines: boundMain(ioRoutines)
-
+        ioRoutines: ioRoutines
     };
-
 });

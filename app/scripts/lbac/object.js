@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * Prologue
  * ========
@@ -12,14 +14,13 @@
  *
  * The JavaScript code was ported section by section based on
  * *prototypal inheritance*.
- * It aims to be as similar to the [original Pascal version][original]
- * as possible.
- * A tiny console is provided with necessary I/O routines and
+ * It aims to be similar to the [original Pascal version][original].
+ * A tiny console is provided with necessary I/O routines
  * for user interactions.
  *
  * The base object
  * ------------
- * The base `object` defined here provides the `object.extend` method
+ * The base `object` provides the `object.extend` method
  * for *prototypal inheritance* and some other helper functions.
  *
  */
@@ -27,19 +28,7 @@
 define(['jquery'], function ($) {
     'use strict';
 
-    // Polyfill
-    if (!Object.create) {
-        Object.create = function (o) {
-            if (arguments.length > 1) {
-                throw new Error('Object.create implementation only accepts the first parameter.');
-            }
-            function F() {}
-            F.prototype = o;
-            return new F();
-        };
-    }
-
-    return {
+    var object = {
 
         // Extend method used for prototyal inheritance
         extend: function (obj) {
@@ -58,11 +47,6 @@ define(['jquery'], function ($) {
          * Helper functions
          */
 
-        // get the bound main function
-        boundMain: function (obj) {
-            return obj.main.bind(obj);
-        },
-
         // Convert an array to an object to work as enum
         // e.g. enumerate([a, b]) => { a: 0, b: 1 }
         enumerate: function (arr, start) {
@@ -76,4 +60,5 @@ define(['jquery'], function ($) {
         }
     };
 
+    return object;
 });

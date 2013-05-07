@@ -1,3 +1,5 @@
+/* global define, jQuery */
+
 /** Tiny console, a jQuery plugin
  * Author: Malcom Wu
  * version: 0.0.3 (2012-11-20)
@@ -33,7 +35,7 @@
 
     var LF = '\n';
 
-    function htmlEncode(text) {
+    function escape(text) {
         var replacements = [
             //[/&/g, "&amp;"], [/"/g, "&quot;"],
             [/</g, '&lt;'], [/>/g, '&gt;']
@@ -143,7 +145,7 @@
         };
 
         this.highlightElement = function ($el) {
-            var rest = htmlEncode($el.text()),
+            var rest = escape($el.text()),
                 result = matchRules(rest),
                 newHtml = '',
                 front;
@@ -527,7 +529,7 @@
             var str = Array.prototype.slice.call(arguments).join('');
             return this.each(function () {
                 var data = $(this).data('tinyConsole');
-                data.$output.append(htmlEncode(str));
+                data.$output.append(escape(str));
             });
         },
 
@@ -541,11 +543,11 @@
             throw 'Halt.';
         },
 
-        'function': function (name) {
+        getFunction: function (name) {
             return $.proxy(methods[name], this);
         },
 
-        execute: function (fn) {
+        setExecute: function (fn) {
             return this.each(function () {
                 var data = $(this).data('tinyConsole');
                 data.execute = fn;

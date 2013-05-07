@@ -1,4 +1,3 @@
-// Generated on 2013-03-05 using generator-webapp 0.1.5
 'use strict';
 var lrSnippet = require('grunt-contrib-livereload/lib/utils').livereloadSnippet;
 var mountFolder = function (connect, dir) {
@@ -10,6 +9,7 @@ var mountFolder = function (connect, dir) {
 // 'test/spec/{,*/}*.js'
 // use this if you want to match all subfolders:
 // 'test/spec/**/*.js'
+// templateFramework: 'lodash'
 
 module.exports = function (grunt) {
     // load all grunt tasks
@@ -46,10 +46,16 @@ module.exports = function (grunt) {
                     '{.tmp,<%= yeoman.app %>}/styles/{,*/}*.css',
                     '{.tmp,<%= yeoman.app %>}/scripts/{,*/}*.js',
                     '!<%= yeoman.app %>/scripts/lbac/*.js',
-                    '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,webp}',
-                    '.tmp/ajax/*'
+                    '.tmp/data/*',
+                    '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp}'
                 ],
                 tasks: ['livereload']
+            },
+            jst: {
+                files: [
+                    '<%= yeoman.app %>/scripts/templates/*.ejs'
+                ],
+                tasks: ['jst']
             }
         },
         connect: {
@@ -155,13 +161,10 @@ module.exports = function (grunt) {
                 }
             }
         },
-
-        // not used since Uglify task does concat,
-        // but still available if needed
         concat: {
-            ajax: {
+            data: {
                 files: [{
-                    dest: '.tmp/ajax/lbac.src.txt',
+                    dest: '.tmp/data/lbac.src.txt',
                     src: [
                         '<%= yeoman.app %>/scripts/lbac/*.js',
                         '!<%= yeoman.app %>/scripts/lbac/11-lexical-scan-revisited.js',
@@ -177,6 +180,10 @@ module.exports = function (grunt) {
                     // `name` and `out` is set by grunt-usemin
                     baseUrl: 'app/scripts',
                     optimize: 'none',
+                    paths: {
+                        'templates': '../../.tmp/scripts/templates',
+                        'src': '../../.tmp/data/lbac.src.txt'
+                    },
                     // TODO: Figure out how to make sourcemaps work with grunt-usemin
                     // https://github.com/yeoman/grunt-usemin/issues/30
                     //generateSourceMaps: true,
@@ -244,6 +251,14 @@ module.exports = function (grunt) {
             }
         },
         copy: {
+            defaultTemplate: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= yeoman.app %>/templates/templates.js',
+                    dest: '.tmp/scripts/',
+                    src: [ 'templates.js' ]
+                }]
+            },
             dist: {
                 files: [{
                     expand: true,
@@ -252,19 +267,25 @@ module.exports = function (grunt) {
                     dest: '<%= yeoman.dist %>',
                     src: [
                         '*.{ico,txt}',
-                        '.htaccess'
+                        '.htaccess',
+                        'images/{,*/}*.{webp,gif}'
                     ]
-                }, {
-                    expand: true,
-                    flatten: true,
-                    dest: '<%= yeoman.dist %>/ajax',
-                    src: '.tmp/ajax/*'
                 }]
             }
         },
         bower: {
             all: {
                 rjsConfig: '<%= yeoman.app %>/scripts/main.js'
+            }
+        },
+        jst: {
+            options: {
+                amd: true
+            },
+            compile: {
+                files: {
+                    '.tmp/scripts/templates.js': ['<%= yeoman.app %>/scripts/templates/*.ejs']
+                }
             }
         }
     });
@@ -279,8 +300,10 @@ module.exports = function (grunt) {
         grunt.task.run([
             'clean:server',
             'coffee:dist',
+            'copy:defaultTemplate',
+            'jst',
             'compass:server',
-            'concat',
+            'concat:data',
             'livereload-start',
             'connect:livereload',
             'open',
@@ -291,6 +314,8 @@ module.exports = function (grunt) {
     grunt.registerTask('test', [
         'clean:server',
         'coffee',
+        'copy:defaultTemplate',
+        'jst',
         'compass',
         'connect:test',
         'mocha'
@@ -299,15 +324,18 @@ module.exports = function (grunt) {
     grunt.registerTask('build', [
         'clean:dist',
         'coffee',
+        'copy:defaultTemplate',
+        'jst',
         'compass:dist',
         'useminPrepare',
+        'concat:data',
         'requirejs',
         'imagemin',
         'htmlmin',
         'concat',
         'cssmin',
         'uglify',
-        'copy',
+        'copy:dist',
         'usemin'
     ]);
 

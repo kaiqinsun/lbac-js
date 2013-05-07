@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * Chapter 12 Miscellany
  * ======================
@@ -6,8 +8,7 @@
 define(['./object', './11.6-tiny-1.1'], function (object, tiny_11) {
     'use strict';
 
-    var boundMain = object.boundMain,
-        dealingWithSemicolons;          // 12.4
+    var dealingWithSemicolons;          // 12.4
 
     /**
      * 12.1 Introduction
@@ -95,15 +96,11 @@ define(['./object', './11.6-tiny-1.1'], function (object, tiny_11) {
             this.matchString('END');
             this.epilog();
         }
-
     });
 
 
-    // return main functions for executions
     return {
-
-        dealingWithSemicolons: boundMain(dealingWithSemicolons)
-
+        dealingWithSemicolons: dealingWithSemicolons
     };
 
 });

@@ -4,26 +4,24 @@ lbac-js
 A JavaScript port of **Let's Build a Compiler** (lbac) by Jack Crenshaw.
 *A non-technical introduction to compiler construction*.
 
-Please refer to the [original context][original]
+Please refer to the [original article][original]
 or alternatively a [LaTeX typeset PDF version][latex].
 
 [original]: http://compilers.iecc.com/crenshaw/
 [latex]: http://www.stack.nl/~marcov/compiler.pdf
 
-Demo
+Application page
 --------
-The code is constructed section by section based on prototypal inheritance.
-It aims to be as similar to the [original Pascal version][original] as possible.
-A tiny console is provided with necessary I/O routines and for user interactions.
-[Check out the demo][demo] and learn by doing.
+This project is a web application. A console is provided for user interactions.
+[Check out the app][webapp] and learn by doing.
 
-[demo]: http://malcomwu.github.com/lbac-js/
+[webapp]: http://malcomwu.github.com/lbac-js/
 
 Build
 --------
 The lbac-js project structures and workflow were initialized using [Yeoman][].
-Building lbac-js requires [node.js][]
-and [Ruby][] (for [Compass]) pre-installed.
+
+First, install [node.js][] and [Ruby][] (for [Compass]).
 
 [yeoman]: http://yeoman.io/
 [node.js]: http://nodejs.org/

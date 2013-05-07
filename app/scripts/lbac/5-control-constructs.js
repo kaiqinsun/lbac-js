@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * Chapter 5 Control Constructs
  * ============================
@@ -6,8 +8,7 @@
 define(['./1.2-cradle', 'io'], function (cradle, io) {
     'use strict';
 
-    var boundMain = cradle.boundMain,
-        oneStatement,               // 5.2.1
+    var oneStatement,               // 5.2.1
         moreThanOneStatement,       // 5.2.2
         someGroundwork,             // 5.3
         theIfStatement,             // 5.4
@@ -51,7 +52,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.init();
             this.other();
         }
-
     });
 
     /**
@@ -86,7 +86,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.init();
             this.doProgram();
         }
-
     });
 
     /**
@@ -119,7 +118,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.lCount = 0;
             this.getChar();
         }
-
     });
 
     /**
@@ -213,7 +211,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 }
             }
         }
-
     });
 
     /**
@@ -298,7 +295,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 }
             }
         }
-
     });
 
     /**
@@ -417,7 +413,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 }
             }
         }
-
     });
 
     /**
@@ -485,7 +480,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 }
             }
         }
-
     });
 
     /**
@@ -559,7 +553,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 }
             }
         }
-
     });
 
     /**
@@ -674,7 +667,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 }
             }
         }
-
     });
 
     /**
@@ -762,7 +754,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 }
             }
         }
-
     });
 
     /**
@@ -901,7 +892,6 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.emitLn('SUBQ #2, SP');  // <--
             this.postLabel(label_2);    // <--
             this.emitLn('ADDQ #2, SP'); // <--
-
         },
 
         // Recognize and translate a break
@@ -945,48 +935,42 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 }
             }
         }
-
     });
 
-    // return main functions for executions
-    // and the final theBreakStatement object for next chapter (ch. 6),
+
     return {
 
         // <program> ::= <statement>
-        oneStatement: boundMain(oneStatement),
+        oneStatement: oneStatement,
 
         // <program> ::= <block> END
         // <block> ::= [<statement>]*
-        moreThanOneStatement: boundMain(moreThanOneStatement),
+        moreThanOneStatement: moreThanOneStatement,
 
-        someGroundwork: boundMain(someGroundwork),
+        someGroundwork: someGroundwork,
 
         // <if> ::= IF <condition> <block> ENDIF
-        theIfStatement: boundMain(theIfStatement),
+        theIfStatement: theIfStatement,
 
         // <if> ::= IF <condition> <block> [ELSE <block>] ENDIF
-        addTheElseClause: boundMain(addTheElseClause),
+        addTheElseClause: addTheElseClause,
 
         // <while> ::= WHILE <condition> <block> ENDWHILE
-        theWhileStatement: boundMain(theWhileStatement),
+        theWhileStatement: theWhileStatement,
 
         // <loop> ::= LOOP <block> ENDLOOP
-        theLoopStatement: boundMain(theLoopStatement),
+        theLoopStatement: theLoopStatement,
 
         // <repeat> ::= REPEAT <block> UNTIL <conditon>
-        theRepeatUntilStatement: boundMain(theRepeatUntilStatement),
+        theRepeatUntilStatement: theRepeatUntilStatement,
 
         // <for> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
-        theForLoop: boundMain(theForLoop),
+        theForLoop: theForLoop,
 
         // <do> ::= DO <expression> <block> ENDDO
-        theDoStatement: boundMain(theDoStatement),
+        theDoStatement: theDoStatement,
 
-        theBreakStatement: boundMain(theBreakStatement),
-
-        // Export the object for the next chapter
-        theBreakStatementObject: theBreakStatement
-
+        theBreakStatement: theBreakStatement
     };
 
     /**
@@ -1011,5 +995,4 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <break statement> ::= BREAK
      * ```
      */
-
 });

@@ -1,9 +1,13 @@
+/* global define */
+
 define(function () {
     'use strict';
 
     var io;
 
     return {
+
+        // Setter
         set: function (newIo) {
             io = newIo;
         },

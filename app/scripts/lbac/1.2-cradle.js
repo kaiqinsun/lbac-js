@@ -1,3 +1,5 @@
+/* global define */
+
 /**
  * Chapter 1 Introduction
  * ======================
@@ -27,7 +29,7 @@
 define(['./object', 'io'], function (object, io) {
     'use strict';
 
-    return object.extend({
+    var cradle = object.extend({
 
         // Constant declarations
         TAB: '\t',
@@ -119,7 +121,7 @@ define(['./object', 'io'], function (object, io) {
         main: function () {
             this.init();
         }
-
     });
 
+    return cradle;
 });

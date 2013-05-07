@@ -1,3 +1,5 @@
+/* global define */
+
 define([
     './2-expression-parsing',
     './3-more-expressions',
