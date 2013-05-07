@@ -17,12 +17,10 @@
 
 <body>
 
-<!-- header
-================================ -->
-<header class="hero-unit">
+<header id="header" class="hero-unit">
     <hgroup>
         <h1>Let's Build a Compiler</h1>
-        <h2>A JavaScript port of the <a href="http://compilers.iecc.com/crenshaw/" target="_blank">series by Jack Crenshaw</a>, a non-technical introduction to compiler construction.</h2>
+        <h2>A JavaScript port of the <a href="http://compilers.iecc.com/crenshaw/" target="_blank">series by Jack Crenshaw</a>, a non-technical introduction to compiler construction. With an interactive console.</h2>
     </hgroup>
 
     <!-- Fork me on Github ribbon
@@ -32,424 +30,60 @@
     </a>
 </header>
 
+<div id="main-container" class="container-fluid">
+<div class="row-fluid">
 
-<div class="container-fluid" id="main-container">
+    <!-- Accordion nav menu
+    =========================================== -->
+    <nav id="menu" class="span4 accordion"></nav>
 
-    <div class="row-fluid">
+    <!-- Main content
+    ========================================== -->
+    <article id="content" class="span8">
 
-        <!-- Accordion nav menu
-        =========================================== -->
-        <nav class="span4 accordion" id="accordion2">
+        <div id="info" class="alert alert-info"></div>
+        <ul id="top-pager" class="pager"></ul>
 
-            <!-- Preparation
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch0">
-                        Prologue
-                    </a>
-                </div>
-                <div id="ch0" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li class="disabled"><a href="#">The base object</a></li>
-                </ul>
-                </div>
-            </div>
+        <section id="doc"></section>
 
-            <!-- Chapter 1
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch1">
-                        Chapter 1 Introduction
-                    </a>
-                </div>
-                <div id="ch1" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li class="disabled"><a href="#">1.1 Introduction</a></li>
-                    <li class="disabled"><a href="#">1.2 The cradle</a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 2
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch2">
-                        Chapter 2 Expression Parsing
-                    </a>
-                </div>
-                <div id="ch2" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li class="disabled"><a href="#">2.1 Getting started</a></li>
-                    <li><a href="#">2.2 Single digits</a></li>
-                    <li><a href="#">2.3 Binary expressions</a></li>
-                    <li><a href="#">2.4 General expressions</a></li>
-                    <li><a href="#">2.5 Using the stack</a></li>
-                    <li><a href="#">2.6 Multiplication and division</a></li>
-                    <li><a href="#">2.7 Parentheses</a></li>
-                    <li><a href="#">2.8 Unary minus</a></li>
-                    <li class="disabled"><a href="#">2.9 A word about optimization</a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 3
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch3">
-                        Chapter 3 More Expressions
-                    </a>
-                </div>
-                <div id="ch3" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li class="disabled"><a href="#">3.1 Introduction</a></li>
-                    <li><a href="#">3.2 Variables</a></li>
-                    <li><a href="#">3.3 Functions</a></li>
-                    <li><a href="#">3.4 More on error handling</a></li>
-                    <li><a href="#">3.5 Assignment statements</a></li>
-                    <li><a href="#">3.6 Multi-character tokens</a></li>
-                    <li><a href="#">3.7 White space</a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 4
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch4">
-                        Chapter 4 Interpreters
-                    </a>
-                </div>
-                <div id="ch4" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li class="disabled"><a href="#">4.1 Introduction</a></li>
-                    <li class="disabled"><a href="#">4.2 The interpreters</a></li>
-                    <li><a href="#">4.2.1 Single digits</a></li>
-                    <li><a href="#">4.2.2 Binary expressions</a></li>
-                    <li><a href="#">4.2.3 General expressions</a></li>
-                    <li><a href="#">4.2.4 Multi-digits number</a></li>
-                    <li><a href="#">4.2.5 Factor</a></li>
-                    <li class="disabled"><a href="#">4.3 A little philosophy</a></li>
-                    <li><a href="#">4.3.1 Variables</a></li>
-                    <li><a href="#">4.3.2 Assignment statements</a></li>
-                    <li><a href="#">4.3.3 Multiple statements</a></li>
-                    <li><a href="#">4.3.4 I/O routines</a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 5
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch5">
-                        Chapter 5 Control Constructs
-                    </a>
-                </div>
-                <div id="ch5" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li class="disabled"><a href="#">5.1 Introduction</a></li>
-                    <li class="disabled"><a href="#">5.2 The plan</a></li>
-                    <li><a href="#">5.2.1 One statement</a></li>
-                    <li><a href="#">5.2.2 More than one statement</a></li>
-                    <li><a href="#">5.3 Some groundwork</a></li>
-                    <li><a href="#">5.4 The IF statement</a></li>
-                    <li><a href="#">5.4.2 Add the ELSE clause</a></li>
-                    <li><a href="#">5.5 The WHILE statement</a></li>
-                    <li><a href="#">5.6 The LOOP statement</a></li>
-                    <li><a href="#">5.7 The Repeat-Until statement</a></li>
-                    <li><a href="#">5.8 The FOR loop</a></li>
-                    <li><a href="#">5.9 The DO statement</a></li>
-                    <li><a href="#">5.10 The BREAK statement</a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 6
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch6">
-                        Chapter 6 Boolean Expressions
-                    </a>
-                </div>
-                <div id="ch6" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li class="disabled"><a href="#">6.1 Introduction</a></li>
-                    <li class="disabled"><a href="#">6.2 The plan</a></li>
-                    <li class="disabled"><a href="#">6.3 The grammar</a></li>
-                    <li class="disabled"><a href="#">6.4 Relops</a></li>
-                    <li class="disabled"><a href="#">6.5 Fixing the grammar</a></li>
-                    <li><a href="#">6.6 The parser</a></li>
-                    <li><a href="#">6.6.2 Boolean literal</a></li>
-                    <li><a href="#">6.6.3 General expressions</a></li>
-                    <li><a href="#">6.6.4 AND operation</a></li>
-                    <li><a href="#">6.6.5 NOT operation</a></li>
-                    <li><a href="#">6.6.6 Expand the factor</a></li>
-                    <li><a href="#">6.6.7 Full-blown relation</a></li>
-                    <li><a href="#">6.6.8 Merging with expressions</a></li>
-                    <li><a href="#">6.6.9 Change to latest expression syntax</a></li>
-                    <li><a href="#">6.7 Merging with control constructs</a></li>
-                    <li><a href="#">6.8 Adding assignments</a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 7
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch7">
-                        Chapter 7 Lexical Scanning
-                    </a>
-                </div>
-                <div id="ch7" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li class="disabled"><a href="#">7.1 Introduction</a></li>
-                    <li class="disabled"><a href="#">7.2 Lexical scanning</a></li>
-                    <li class="disabled"><a href="#">7.3 State machines and alternatives</a></li>
-                    <li><a href="#">7.4 Some experiments in scanning</a></li>
-                    <li><a href="#">7.5 White space</a></li>
-                    <li class="disabled"><a href="#">7.6 State machines</a></li>
-                    <li><a href="#">7.7 Newlines</a></li>
-                    <li><a href="#">7.8 Operators</a></li>
-                    <li><a href="#">7.9 Lists, commas and command lines</a></li>
-                    <li><a href="#">7.10 Getting fancy</a></li>
-                    <li><a href="#">7.10.2 Returning codes</a></li>
-                    <li><a href="#">7.10.3 Cleanup with global</a></li>
-                    <li><a href="#">7.11 Returning a character</a></li>
-                    <li class="disabled"><a href="#">7.12 Distributed vs centralized scanners</a></li>
-                    <li class="disabled"><a href="#">7.13 Merging scanner and parser</a></li>
-                    <li><a href="#">7.13.1 Judicious copying</a></li>
-                    <li><a href="#">7.13.2 Merging scanner and parser</a></li>
-                    <li class="disabled"><a href="#">7.14 Conclusion</a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 8
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch8">
-                        Chapter 8 A Little Philosophy
-                    </a>
-                </div>
-                <div id="ch8" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li class="disabled"><a href="#">8.1 Introduction</a></li>
-                    <li class="disabled"><a href="#">8.2 The road home</a></li>
-                    <li class="disabled"><a href="#">8.3 Why is it so simple?</a></li>
-                    <li class="disabled"><a href="#">Conclusion</a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 9
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch9">
-                        Chapter 9 A Top View
-                    </a>
-                </div>
-                <div id="ch9" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li class="disabled"><a href="#">9.1 Introduction</a></li>
-                    <li class="disabled"><a href="#">9.2 The top level</a></li>
-                    <li><a href="#">9.3 The structure of Pascal</a></li>
-                    <li><a href="#">9.4 Fleshing it out</a></li>
-                    <li><a href="#">9.5 Declarations</a></li>
-                    <li><a href="#">9.6 The structure of C</a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 10
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch10">
-                        Chapter 10 Introducing "Tiny"
-                    </a>
-                </div>
-                <div id="ch10" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li class="disabled"><a href="#">10.1 Introduction</a></li>
-                    <li class="disabled"><a href="#">10.2 Getting started</a></li>
-                    <li><a href="#">10.2.1 First step</a></li>
-                    <li><a href="#">10.2.2 The main program</a></li>
-                    <li><a href="#">10.3 Declarations</a></li>
-                    <li><a href="#">10.4 Declarations and symbols</a></li>
-                    <li><a href="#">10.4.2 Variable list</a></li>
-                    <li><a href="#">10.5 Initializers</a></li>
-                    <li><a href="#">10.5.2 Multi-digit integer</a></li>
-                    <li><a href="#">10.6 The symbol table</a></li>
-                    <li><a href="#">10.7 Executable statements</a></li>
-                    <li><a href="#">10.7.2 Code generation routines</a></li>
-                    <li><a href="#">10.7.3 Assignment statement</a></li>
-                    <li class="disabled"><a href="#">10.8 Booleans</a></li>
-                    <li><a href="#">10.8.1 More code generation routines</a></li>
-                    <li><a href="#">10.8.2 Boolean expressions</a></li>
-                    <li><a href="#">10.9 Control structures</a></li>
-                    <li><a href="#">10.10 Lexical scanning</a></li>
-                    <li class="disabled"><a href="#">10.11 Multi-character variable names</a></li>
-                    <li><a href="#">10.12 More relops</a></li>
-                    <li><a href="#">10.13 Input / Output</a></li>
-                    <li class="disabled"><a href="#">10.14 Conclusion</a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 11
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch11">
-                        Chapter 11 Lexical Scan Revisited
-                    </a>
-                </div>
-                <div id="ch11" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li class="disabled"><a href="#">11.1 Introduction</a></li>
-                    <li class="disabled"><a href="#">11.2 Background</a></li>
-                    <li class="disabled"><a href="#">11.3 The problem</a></li>
-                    <li><a href="#">11.4 The solution</a></li>
-                    <li><a href="#">11.4.2 Single-character operators</a></li>
-                    <li class="disabled"><a href="#">11.5 Fixing up the compiler</a></li>
-                    <li><a href="#">11.6 Conclusion</a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 12
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch12">
-                        Chapter 12 Miscellany
-                    </a>
-                </div>
-                <div id="ch12" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li class="disabled"><a href="#">12.1 Introduction</a></li>
-                    <li class="disabled"><a href="#">12.2 Semicolons</a></li>
-                    <li class="disabled"><a href="#">12.3 Syntactic sugar</a></li>
-                    <li><a href="#">12.4 Dealing with semicolons</a></li>
-                    <li><a href="#"></a></li>
-                    <li><a href="#"></a></li>
-                    <li><a href="#"></a></li>
-                    <li><a href="#"></a></li>
-                    <li><a href="#"></a></li>
-                    <li><a href="#"></a></li>
-                    <li><a href="#"></a></li>
-                    <li><a href="#"></a></li>
-                    <li><a href="#"></a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 13
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch13">
-                        Chapter 13 Procedures
-                    </a>
-                </div>
-                <div id="ch13" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li><a href="#"></a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 14
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch14">
-                        Chapter 14 Types
-                    </a>
-                </div>
-                <div id="ch14" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li><a href="#"></a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 15
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch15">
-                        Chapter 15 Back to The Future
-                    </a>
-                </div>
-                <div id="ch15" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li><a href="#"></a></li>
-                </ul>
-                </div>
-            </div>
-
-            <!-- Chapter 16
-            ======================================= -->
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#accordion2" href="#ch16">
-                        Chapter 16 Unit Construction
-                    </a>
-                </div>
-                <div id="ch16" class="accordion-body collapse">
-                <ul class="accordion-inner nav nav-tabs nav-stacked">
-                    <li><a href="#"></a></li>
-                </ul>
-                </div>
-            </div>
-
-        </nav>
-
-        <article class="span8">
-            <div id="doc"></div>
-            <div id="editor-area">
-                <textarea id="editor" class="input-block-level" placeholder="Please enter your code, and hit Run on the right to execute..."></textarea>
-                <button id="run-button" class="btn">Run</button>
-            </div>
-            <div id="console-area">
-                <div id="console"></div>
-                <button id="show-editor-button" class="btn">Show Editor</button>
-            </div>
-            <pre id="code" class="prettyprint" style="display: none"></pre>
-        </article>
+        <div id="editor-area">
+            <textarea id="editor" class="input-block-level" placeholder="Please enter your code and hit Run."></textarea>
+            <button id="run-button" class="btn">Run</button>
         </div>
+        <div id="console"></div>
 
-    </div><!--/row-->
+        <section id="code-area">
+            <h1>The source code</h1>
+            <pre id="code" class="prettyprint"></pre>
+        </section>
 
-<!--/.fluid-container-->
+        <ul id="bottom-pager" class="pager"></ul>
+    </article>
 
-<!--[if lt IE 7]>
-    <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
-<![endif]-->
+</div>
+</div>
 
-<footer class="footer">
+<footer id="footer" class="footer">
     <p>JavaScript port of <a href="http://compilers.iecc.com/crenshaw/" target="_blank">Let's Build a Compiler - Copyright &copy; 1988 - 1995 Jack W. Crenshaw.</a></p>
 </footer>
+
+<!--[if lt IE 9]>
+    <p class="chromeframe" style="margin: auto 50px;">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+<![endif]-->
+
+<img id="loading" class="no-js" src="images/ajax-loader.gif">
 
 <script data-main="scripts/main" src="scripts/vendor/require.js"></script>
 
 <!-- Google Analytics: change UA-XXXXX-X to be your site's ID.
-================================================================= -->
+=============================================================== -->
 <script>
+if (location.pathname.indexOf('lbac') >= 0) {
     var _gaq=[['_setAccount','UA-36429024-3'],['_trackPageview']];
     (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=true;
     g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
     s.parentNode.insertBefore(g,s)}(document,'script'));
+}
 </script>
 
 </body>
