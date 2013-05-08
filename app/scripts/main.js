@@ -1,4 +1,4 @@
-/* require js configuration */
+/* requirejs configuration */
 require.config({
     paths: {
 

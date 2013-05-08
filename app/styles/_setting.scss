@@ -1,5 +1,8 @@
 #setting {
     float: right;
+    .dropdown-toggle {
+        outline: none;
+    }
     ul {
         min-width: 55px;
         width: 85px;

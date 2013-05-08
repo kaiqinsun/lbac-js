@@ -99,8 +99,7 @@ define([
         }
     });
 
-    // Extract source code lines of given title
-    // quick and dirty solutions
+    // Extract content of given title
     function extractContent(title) {
         var docBegin = getDocBegin(title),
             docEnd = getDocEnd(docBegin),
@@ -117,26 +116,25 @@ define([
         };
     }
 
+    // Get the min leading white spaces in lines
+    function getMinLeadingWhite(lines) {
+        function getLeadingWhite(line) {
+            var index = line.search(/\S/);
+            return index > -1 ? index : Number.MAX_VALUE;
+        }
+        return getLeadingWhite(_.min(lines, getLeadingWhite));
+    }
+
     // Dedent the code lines
     function dedent(lines, offset, auto) {
-        var minWhite = Number.MAX_VALUE;    // min leading white spaces
+        var minLeadingWhite;    // min leading white spaces
+        offset = offset || 0;   // offset of white spaces to dedent
         auto = auto === undefined ? true : auto; // default: true
-        offset = offset || 0;   // extra num of dedent
 
-        // If auto, automatically find the min leading white spaces
-        if (auto) {
-            _.each(lines, function (line) {
-                var index = line.search(/\S/);
-                if (index > -1 && index < minWhite) {
-                    minWhite = index;
-                }
-            });
-        } else {
-            minWhite = 0;
-        }
+        minLeadingWhite = auto ? getMinLeadingWhite(lines) : 0;
 
         return lines.map(function dedentOne(line) {
-            return line.slice(minWhite + offset);
+            return line.slice(minLeadingWhite + offset);
         });
     }
 
