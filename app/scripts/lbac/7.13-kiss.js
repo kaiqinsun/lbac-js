@@ -1,4 +1,5 @@
-/* global define */
+/*global define*/
+/*jshint camelcase: false*/
 
 /**
  * Chapter 7.13 Merging Scanner and Parser

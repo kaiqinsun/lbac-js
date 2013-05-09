@@ -1,4 +1,5 @@
-/* global define */
+/*global define*/
+/*jshint camelcase: false*/
 
 /**
  * Chapter 10 Introducing "Tiny"

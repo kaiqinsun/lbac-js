@@ -6,7 +6,7 @@ define([
     'use strict';
 
     var Section = Backbone.Model.extend({
-        defaults:{
+        defaults: {
             sec: '',
             title: 'Untitled',
             disabled: false

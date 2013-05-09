@@ -2,7 +2,7 @@
 
 define([
     'jquery',
-    'underscore',
+    'lodash',
     'backbone',
     'templates',
     'collections/sections'

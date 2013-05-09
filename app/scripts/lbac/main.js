@@ -1,4 +1,4 @@
-/* global define */
+/*global define*/
 
 define([
     './2-expression-parsing',
@@ -24,7 +24,7 @@ define([
     aTopView,               // 9
     introducingTiny,        // 10
     lexicalScanRevisited,   // 11
-    tiny_11,                // 11.6
+    tiny11,                 // 11.6
     miscellany              // 12
 ) {
     'use strict';
@@ -40,7 +40,7 @@ define([
         aTopView: aTopView,
         introducingTiny: introducingTiny,
         lexicalScanRevisited: lexicalScanRevisited,
-        tiny_11: tiny_11,
+        tiny11: tiny11,
         miscellany: miscellany
     };
 

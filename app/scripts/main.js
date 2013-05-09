@@ -5,8 +5,8 @@ require.config({
         // components
         jquery: '../components/jquery/jquery',
         text: '../components/requirejs-text/text',
-        backbone: '../components/backbone-amd/backbone',
-        underscore: '../components/underscore-amd/underscore',
+        backbone: '../components/backbone/backbone',
+        lodash: '../components/lodash/lodash',
         bootstrap: 'vendor/bootstrap',
         cookie: '../components/jquery.cookie/jquery.cookie',
         prettify: '../components/google-code-prettify/src/prettify',
@@ -16,15 +16,13 @@ require.config({
         common: 'helpers/common',
         io: 'helpers/io',
 
+        // data
         src: '../../data/lbac.src.txt'
     },
     shim: {
-        underscore: {
-            exports: '_'
-        },
         backbone: {
             deps: [
-                'underscore',
+                'lodash',
                 'jquery'
             ],
             exports: 'Backbone'

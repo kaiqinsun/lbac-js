@@ -1,51 +1,33 @@
 /*global define*/
 
 define([
-    'jquery',
-    'underscore',
+    'lodash',
     'backbone',
     'models/pagerItem',
     'data/toc'
-], function ($, _, Backbone, PagerItem, toc) {
+], function (_, Backbone, PagerItem, toc) {
     'use strict';
-
-    // Calculate the value of the sec, which will be used for comparison.
-    function valueOf(sec) {
-        sec = sec || '0.0.0';
-        var nums = sec.split('.');
-        nums[2] = nums[2] || '0';
-
-        return _.reduce(nums, function (memo, num) {
-            return memo * 100 + parseInt(num, 10);
-        }, 0);
-    }
 
     // Get pager item data for the previous section/chapter.
     function getPrevious(ch, sec) {
-        var sections = toc[ch].sections,
-            section,
+        var sections = _.reject(toc[ch].sections, 'disabled'),
+            index = _.findIndex(sections, { sec: sec}) - 1,
+            section = sec === 'last' ? _.last(sections) : sections[index],
             PreviousSec,
-            title,
-            i;
+            title;
 
-        // Find the previous sec and title.
-        for (i = sections.length - 1; i >= 0; i -= 1) {
-            section = sections[i];
-            if (valueOf(section.sec) < valueOf(sec) && !section.disabled) {
-                PreviousSec = section.sec;
-                title = '&sect;' + PreviousSec + ' ' + section.title;
-                break;
-            }
-        }
+        if (section) {
+            PreviousSec = section.sec;
+            title = '&sect;' + PreviousSec + ' ' + section.title;
+        } else {
 
-        // If previous sec not found, it's full chapter,
-        // otherwise look for previous chapter or it's begin.
-        if (!PreviousSec) {
+            // If previous section not found, it's full chapter,
+            // otherwise look for previous chapter or it's begin.
             if (sec) {
                 title = (ch ? 'Chapter ' + toc[ch].ch + ' ' : '') + toc[ch].title;
             } else {
                 if (ch > 0) {
-                    return getPrevious(ch - 1, '99.9');
+                    return getPrevious(ch - 1, 'last');
                 } else {
                     return null;
                 }
@@ -62,21 +44,19 @@ define([
 
     // Get pager item data for the next section/chapter.
     function getNext(ch, sec) {
-        var END_CH = 12,
+        var END_CH = 16,
+            sections = _.reject(toc[ch].sections, 'disabled'),
+            index = _.findIndex(sections, { sec: sec }) + 1,
+            section = sections[index],
             nextSec,
             title;
 
-        // Find the next sec and title.
-        $.each(toc[ch].sections, function (i, section) {
-            if (valueOf(section.sec) > valueOf(sec) && !section.disabled) {
-                nextSec = section.sec;
-                title = '&sect;' + nextSec + ' ' + section.title;
-                return false;
-            }
-        });
+        if (section) {
+            nextSec = section.sec;
+            title = '&sect;' + nextSec + ' ' + section.title;
+        } else {
 
-        // If not found, next chapter or end.
-        if (!nextSec) {
+            // If next section not found, next chapter or end.
             if (ch < END_CH) {
                 ch += 1;
                 title = 'Chapter ' + toc[ch].ch + ' ' + toc[ch].title;
@@ -94,8 +74,8 @@ define([
         };
     }
 
-    // Get data for pageItem based on ch (and sec).
-    function getData(ch, sec) {
+    // Get an array of page items based on ch (and sec).
+    function getPagerData(ch, sec) {
         var chapter = toc[ch],
             data = [],
             item;
@@ -143,7 +123,7 @@ define([
         model: PagerItem,
 
         update: function (ch, sec) {
-            this.reset(getData(ch, sec));
+            this.reset(getPagerData(ch, sec));
         }
     });
 

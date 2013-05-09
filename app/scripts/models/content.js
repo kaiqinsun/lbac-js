@@ -1,7 +1,7 @@
-/* global define */
+/*global define*/
 
 define([
-    'underscore',
+    'lodash',
     'backbone',
     'prettify',
     'marked',
@@ -12,21 +12,14 @@ define([
 
     var codeLines = src.split('\n');
 
-    // Get the begin line index of the doc in the code lines
+    // Get the begin line index of the doc in the code lines.
     var getDocBegin = _.memoize(function (title) {
-        var begin;
-
-        // Search for the line containing the title
-        _.each(codeLines, function (line, i) {
-            if (line.search(title) !== -1) {
-                begin = i;
-                return false;
-            }
+        return _.findIndex(codeLines, function (line) {
+            return _.contains(line, title);
         });
-        return begin;
     });
 
-    // Look behind for previous doc begin without a code section
+    // Look behind for previous doc begin without a code section.
     var lookBehind = _.memoize(function (begin) {
         var i,
             line;
@@ -34,10 +27,10 @@ define([
         for (i = begin; i >= 0; i -= 1) {
             line = codeLines[i];
             if (line) {
-                if (line.indexOf('*') === -1) {
+                if (!_.contains(line, '*')) {
                     break;
                 }
-                if (line.indexOf('/**') > -1) {
+                if (_.contains(line, '/**')) {
                     begin = i;
                 }
             }
@@ -45,29 +38,26 @@ define([
         return begin;
     });
 
-    // Get the end line index of the doc in the code lines
+    // Get the end line index of the doc in the code lines.
     var getDocEnd = _.memoize(function (docBegin) {
-        var len = codeLines.length,
-            i;
+        var lines = _.rest(codeLines, docBegin);
 
-        for (i = docBegin; i < len; i += 1) {
-            if (codeLines[i].indexOf('*/') > -1) {
-                return i;
-            }
-        }
+        return docBegin + _.findIndex(lines, function (line) {
+            return _.contains(line, '*/');
+        });
     });
 
-    // Get the begin line index of the code in the code lines
+    // Get the begin line index of the code in the code lines.
     var getCodeBegin = _.memoize(function (docEnd) {
-        var i = docEnd + 1;
+        var begin = docEnd + 1;
 
-        while (!codeLines[i].trim()) {
-            i += 1;
+        while (!codeLines[begin].trim()) {
+            begin += 1;
         }
-        return i;
+        return begin;
     });
 
-    // Get the end line index of the code in the code lines
+    // Get the end line index of the code in the code lines.
     var getCodeEnd = _.memoize(function (codeBegin) {
         var len = codeLines.length,
             level = 0,
@@ -79,18 +69,18 @@ define([
         for (i = codeBegin; i < len; i += 1) {
             line = codeLines[i];
 
-            if (line.indexOf('/*') > -1) {
+            if (_.contains(line, '/*')) {
                 isInComment = true;
             }
-            if (line.indexOf('*/') > -1) {
+            if (_.contains(line, '*/')) {
                 isInComment = false;
             }
 
-            if (!isInComment && line.indexOf('{') > -1) {
+            if (!isInComment && _.contains(line, '{')) {
                 level += 1;
                 isCounting = true;
             }
-            if (!isInComment && line.indexOf('}') > -1) {
+            if (!isInComment && _.contains(line, '}')) {
                 level -= 1;
             }
             if (isCounting && level === 0) {

@@ -2,11 +2,11 @@
 
 define([
     'jquery',
-    'underscore',
+    'lodash',
     'backbone',
-    'data/toc',
+    'common',
     'cookie'
-], function ($, _, Backbone, toc) {
+], function ($, _, Backbone, common) {
     'use strict';
 
     var AppRouter = Backbone.Router.extend({
@@ -16,10 +16,11 @@ define([
         },
 
         update: function (ch, sec) {
-            if (!this.validate(ch, sec)) {
+            if (!common.isValid(ch, sec)) {
+                this.restorePage();
                 return;
             }
-            this.trigger('update', parseInt(ch, 10), sec);
+            this.trigger('update', _.parseInt(ch), sec);
 
             // save the menu state with cookie
             $.cookie('ch', ch, { expires: 60 });
@@ -40,30 +41,6 @@ define([
                 trigger: true,
                 replace: true
             });
-        },
-
-        // Validate the ch and sec params, restore page if invalid.
-        validate: function (ch, sec) {
-            var secIsValid;
-
-            // Validate ch
-            if (ch !== parseInt(ch, 10).toString() || !toc[ch]) {
-                this.restorePage();
-                return false;
-            }
-
-            // Validate sec
-            if (sec) {
-                secIsValid = _.some(toc[ch].sections, function (section) {
-                    return section.sec === sec;
-                });
-                if (!secIsValid) {
-                    this.restorePage();
-                    return false;
-                }
-            }
-
-            return true;
         }
     });
 

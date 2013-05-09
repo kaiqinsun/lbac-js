@@ -2,12 +2,11 @@
 
 define([
     'jquery',
-    'underscore',
     'backbone',
     'templates',
     'views/menu',
     'views/content'
-], function ($, _, Backbone, JST, MenuView, ContentView) {
+], function ($, Backbone, JST, MenuView, ContentView) {
     'use strict';
 
     // Top level application view

@@ -2,10 +2,9 @@
 
 define([
     'jquery',
-    'underscore',
     'backbone',
     'templates'
-], function ($, _, Backbone, JST) {
+], function ($, Backbone, JST) {
     'use strict';
 
     // Settings dropdown menu with custom checkbox itmes
@@ -34,11 +33,12 @@ define([
         toggleEditorItem: function (e) {
 
             // Update model
-            var checked = this.model.toggle('editor');
+            this.model.toggle('editor');
             e.preventDefault();
 
             // Update check icon and tooltip
-            this.$('#toggle-editor i').toggleClass('icon-ok', checked);
+            this.$('#toggle-editor i')
+                    .toggleClass('icon-ok', this.model.get('editor'));
             this.$toggleEditor.tooltip('destroy').tooltip({
                 title: this.model.get('editorTitle'),
                 html: true
@@ -49,11 +49,12 @@ define([
         toggleConsoleItem: function (e) {
 
             // Update model
-            var checked = this.model.toggle('console');
+            this.model.toggle('console');
             e.preventDefault();
 
             // Update check icon and tooltip
-            this.$('#toggle-console i').toggleClass('icon-ok', checked);
+            this.$('#toggle-console i')
+                    .toggleClass('icon-ok', this.model.get('console'));
             this.$toggleConsole.tooltip('destroy').tooltip({
                 title: this.model.get('consoleTitle'),
                 html: true

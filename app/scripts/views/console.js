@@ -2,7 +2,7 @@
 
 define([
     'jquery',
-    'underscore',
+    'lodash',
     'backbone',
     'lbac',
     'io',
@@ -13,25 +13,18 @@ define([
 
     // Convert a chapter/section title to a camelcase identifier
     function titleToIdent(title) {
-        var words;
 
         // Filter out unnecessory characters
         title = title.replace(/Chapter\s*\d*\s*/, '');
         title = title.replace(/\d+\.\d+\.?\d?\s*/, '');
         title = title.replace(/-/g, ' ');
         title = title.replace(/[,\/"]/g, '');
-        words = title.split(' ');
 
-        // convert title words to a camelcase identifier
-        $.each(words, function (i, word) {
-            if (i === 0) {
-                words[0] = word.toLowerCase();
-            } else {
-                words[i] = word.substr(0, 1).toUpperCase() +
-                        word.substr(1).toLowerCase();
-            }
-        });
-        return words.join('');
+        // Convert title words to camelcase identifier
+        return _.reduce(title.split(' '), function (ident, word, i) {
+            return ident + (i ? word.substr(0, 1).toUpperCase() +
+                    word.substr(1).toLowerCase() : word.toLowerCase());
+        }, '');
     }
 
     // Get the bound main function
@@ -88,8 +81,8 @@ define([
             }
             // 11.6 Conclusion: Tiny v1.1
             if (c === 'lexicalScanRevisited' && s === 'conclusion') {
-                c = 'tiny_11';
-                s = 'run';
+                c = 'tiny11';
+                s = 'object';
             }
 
             // Set the excute function and update the promput

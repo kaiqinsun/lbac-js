@@ -1,5 +1,3 @@
-/* global define */
-
 /**
  * Chapter 8 A Little Philosophy
  * ==============================
@@ -60,6 +58,6 @@
  * Then we’ll press on into the new subjects listed at section 8.2.
  */
 
-{
-    'No code in this chapter';
-}
+//{
+//    'No code in this chapter'
+//}

@@ -1,4 +1,4 @@
-/* global define, jQuery */
+/*global define, jQuery*/
 
 /** Tiny console, a jQuery plugin
  * Author: Malcom Wu

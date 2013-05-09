@@ -1,4 +1,4 @@
-/* global define */
+/*global define*/
 
 /**
  * Chapter 6 Boolean Expressions

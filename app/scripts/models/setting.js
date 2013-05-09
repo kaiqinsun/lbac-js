@@ -6,7 +6,7 @@ define([
     'use strict';
 
     var Setting = Backbone.Model.extend({
-        defaults:{
+        defaults: {
             editor: true,
             editorTitle: '',
             console: true,
@@ -21,11 +21,8 @@ define([
         // Toggle the editor or console check state
         // and return the new state
         toggle: function (what) {
-            var newState = !this.get(what);
-            this.set(what, newState);
+            this.set(what, !this.get(what));
             this.setTitle(what);
-
-            return newState;
         },
 
         // Set the tooltip title of editorTitle or consoleTitle

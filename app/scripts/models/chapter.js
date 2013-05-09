@@ -6,7 +6,7 @@ define([
     'use strict';
 
     var Chapter = Backbone.Model.extend({
-        defaults:{
+        defaults: {
             ch: 0,
             title: 'Untitled'
         }

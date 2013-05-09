@@ -1,32 +1,38 @@
-/* global define */
+/*global define*/
 
-define(['underscore', 'data/toc'], function (_, toc) {
+define(['lodash', 'data/toc'], function (_, toc) {
     'use strict';
 
-    // Get the chapter, or section title if sec provided.
+    // Check ch and sec against toc.
+    function isValid(ch, sec) {
+
+        // Check ch
+        if (ch !== _.parseInt(ch).toString() || !toc[ch]) {
+            return false;
+        }
+        // Check sec
+        if (sec && !_.any(toc[ch].sections, { sec: sec })) {
+            return false;
+        }
+        return true;
+    }
+
+    // Get the title of chapter, or section if sec provided.
     function getTitle(ch, sec) {
-
-        function getChapterTitle(ch) {
-            var chapter = toc[ch];
-            return chapter.ch ? ('Chapter ' + chapter.ch + ' ' + chapter.title) : chapter.title;
-        }
-
-        function getSectionTitle(ch, sec) {
-            var sections = toc[ch].sections;
-            var section = _.find(sections, function (section) {
-                return section.sec === sec;
-            });
-            return sec + ' ' + section.title;
-        }
+        var chapter = toc[ch],
+            section;
 
         if (sec) {
-            return getSectionTitle(ch, sec);
+            section = _.find(chapter.sections, { sec: sec });
+            return sec + ' ' + section.title;
         } else {
-            return getChapterTitle(ch);
+            return (chapter.ch ? 'Chapter ' + chapter.ch + ' ' : '') +
+                    chapter.title;
         }
     }
 
     return {
+        isValid: isValid,
         getTitle: getTitle
     };
 });

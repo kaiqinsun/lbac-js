@@ -1,4 +1,5 @@
-/* global define */
+/*global define*/
+/*jshint camelcase: false*/
 
 /**
  * 11.6 Conclusion
@@ -9,7 +10,7 @@
 define(['./object', 'io'], function (object, io) {
     'use strict';
 
-    var program = object.extend({
+    var tiny11 = object.extend({
 
         // Constant declarations
         TAB: '\t',
@@ -788,11 +789,7 @@ define(['./object', 'io'], function (object, io) {
         }
     });
 
-    // return main functions for executions
-    // and the program itself for chapter 12
     return {
-        run: program,
-        object: program
+        object: tiny11
     };
-
 });

@@ -1,4 +1,4 @@
-/* global define */
+/*global define*/
 
 /**
  * Chapter 7 Lexical Scanning

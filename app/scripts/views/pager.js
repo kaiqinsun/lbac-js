@@ -2,11 +2,10 @@
 
 define([
     'jquery',
-    'underscore',
     'backbone',
     'templates',
     'collections/pager'
-], function ($, _, Backbone, JST, Pager) {
+], function ($, Backbone, JST, Pager) {
     'use strict';
 
     // Pager view

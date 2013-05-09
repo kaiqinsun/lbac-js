@@ -2,7 +2,7 @@
 
 define([
     'jquery',
-    'underscore',
+    'lodash',
     'backbone',
     'templates',
     'models/content',
@@ -65,21 +65,18 @@ define([
 
         // Update the console view and the content model.
         updateConsole: function (ch, sec) {
-            var hasConsole,
+            var hasConsole = false,
+                hasEditor = false,
                 section;
 
             if (sec) {
                 hasConsole = this.consoleView.update(ch, sec);
-                this.content.set('hasConsole', hasConsole);
-
-                section = _.find(toc[ch].sections, function (section) {
-                    return section.sec === sec;
-                });
-                this.content.set('hasEditor', !!section.editor);
-            } else {
-                this.content.set('hasConsole', false);
-                this.content.set('hasEditor', false);
+                section = _.find(toc[ch].sections, { sec: sec });
+                hasEditor = !!section.editor;
             }
+
+            this.content.set('hasConsole', hasConsole);
+            this.content.set('hasEditor', hasEditor);
         },
 
         // Render the doc

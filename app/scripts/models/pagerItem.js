@@ -6,7 +6,7 @@ define([
     'use strict';
 
     var PagerItem = Backbone.Model.extend({
-        defaults:{
+        defaults: {
             className: '',
             href: '#',
             title: 'Untitled',

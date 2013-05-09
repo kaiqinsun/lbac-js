@@ -1,11 +1,11 @@
-/* global define */
+/*global define*/
 
 /**
  * Chapter 12 Miscellany
  * ======================
  */
 
-define(['./object', './11.6-tiny-1.1'], function (object, tiny_11) {
+define(['./11.6-tiny-1.1'], function (tiny11) {
     'use strict';
 
     var dealingWithSemicolons;          // 12.4
@@ -38,7 +38,7 @@ define(['./object', './11.6-tiny-1.1'], function (object, tiny_11) {
      * <block> ::= (<statement> ';')*
      * ```
      */
-    dealingWithSemicolons = tiny_11.object.extend({
+    dealingWithSemicolons = tiny11.object.extend({
 
         // Match a semicolon
         semi: function () {
