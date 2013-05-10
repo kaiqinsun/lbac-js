@@ -9,6 +9,8 @@ define([
 ], function ($, Backbone, JST, MenuView, ContentView) {
     'use strict';
 
+    var visited = false;
+
     // Top level application view
     var AppView = Backbone.View.extend({
         el: 'body',
@@ -31,7 +33,11 @@ define([
         update: function (ch, sec) {
             this.menuView.update(ch, sec);
             this.contentView.update(ch, sec);
-            $('html, body').scrollTop(this.$content.offset().top - 20);
+            if (visited) {
+                $('html, body').scrollTop(this.$content.offset().top - 20);
+            } else {
+                visited = true;
+            }
         }
     });
 

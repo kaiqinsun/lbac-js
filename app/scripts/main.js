@@ -5,10 +5,10 @@ require.config({
         // components
         jquery: '../components/jquery/jquery',
         text: '../components/requirejs-text/text',
-        backbone: '../components/backbone/backbone',
+        backbone: '../components/backbone-amd/backbone',
+        localstorage: '../components/backbone.localStorage/backbone.localStorage',
         lodash: '../components/lodash/lodash',
         bootstrap: 'vendor/bootstrap',
-        cookie: '../components/jquery.cookie/jquery.cookie',
         prettify: '../components/google-code-prettify/src/prettify',
         marked: '../components/marked/lib/marked',
 
@@ -20,20 +20,14 @@ require.config({
         src: '../../data/lbac.src.txt'
     },
     shim: {
-        backbone: {
-            deps: [
-                'lodash',
-                'jquery'
-            ],
-            exports: 'Backbone'
-        },
         bootstrap: {
             deps: ['jquery'],
             exports: 'jquery'
-        },
-        cookie: {
-            deps: ['jquery'],
-            exports: 'jquery'
+        }
+    },
+    map: {
+        '*': {
+            underscore: 'lodash'
         }
     },
     packages: ['lbac']

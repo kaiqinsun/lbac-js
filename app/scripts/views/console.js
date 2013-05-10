@@ -27,11 +27,6 @@ define([
         }, '');
     }
 
-    // Get the bound main function
-    function boundMain(obj) {
-        return _.bind(obj.main, obj);
-    }
-
 
     // Console view
     var ConsoleView = Backbone.View.extend({
@@ -87,7 +82,7 @@ define([
 
             // Set the excute function and update the promput
             if (lbac[c] && lbac[c][s]) {
-                this.$el.tinyConsole('setExecute', boundMain(lbac[c][s]));
+                this.$el.tinyConsole('setExecute', _.bindKey(lbac[c][s], 'main'));
                 this.$el.tinyConsole('option', 'prompt', sectionTitle + '>');
                 return true;
             }

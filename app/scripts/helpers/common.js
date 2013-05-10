@@ -3,20 +3,6 @@
 define(['lodash', 'data/toc'], function (_, toc) {
     'use strict';
 
-    // Check ch and sec against toc.
-    function isValid(ch, sec) {
-
-        // Check ch
-        if (ch !== _.parseInt(ch).toString() || !toc[ch]) {
-            return false;
-        }
-        // Check sec
-        if (sec && !_.any(toc[ch].sections, { sec: sec })) {
-            return false;
-        }
-        return true;
-    }
-
     // Get the title of chapter, or section if sec provided.
     function getTitle(ch, sec) {
         var chapter = toc[ch],
@@ -32,7 +18,6 @@ define(['lodash', 'data/toc'], function (_, toc) {
     }
 
     return {
-        isValid: isValid,
         getTitle: getTitle
     };
 });

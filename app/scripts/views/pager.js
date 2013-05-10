@@ -37,8 +37,8 @@ define([
 
         // Extra work to remedy the flicker when switching to chapter
         itemClicked: function (e) {
-            var fragment = $(e.target).attr('href').replace(/#/, '');
-            this.trigger('click:item', fragment);
+            var href = $(e.target).attr('href');
+            this.trigger('click:item', href);
             e.preventDefault();
         }
     });

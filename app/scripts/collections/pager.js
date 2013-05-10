@@ -11,18 +11,18 @@ define([
     // Get pager item data for the previous section/chapter.
     function getPrevious(ch, sec) {
         var sections = _.reject(toc[ch].sections, 'disabled'),
-            index = _.findIndex(sections, { sec: sec}) - 1,
+            index = _.findIndex(sections, { sec: sec }) - 1,
             section = sec === 'last' ? _.last(sections) : sections[index],
-            PreviousSec,
+            previousSec,
             title;
 
         if (section) {
-            PreviousSec = section.sec;
-            title = '&sect;' + PreviousSec + ' ' + section.title;
+            previousSec = section.sec;
+            title = '&sect;' + previousSec + ' ' + section.title;
         } else {
 
             // If previous section not found, it's full chapter,
-            // otherwise look for previous chapter or it's begin.
+            // otherwise look for previous chapter, or it's begin.
             if (sec) {
                 title = (ch ? 'Chapter ' + toc[ch].ch + ' ' : '') + toc[ch].title;
             } else {
@@ -36,7 +36,8 @@ define([
 
         return {
             className: 'previous',
-            href: '#ch' + ch + (PreviousSec ? '/' + PreviousSec : ''),
+            ch: ch,
+            sec: previousSec,
             title: title,
             text: '&laquo; Previous',
         };
@@ -56,7 +57,7 @@ define([
             title = '&sect;' + nextSec + ' ' + section.title;
         } else {
 
-            // If next section not found, next chapter or end.
+            // If next section not found, next chapter, or end.
             if (ch < END_CH) {
                 ch += 1;
                 title = 'Chapter ' + toc[ch].ch + ' ' + toc[ch].title;
@@ -67,7 +68,8 @@ define([
 
         return {
             className: 'next',
-            href: '#ch' + ch + (nextSec ? '/' + nextSec : ''),
+            ch: ch,
+            sec: nextSec,
             title: title,
             text: 'Next &raquo;',
             placement: 'bottom'
@@ -89,20 +91,17 @@ define([
         // This chapter
         data.push({
             className: sec ? '' : 'disabled',
-            href: '#ch' + ch,
+            ch: ch,
             title: (ch ? 'Chapter ' + ch + ' ' : '') + chapter.title,
             text: ch ? 'Ch' + ch : chapter.title
         });
 
-        // Each section
-        _.each(chapter.sections, function (section) {
-            if (section.disabled) {
-                return;
-            }
-
+        // Each none-disabled section
+        _(chapter.sections).reject('disabled').each(function (section) {
             data.push({
                 className: (section.sec === sec) ? 'disabled' : '',
-                href: '#ch' + ch + '/' + section.sec,
+                ch: ch,
+                sec: section.sec,
                 title: '&sect;' + section.sec + ' ' + section.title,
                 text: section.sec
             });

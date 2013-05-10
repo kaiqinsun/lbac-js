@@ -4,43 +4,44 @@ define([
     'jquery',
     'lodash',
     'backbone',
-    'common',
-    'cookie'
-], function ($, _, Backbone, common) {
+    'models/app'
+], function ($, _, Backbone, App) {
     'use strict';
 
     var AppRouter = Backbone.Router.extend({
         routes: {
-            'ch:ch(/:sec)': 'update',
+            'ch/:ch(/:sec)': 'saveState',
             '*any': 'restorePage'
         },
 
-        update: function (ch, sec) {
-            if (!common.isValid(ch, sec)) {
-                this.restorePage();
-                return;
-            }
-            this.trigger('update', _.parseInt(ch), sec);
+        initialize: function () {
+            this.model = new App({ id: 1 });
 
-            // save the menu state with cookie
-            $.cookie('ch', ch, { expires: 60 });
-            $.cookie('sec', sec || '', { expires: 60 });
+            this.listenTo(this.model, 'sync', this.triggerUpdate);
+            this.listenTo(this.model, 'invalid', this.restorePage);
         },
 
-        // Restore the page state using cookie
-        restorePage: function () {
-            var ch = $.cookie('ch') || 0,
-                sec = ch ? $.cookie('sec') : '',
-                fragment;
+        // Save the app state.
+        saveState: function (ch, sec) {
+            this.model.save({ ch: ch, sec: sec });
+        },
 
-            fragment = 'ch' + ch;
-            if (sec) {
-                fragment += '/' + sec;
+        // Restore the page state for invalid state.
+        restorePage: function () {
+            this.model.fetch();
+            var fragment = 'ch/' + this.model.get('ch');
+
+            if (this.model.get('sec')) {
+                fragment += '/' + this.model.get('sec');
             }
-            this.navigate(fragment, {
-                trigger: true,
-                replace: true
-            });
+            this.navigate(fragment, { replace: true });
+        },
+
+        // Trigger update event to be observed by AppView.
+        triggerUpdate: function () {
+            var ch = _.parseInt(this.model.get('ch')),
+                sec = this.model.get('sec');
+            this.trigger('update', ch, sec);
         }
     });
 

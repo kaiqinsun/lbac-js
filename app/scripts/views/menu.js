@@ -66,8 +66,8 @@ define([
 
         // Extra work to remedy the flicker when switching to chapter
         chapterClicked: function (e) {
-            var ch = $(e.target).attr('href').replace(/#/, '');
-            this.trigger('click:chapter', ch);
+            var href = $(e.target).attr('href');
+            this.trigger('click:chapter', href);
             e.preventDefault();
         },
 

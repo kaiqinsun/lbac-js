@@ -37,7 +37,7 @@
  * ------------------------
  * Just to make sure you get the message here, let me state it flat out:
  * > USING THE TECHNIQUES WE’VE USED HERE, IT IS POSSIBLE TO BUILD
- * > A PRODUCTIONQUALITY, WORKING COMPILER WITHOUT ADDING A LOT OF
+ * > A PRODUCTION QUALITY, WORKING COMPILER WITHOUT ADDING A LOT OF
  * > COMPLEXITY TO WHAT WE’VE ALREADY DONE.
  *
  * The areas that I think have led to complexity in the past:
