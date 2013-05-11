@@ -92,6 +92,7 @@ define([
         data.push({
             className: sec ? '' : 'disabled',
             ch: ch,
+            sec: null,
             title: (ch ? 'Chapter ' + ch + ' ' : '') + chapter.title,
             text: ch ? 'Ch' + ch : chapter.title
         });

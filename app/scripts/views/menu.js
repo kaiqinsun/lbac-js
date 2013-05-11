@@ -2,20 +2,20 @@
 
 define([
     'jquery',
+    'lodash',
     'backbone',
     'templates',
     'models/menu',
-    'collections/chapters',
-    'views/sections',
     'data/toc'
-], function ($, Backbone, JST, Menu, Chapters, SectionsView, toc) {
+], function ($, _, Backbone, JST, Menu, toc) {
     'use strict';
 
     // Accordion menu view consists of chapter <div>'s
     // and section subviews (<ul> for each chapter).
     var MenuView = Backbone.View.extend({
         className: 'accordion-group',
-        template: JST['app/scripts/templates/chapterItem.ejs'],
+        chapterTemplate: JST['app/scripts/templates/chapterItem.ejs'],
+        sectionTemplate: JST['app/scripts/templates/sectionItem.ejs'],
 
         events: {
             'click .disabled a': 'preventDefault',
@@ -24,7 +24,6 @@ define([
 
         initialize: function () {
             this.model = new Menu();
-            this.chapters = new Chapters(toc);
 
             this.listenTo(this.model, 'change:ch', this.toggleCh);
             this.listenTo(this.model, 'change:active', this.toggleActive);
@@ -33,19 +32,17 @@ define([
         },
 
         render: function () {
-            var that = this;
+            var chapterTemplate = this.chapterTemplate,
+                sectionTemplate = this.sectionTemplate;
 
-            this.chapters.each(function (chapter) {
-                var sectionsView;
-                chapter = chapter.attributes;
+            var html = _.map(toc, function (chapter) {
+                chapter = _.extend({}, chapter.attributes, {
+                    sectionTemplate: sectionTemplate
+                });
+                return chapterTemplate(chapter);
+            }).join('');
 
-                // Append the chapter item
-                that.$el.append(that.template(chapter));
-
-                // Append the section list
-                sectionsView = new SectionsView(chapter.sections, chapter.ch);
-                that.$('#ch' + chapter.ch).append(sectionsView.el);
-            });
+            this.$el.html(html);
         },
 
         // Update the menu state

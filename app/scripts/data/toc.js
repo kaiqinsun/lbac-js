@@ -1,6 +1,6 @@
 /*global define*/
 
-define(function () {
+define(['lodash'], function (_) {
     'use strict';
 
     // Table of Content
@@ -774,5 +774,10 @@ define(function () {
         },
     ];
 
-    return toc;
+    return _.each(toc, function (chapter) {
+        _.each(chapter.sections, function (section) {
+            section.ch = chapter.ch;
+            section.disabled = section.disabled || false;
+        });
+    });
 });

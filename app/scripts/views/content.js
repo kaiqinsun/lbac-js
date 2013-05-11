@@ -7,11 +7,12 @@ define([
     'templates',
     'models/content',
     'models/setting',
+    'collections/pager',
     'views/pager',
     'views/setting',
     'views/console',
     'data/toc'
-], function ($, _, Backbone, JST, Content, Setting, PagerView, SettingView, ConsoleView, toc) {
+], function ($, _, Backbone, JST, Content, Setting, Pager, PagerView, SettingView, ConsoleView, toc) {
     'use strict';
 
     // Contents view
@@ -31,8 +32,15 @@ define([
             this.content = new Content();
             this.setting = new Setting();
 
-            this.topPagerView = new PagerView({ el: '#top-pager' });
-            this.bottomPagerView = new PagerView({ el: '#bottom-pager' });
+            this.pager = new Pager();
+            this.topPagerView = new PagerView({
+                el: '#top-pager',
+                collection: this.pager
+            });
+            this.bottomPagerView = new PagerView({
+                el: '#bottom-pager',
+                collection: this.pager
+            });
 
             this.listenTo(this.content, 'change:doc', this.renderDoc);
             this.listenTo(this.content, 'change:code', this.renderCode);
@@ -53,8 +61,8 @@ define([
 
         // Update the content view
         update: function (ch, sec) {
-            this.topPagerView.update(ch, sec);
-            this.bottomPagerView.update(ch, sec);
+            this.pager.update(ch, sec);
+
             this.$info.html(this.infoTemplate({
                 ch: ch,
                 title: toc[ch].title.toUpperCase().replace(/ /g, '&nbsp;')

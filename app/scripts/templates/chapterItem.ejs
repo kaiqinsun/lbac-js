@@ -1,4 +1,10 @@
 <div class="accordion-heading">
     <a id="chapter<%= ch %>" class="accordion-toggle btn" href="#ch/<%= ch %>"><%= ch ? 'Chapter ' + ch + ' ' : '' %><%= title %></a>
 </div>
-<div id="ch<%= ch %>" class="accordion-body collapse"></div>
+<div id="ch<%= ch %>" class="accordion-body collapse">
+    <ul class="accordion-inner nav nav-tabs nav-stacked">
+    <%= _.map(sections, function (section) {
+        return sectionTemplate(section);
+    }).join('') %>
+    </ul>
+</div>

@@ -3,9 +3,8 @@
 define([
     'jquery',
     'backbone',
-    'templates',
-    'collections/pager'
-], function ($, Backbone, JST, Pager) {
+    'templates'
+], function ($, Backbone, JST) {
     'use strict';
 
     // Pager view
@@ -17,29 +16,22 @@ define([
         },
 
         initialize: function () {
-            this.collection = new Pager();
             this.listenTo(this.collection, 'reset', this.render);
         },
 
         render: function () {
-            var that = this;
-            this.$el.empty();
-            this.collection.each(function (item) {
-                that.$el.append(that.template(item.attributes));
-            });
-            this.$el.find('a').tooltip();
-        },
-
-        // Update the pager collection
-        update: function (ch, sec) {
-            this.collection.update(ch, sec);
+            var template = this.template,
+                html = this.collection.map(function (item) {
+                    return template(item.attributes);
+                }).join('');
+            this.$el.html(html).find('a').tooltip();
         },
 
         // Extra work to remedy the flicker when switching to chapter
         itemClicked: function (e) {
             var href = $(e.target).attr('href');
             this.trigger('click:item', href);
-            e.preventDefault();
+            return false;
         }
     });
 

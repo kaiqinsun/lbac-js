@@ -9,7 +9,7 @@ define([
 ], function ($, Backbone, JST, MenuView, ContentView) {
     'use strict';
 
-    var visited = false;
+    var isFirstUpdate = false;
 
     // Top level application view
     var AppView = Backbone.View.extend({
@@ -33,10 +33,12 @@ define([
         update: function (ch, sec) {
             this.menuView.update(ch, sec);
             this.contentView.update(ch, sec);
-            if (visited) {
+
+            // Scroll top if the view is not the first update.
+            if (isFirstUpdate) {
                 $('html, body').scrollTop(this.$content.offset().top - 20);
             } else {
-                visited = true;
+                isFirstUpdate = true;
             }
         }
     });
