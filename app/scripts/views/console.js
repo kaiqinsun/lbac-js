@@ -31,10 +31,6 @@ define([
     // Console view
     var ConsoleView = Backbone.View.extend({
 
-        initialize: function () {
-            this.render();
-        },
-
         render: function () {
 
             // Initialize the tiny console

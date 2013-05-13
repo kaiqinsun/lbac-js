@@ -9,7 +9,7 @@ define([
     var Menu = Backbone.Model.extend({
         defaults: {
             ch: -1,     // curent ch
-            active: ''   // current selector of active item
+            active: ''  // current selector of active item
         }
     });
 

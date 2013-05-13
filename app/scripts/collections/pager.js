@@ -122,6 +122,7 @@ define([
     var Pager = Backbone.Collection.extend({
         model: PagerItem,
 
+        // Reset the collection, at once, based on ch and sec.
         update: function (ch, sec) {
             this.reset(getPagerData(ch, sec));
         }

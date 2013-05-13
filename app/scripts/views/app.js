@@ -9,24 +9,23 @@ define([
 ], function ($, Backbone, JST, MenuView, ContentView) {
     'use strict';
 
-    var isFirstUpdate = false;
+    var isFirstUpdate = true;
 
     // Top level application view
     var AppView = Backbone.View.extend({
         el: 'body',
 
         initialize: function () {
-            this.menuView = new MenuView();
             this.$content = $('#content');
-
-            this.render();
+            this.menuView = new MenuView({ el: '#menu' });
+            this.contentView = new ContentView({ el: this.$content });
         },
 
         render: function () {
-            this.$('#menu').html(this.menuView.el);
-            this.contentView = new ContentView({ el: this.$content });
-            this.$('#footer').show();
+            this.menuView.render();
+            this.contentView.render();
             this.$('#loading').remove();
+            this.$('#footer').show();
         },
 
         // Update the menu and content views
@@ -36,9 +35,9 @@ define([
 
             // Scroll top if the view is not the first update.
             if (isFirstUpdate) {
-                $('html, body').scrollTop(this.$content.offset().top - 20);
+                isFirstUpdate = false;
             } else {
-                isFirstUpdate = true;
+                $('html, body').scrollTop(this.$content.offset().top - 20);
             }
         }
     });

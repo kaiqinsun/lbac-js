@@ -144,7 +144,7 @@ define([
             hasEditor: false
         },
 
-        // Update the doc and code
+        // Update the doc and code based on ch and sec.
         update: function (ch, sec) {
             var title = common.getTitle(ch, sec),
                 content = extractContent(title),

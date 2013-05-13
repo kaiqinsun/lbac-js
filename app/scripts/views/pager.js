@@ -7,9 +7,10 @@ define([
 ], function ($, Backbone, JST) {
     'use strict';
 
-    // Pager view
+    // Pager view, to be simple,
+    // the pager only renders after collection been reset.
     var PagerView = Backbone.View.extend({
-        template: JST['app/scripts/templates/pagerItem.ejs'],
+        itemTemplate: JST['app/scripts/templates/pagerItem.ejs'],
 
         events: {
             'click a': 'itemClicked'
@@ -20,14 +21,14 @@ define([
         },
 
         render: function () {
-            var template = this.template,
+            var itemTemplate = this.itemTemplate,
                 html = this.collection.map(function (item) {
-                    return template(item.attributes);
+                    return itemTemplate(item.attributes);
                 }).join('');
             this.$el.html(html).find('a').tooltip();
         },
 
-        // Extra work to remedy the flicker when switching to chapter
+        // Extra work to remedy the flicker on click.
         itemClicked: function (e) {
             var href = $(e.target).attr('href');
             this.trigger('click:item', href);

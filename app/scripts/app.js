@@ -17,6 +17,7 @@ define([
             appRouter.navigate(fragment, { trigger: true });
         }
 
+        appView.render();
         appView.listenTo(appRouter, 'update', appView.update);
 
         appView.menuView.on('click:chapter', navigate);

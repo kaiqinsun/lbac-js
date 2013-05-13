@@ -13,12 +13,11 @@ define([
     // Accordion menu view consists of chapter <div>'s
     // and section subviews (<ul> for each chapter).
     var MenuView = Backbone.View.extend({
-        className: 'accordion-group',
         chapterTemplate: JST['app/scripts/templates/chapterItem.ejs'],
         sectionTemplate: JST['app/scripts/templates/sectionItem.ejs'],
 
         events: {
-            'click .disabled a': 'preventDefault',
+            'click .disabled a': function () { return false; },
             'click .accordion-toggle': 'chapterClicked'
         },
 
@@ -27,18 +26,15 @@ define([
 
             this.listenTo(this.model, 'change:ch', this.toggleCh);
             this.listenTo(this.model, 'change:active', this.toggleActive);
-
-            this.render();
         },
 
+        // Render the accordion menu.
         render: function () {
             var chapterTemplate = this.chapterTemplate,
                 sectionTemplate = this.sectionTemplate;
 
             var html = _.map(toc, function (chapter) {
-                chapter = _.extend({}, chapter.attributes, {
-                    sectionTemplate: sectionTemplate
-                });
+                chapter.sectionTemplate = sectionTemplate;
                 return chapterTemplate(chapter);
             }).join('');
 
@@ -54,11 +50,6 @@ define([
             } else {
                 this.model.set('active', '#chapter' + ch);
             }
-        },
-
-        // Prevent default for the click event of disalbed menu items
-        preventDefault: function (e) {
-            e.preventDefault();
         },
 
         // Extra work to remedy the flicker when switching to chapter

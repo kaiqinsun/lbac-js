@@ -21,7 +21,7 @@ define([
 
         initialize: function () {
 
-            // cache the elements
+            // Cache the elements
             this.$info = this.$('#info');
             this.$doc = this.$('#doc');
             this.$editorArea = this.$('#editor-area');
@@ -29,10 +29,12 @@ define([
             this.$codeArea = this.$('#code-area');
             this.$code = this.$('#code');
 
+            // Models
             this.content = new Content();
             this.setting = new Setting();
-
             this.pager = new Pager();
+
+            // Init the subviews.
             this.topPagerView = new PagerView({
                 el: '#top-pager',
                 collection: this.pager
@@ -41,21 +43,22 @@ define([
                 el: '#bottom-pager',
                 collection: this.pager
             });
+            this.settingView = new SettingView({ model: this.setting });
+            this.consoleView = new ConsoleView({ el: '#console' });
 
+            // Observe the models.
             this.listenTo(this.content, 'change:doc', this.renderDoc);
             this.listenTo(this.content, 'change:code', this.renderCode);
             this.listenTo(this.content, 'change:hasEditor', this.toggleEditor);
             this.listenTo(this.content, 'change:hasConsole', this.toggleConsole);
             this.listenTo(this.setting, 'change:editor', this.toggleEditor);
             this.listenTo(this.setting, 'change:console', this.toggleConsole);
-
-            this.render();
         },
 
         render: function () {
             this.$info.show();
-            this.settingView = new SettingView({ model: this.setting });
-            this.consoleView = new ConsoleView({ el: '#console' });
+            this.settingView.render();
+            this.consoleView.render();
             this.$codeArea.show();
         },
 

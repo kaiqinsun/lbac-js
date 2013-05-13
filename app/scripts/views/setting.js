@@ -16,10 +16,6 @@ define([
             'click #toggle-console': 'toggleConsoleItem'
         },
 
-        initialize: function () {
-            this.render();
-        },
-
         render: function () {
             this.$el.html(this.template(this.model.attributes));
             this.$toggleEditor = this.$('#toggle-editor');
@@ -38,7 +34,7 @@ define([
 
             // Update check icon and tooltip
             this.$('#toggle-editor i')
-                    .toggleClass('icon-ok', this.model.get('editor'));
+                .toggleClass('icon-ok', this.model.get('editor'));
             this.$toggleEditor.tooltip('destroy').tooltip({
                 title: this.model.get('editorTitle'),
                 html: true
@@ -54,7 +50,7 @@ define([
 
             // Update check icon and tooltip
             this.$('#toggle-console i')
-                    .toggleClass('icon-ok', this.model.get('console'));
+                .toggleClass('icon-ok', this.model.get('console'));
             this.$toggleConsole.tooltip('destroy').tooltip({
                 title: this.model.get('consoleTitle'),
                 html: true
