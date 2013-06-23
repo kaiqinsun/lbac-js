@@ -228,7 +228,7 @@ define(['./object', 'io'], function (object, io) {
             io.writeLn();
         },
 
-        // Generate a unique lable
+        // Generate a unique label
         newLabel: function () {
             var label = 'L' + this.lCount;
             this.lCount += 1;
@@ -775,7 +775,7 @@ define(['./object', 'io'], function (object, io) {
             this.next();
         },
 
-        // Main function
+        // Main program
         main: function () {
             this.init();
             this.matchString('PROGRAM');

@@ -1,5 +1,4 @@
 /*global define*/
-/*jshint camelcase: false*/
 
 /**
  * Chapter 5 Control Constructs
@@ -9,71 +8,72 @@
 define(['./1.2-cradle', 'io'], function (cradle, io) {
     'use strict';
 
-    var oneStatement,               // 5.2.1
-        moreThanOneStatement,       // 5.2.2
-        someGroundwork,             // 5.3
-        theIfStatement,             // 5.4
-        addTheElseClause,           // 5.4.2
-        theWhileStatement,          // 5.5
-        theLoopStatement,           // 5.6
-        theRepeatUntilStatement,    // 5.7
-        theForLoop,                 // 5.8
-        theDoStatement,             // 5.9
-        theBreakStatement;          // 5.10
-
     /**
      * 5.1 Introduction
      * ----------------
+     * We’ll take off on a new and exciting tangent:
+     * that of parsing and translating control constructs such as
+     * IF statements.
      */
 
     /**
      * 5.2 The plan
      * -------------
+     * We’ll be starting over again with a bare cradle.
+     * We’ll also be retaining the concept of single-character tokens.
+     * This means that the "code" will look a little funny,
+     * with `i` for `IF`, `w` for `WHILE`, etc.
      */
 
     /**
      * ### 5.2.1 One statement ###
+     * We will use an anonymous statement `other` to take the place of
+     * the non- control statements and serve as a place-holder for them.
+     *
      * **In BNF notation**
      * ```
      * <program> ::= <statement>
      * <statement> ::= <other>
      * ```
-     * code example: `a`
+     * Code example: `a`
      */
-    oneStatement = cradle.extend({
+    var oneStatement = cradle.extend({
 
-        // Recognize and translate an "Other"
-        // an anonymous statement serve as a place-holder
+        // Recognize and translate an "Other".
+        // an anonymous statement serve as a place-holder.
         other: function () {
             this.emitLn('<block ' + this.getName() + '>');
         },
 
-        // Main function
+        // Main program.
         main: function () {
             this.init();
-            this.other();
+            this.other();   // <--
         }
     });
 
     /**
      * ### 5.2.2 More than one statement ###
+     * The first thing we need is the ability to deal with more than
+     * one statement.
+     *
      * **In BNF notation**
      * ```
      * <program> ::= <block> END
      * <block> ::= [<statement>]*
      * ```
-     * code example: `abc`
+     * Code example: `abce`
      */
-    moreThanOneStatement = oneStatement.extend({
+    var moreThanOneStatement = oneStatement.extend({
 
-        // Recognize and translate a statement block
+        // Recognize and translate a statement block.
         block: function () {
             while (this.look !== 'e') {
                 this.other();
             }
         },
 
-        // Parse and translate a program
+        // Parse and translate a program.
         doProgram: function () {
             this.block();
             if (this.look !== 'e') {
@@ -82,41 +82,44 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.emitLn('END');
         },
 
-        // Main function
+        // Main program.
         main: function () {
             this.init();
-            this.doProgram();
+            this.doProgram();   // <--
         }
     });
 
     /**
      * 5.3 Some groundwork
      * --------------------
+     * We’re going to need some more procedures to help us deal with
+     * branches.
+     *
      * Prepare two routines
      *
-     * - `newLable` to generate label **Lnn**,
-     *    where nn is a label number starting from zero.
+     * - `newLabel` to generate label `Lnn`,
+     *    where `nn` is a label number starting from zero.
      * - `postLabel` to output the labels at the proper place.
      */
-    someGroundwork = moreThanOneStatement.extend({
+    var someGroundwork = moreThanOneStatement.extend({
 
-        lCount: 0,  // label number
+        lCount: 0,  // label counter
 
-        // Generate a unique lable
+        // Generate a unique label.
         newLabel: function () {
             var label = 'L' + this.lCount;
             this.lCount += 1;
             return label;
         },
 
-        // Post a label to output
+        // Post a label to output.
         postLabel: function (label) {
             io.writeLn(label + ':');
         },
 
-        // Initialize
+        // Initialize.
         init: function () {
-            this.lCount = 0;
+            this.lCount = 0;    // <--
             this.getChar();
         }
     });
@@ -124,6 +127,10 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 5.4 The IF statement
      * ---------------------
+     * All of the constructs we’ll be dealing with here involve transfer
+     * of control, which at the assembler-language level means conditional
+     * and/or unconditional branches.
+     *
      * **In BNF**
      * ```
      * <if> ::= IF <condition> <block> ENDIF
@@ -131,7 +138,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * Output should be:
      * ```
      *      <condition>
-     *      BEQ L1      # branch if false
+     *      BEQ L1      # branch if false to L1
      *      <block>
      * L1:
      * ```
@@ -166,31 +173,35 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * with the character `i` for `IF`, and `e` for `ENDIF`
      * (as well as `END` ... that dual nature causes no confusion).
      *
-     * code example: `aibcedhe`,
+     * Code example: `aibece` and nested IF's `aibicedefe`.
      *
-     * which stands for
+     * The later stands for
      * ```
      * <block A>                a
      * IF <condition>           i
      *     <block B>            b
-     *     <block C>            c
+     *     IF <condition>       i
+     *         <block C>        c
+     *     ENDIF                e
+     *     <block D>            d
      * ENDIF                    e
-     * <block D>                d
-     * <block H>                h
+     * <block F>                f
      * END                      e
      * ```
+     * It’s starting to look real, eh?
      */
-    theIfStatement = someGroundwork.extend({
+    var theIfStatement = someGroundwork.extend({
 
-        // Parse and translate a boolean condition
-        // This version is a dummy
+        // Parse and translate a boolean condition.
+        // This version is a dummy.
         condition: function () {
             this.emitLn('<condition>');
         },
 
-        // Recognize and translate an IF constructor
+        // Recognize and translate an IF constructor.
         doIf: function () {
             var label;
+
             this.match('i');
             label = this.newLabel();
             this.condition();
@@ -200,12 +211,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.postLabel(label);
         },
 
-        // Recognize and translate a statement block
+        // Recognize and translate a statement block.
         block: function () {
             while (this.look !== 'e') {
                 switch (this.look) {
-                case 'i':
-                    this.doIf();
+                case 'i':           // <--
+                    this.doIf();    // <--
                     break;
                 default:
                     this.other();
@@ -216,6 +227,10 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * ### 5.4.2 Add the ELSE clause ###
+     * To add the ELSE clause to IF, the tricky part arises simply
+     * because there is an optional part, which doesn’t occur in
+     * the other constructs.
+     *
      * **BNF of the `IF` statement**
      * ```
      * <if> ::= IF <condition> <block> [ELSE <block>] ENDIF
@@ -230,7 +245,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      *      <block>
      * L2:
      * ```
-     * **Syntax-directed translation**
+     * This leads us to the following **syntax-directed translation**
      * ```
      *   SYNTAX           ACTIONS
      *   -------------------------------------------
@@ -259,32 +274,36 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <block D>            d
      * END                  e
      * ```
+     * Did it work? Now, just to be sure we haven’t broken the ELSE-less
+     * case, try `aibece`.
+     * Now try some nested IF’s. Try anything you like, including some
+     * badly formed statements.
      */
-    addTheElseClause = theIfStatement.extend({
+    var addTheElseClause = theIfStatement.extend({
 
-        // Recognize and translate an IF constructor
+        // Recognize and translate an IF constructor.
         doIf: function () {
-            var label_1, label_2;
+            var label1, label2;
+
             this.match('i');
             this.condition();
-            label_1 = this.newLabel();
-            label_2 = label_1;
-            this.emitLn('BEQ ' + label_1);
+            label1 = label2 = this.newLabel();  // <--
+            this.emitLn('BEQ ' + label1);
             this.block();
 
-            if (this.look === 'l') {
+            if (this.look === 'l') {            // <-- optional ELSE clause
                 this.match('l');
-                label_2 = this.newLabel();
-                this.emitLn('BRA ' + label_2);
-                this.postLabel(label_1);
+                label2 = this.newLabel();
+                this.emitLn('BRA ' + label2);   // <-- unconditional branch
+                this.postLabel(label1);
                 this.block();
             }
 
             this.match('e');
-            this.postLabel(label_2);
+            this.postLabel(label2);             // <--
         },
 
-        // Recognize and translate a statement block
+        // Recognize and translate a statement block.
         block: function () {
             while (this.look !== 'e' && this.look !== 'l') {  // <--
                 switch (this.look) {
@@ -333,7 +352,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <block C>                c
      * END                      e
      * ```
-     * Note that this time, the <condition> code is *INSIDE* the upper label,
+     * Note that this time, the `<condition>` code is *INSIDE* the upper label,
      * which is just where we wanted it.
      *
      * Try some **nested loops**, for example `awbwcedefe` which stands for
@@ -380,33 +399,35 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * END                      e
      * ```
      * If you get a bit confused as to what you should type,
-     * don’t be discouraged: you write bugs in other languages, too, don’t you?
+     * don’t be discouraged: you write *bugs* in other languages, too,
+     * don’t you?
      */
-    theWhileStatement = addTheElseClause.extend({
+    var theWhileStatement = addTheElseClause.extend({
 
-        // Parse and translate a WHILE statement
+        // Parse and translate a WHILE statement.
         doWhile: function () {
-            var label_1, label_2;
+            var label1, label2;
+
             this.match('w');
-            label_1 = this.newLabel();
-            label_2 = this.newLabel();
-            this.postLabel(label_1);
+            label1 = this.newLabel();
+            label2 = this.newLabel();
+            this.postLabel(label1);
             this.condition();
-            this.emitLn('BEQ ' + label_2);
+            this.emitLn('BEQ ' + label2);
             this.block();
             this.match('e');
-            this.emitLn('BRA ' + label_1);
-            this.postLabel(label_2);
+            this.emitLn('BRA ' + label1);
+            this.postLabel(label2);
         },
 
-        // Recognize and translate a statement block
+        // Recognize and translate a statement block.
         block: function () {
             while (this.look !== 'e' && this.look !== 'l') {
                 switch (this.look) {
                 case 'i':
                     this.doIf();
                     break;
-                case 'w':   // <--
+                case 'w':           // <--
                     this.doWhile();
                     break;
                 default:
@@ -438,9 +459,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <block>
      * ENDLOOP        { emit(BRA L) }
      * ```
-     * Code example `apbece`
-     *
-     * which stands for
+     * Code example `apbece`, which stands for
      * ```
      * <block A>                a
      * LOOP                     p
@@ -450,11 +469,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * END                      e
      * ```
      */
-    theLoopStatement = theWhileStatement.extend({
+    var theLoopStatement = theWhileStatement.extend({
 
-        // Parse and translate a LOOP statement
+        // Parse and translate a LOOP statement.
         doLoop: function () {
             var label;
+
             this.match('p');
             label = this.newLabel();
             this.postLabel(label);
@@ -463,7 +483,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.emitLn('BRA ' + label);
         },
 
-        // Recognize and translate a statement block
+        // Recognize and translate a statement block.
         block: function () {
             while (this.look !== 'e' && this.look !== 'l') {
                 switch (this.look) {
@@ -473,7 +493,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 case 'w':
                     this.doWhile();
                     break;
-                case 'p':   // <--
+                case 'p':           // <--
                     this.doLoop();
                     break;
                 default:
@@ -507,7 +527,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * UNTIL
      * <condition>    { emit(BEQ L) }
      * ```
-     * code example `arbuce`
+     * Code example `arbuce`
      * which stands for
      * ```
      * <block A>                a
@@ -518,11 +538,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * END                      e
      * ```
      */
-    theRepeatUntilStatement = theLoopStatement.extend({
+    var theRepeatUntilStatement = theLoopStatement.extend({
 
-        // Parse and translate a REPEAT statement
+        // Parse and translate a REPEAT statement.
         doRepeat: function () {
             var label;
+
             this.match('r');
             label = this.newLabel();
             this.postLabel(label);
@@ -532,7 +553,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.emitLn('BEQ ' + label);
         },
 
-        // Recognize and translate a statement block
+        // Recognize and translate a statement block.
         block: function () {
             while (this.look !== 'e' && this.look !== 'l' &&
                     this.look !== 'u') {    // <--
@@ -546,7 +567,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 case 'p':
                     this.doLoop();
                     break;
-                case 'r':   // <--
+                case 'r':                   // <--
                     this.doRepeat();
                     break;
                 default:
@@ -559,23 +580,27 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 5.8 The FOR loop
      * -----------------
+     * The FOR loop is a very handy one to have around, but it’s a bear
+     * to translate, because it’s hard to implement in assembler language.
+     *
      * **BNF of the `FOR` statement**
      * ```
      * <for> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
      * ```
-     * The construct is equivalence to:
+     * It gets simpler if you adopt the point of view that the construct
+     * is equivalent to:
      * ```
      *  <ident> = <expr1>
      *  temp = <expr2>
      *  WHILE <ident> <= temp
-     *  <block>
+     *      <block>
      *  ENDWHILE
      * ```
      * The translated code came out like this:
      * ```
      *      <ident>               get name of loop counter
      *      <expr1>               get initial value
-     *      LEA <ident>(PC),A0    address the loop counter
+     *      LEA <ident>(PC), A0   address the loop counter
      *      SUBQ #1, D0           predecrement it
      *      MOVE D0, (A0)         save it
      *      <expr2>               get upper limit
@@ -592,34 +617,34 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * L2:
      *      ADDQ #2, SP           clean up the stack
      * ```
-     * code example `afi=bece`
+     * Code example `afi=bece`
      * which stands for
      * ```
      * <block A>                    a
-     * FOR I = <expr1> TO <expr2>   fi=
+     * FOR I = <expr1> TO <expr2>   f i =
      *     <block B>                b
      * ENDFOR                       e
      * <block C>                    c
      * END                          e
      * ```
+     * Well, it DOES generate a lot of code, doesn’t it?
+     * But at least it’s the RIGHT code.
      */
-    theForLoop = theRepeatUntilStatement.extend({
+    var theForLoop = theRepeatUntilStatement.extend({
 
-        // Parse and translate an expression
-        // This version is a dummy
+        // Parse and translate an expression.
+        // This version is a dummy.
         expression: function () {
             this.emitLn('<expression>');
         },
 
-        // Parse and translate a FOR statement
+        // Parse and translate a FOR statement.
         doFor: function () {
-            var label_1,
-                label_2,
-                name;
+            var label1, label2, name;
 
             this.match('f');
-            label_1 = this.newLabel();
-            label_2 = this.newLabel();
+            label1 = this.newLabel();
+            label2 = this.newLabel();
             name = this.getName();
             this.match('=');
             this.expression();
@@ -629,21 +654,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.expression();
             this.emitLn('MOVE D0, -(SP)');
 
-            this.postLabel(label_1);
+            this.postLabel(label1);
             this.emitLn('LEA ' + name + '(PC), A0');
             this.emitLn('MOVE (A0), D0');
             this.emitLn('ADDQ #1, D0');
             this.emitLn('MOVE D0, (A0)');
             this.emitLn('CMP (SP), D0');
-            this.emitLn('BGT ' + label_2);
+            this.emitLn('BGT ' + label2);
             this.block();
             this.match('e');
-            this.emitLn('BRA ' + label_1);
-            this.postLabel(label_2);
+            this.emitLn('BRA ' + label1);
+            this.postLabel(label2);
             this.emitLn('ADDQ #2, SP');
         },
 
-        // Recognize and translate a statement block
+        // Recognize and translate a statement block.
         block: function () {
             while (this.look !== 'e' && this.look !== 'l' &&
                     this.look !== 'u') {
@@ -660,7 +685,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 case 'r':
                     this.doRepeat();
                     break;
-                case 'f':   // <--
+                case 'f':           // <--
                     this.doFor();
                     break;
                 default:
@@ -673,12 +698,17 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 5.9 The DO statement
      * ----------------------
+     * This is a simpler version of the FOR loop.
+     * If all we need is a counting loop to make us go through something
+     * a specified number of times, but don’t need access to the counter
+     * itself.
+     *
      * **BNF of the `DO` statement**
      * ```
      * <do> ::= DO <expr> <block> ENDDO
-     *
+     * ```
      * translated code:
-     *
+     * ```
      *      <expression>
      *      SUBQ #1, D0
      * L1:
@@ -699,7 +729,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ENDDO          { emit(MOVE (SP)+,D0);
      *                  emit(DBRA D0,L) }
      * ```
-     * code example `adbece`
+     * Code example `adbece`
      * which stands for
      * ```
      * <block A>                a
@@ -710,11 +740,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * END                      e
      * ```
      */
-    theDoStatement = theForLoop.extend({
+    var theDoStatement = theForLoop.extend({
 
-        // Parse and translate a DO statement
+        // Parse and translate a DO statement.
         doDo: function () {
             var label;
+
             this.match('d');
             label = this.newLabel();
             this.expression();
@@ -727,7 +758,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.emitLn('DBRA D0, ' + label);
         },
 
-        // Recognize and translate a statement block
+        // Recognize and translate a statement block.
         block: function () {
             while (this.look !== 'e' && this.look !== 'l' &&
                     this.look !== 'u') {
@@ -747,7 +778,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 case 'f':
                     this.doFor();
                     break;
-                case 'd':   // <--
+                case 'd':           // <--
                     this.doDo();
                     break;
                 default:
@@ -760,11 +791,19 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 5.10 The BREAK statement
      * -------------------------
+     * On the face of it a BREAK seems really tricky.
+     * The secret is to note that every BREAK statement has to occur
+     * within a block ... there’s no place else for it to be.
+     * So all we have to do is to pass into Block the exit address of
+     * the innermost loop.
+     * Then it can pass the address to the routine that translates
+     * the break instruction.
+     *
      * **In BNF**
      * ```
      * <break> ::= BREAK
      * ```
-     * code example `apcibegehe`
+     * Code example `apcibegehe`
      * which stands for
      * ```
      * <block A>                a
@@ -779,81 +818,84 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * END                      e
      * ```
      */
-    theBreakStatement = theDoStatement.extend({
+    var theBreakStatement = theDoStatement.extend({
 
-        // Recognize and translate an IF constructor
-        doIf: function (label) {    // <--
-            var label_1, label_2;
+        // Recognize and translate an IF constructor.
+        doIf: function (label) {                // <--
+            var label1, label2;
+
             this.match('i');
             this.condition();
-            label_1 = this.newLabel();
-            label_2 = label_1;
-            this.emitLn('BEQ ' + label_1);
-            this.block(label);  // <--
+            label1 = label2 = this.newLabel();
+            this.emitLn('BEQ ' + label1);
+            this.block(label);                  // <--
 
             if (this.look === 'l') {
                 this.match('l');
-                label_2 = this.newLabel();
-                this.emitLn('BRA ' + label_2);
-                this.postLabel(label_1);
-                this.block();
+                label2 = this.newLabel();
+                this.emitLn('BRA ' + label2);
+                this.postLabel(label1);
+                this.block(label);              // <--
             }
 
             this.match('e');
-            this.postLabel(label_2);
+            this.postLabel(label2);
         },
 
-        // Parse and translate a WHILE statement
+        // Parse and translate a WHILE statement.
         doWhile: function () {
-            var label_1, label_2;
+            var label1, label2;
+
             this.match('w');
-            label_1 = this.newLabel();
-            label_2 = this.newLabel();
-            this.postLabel(label_1);
+            label1 = this.newLabel();
+            label2 = this.newLabel();
+            this.postLabel(label1);
             this.condition();
-            this.emitLn('BEQ ' + label_2);
-            this.block(label_2);    // <--
+            this.emitLn('BEQ ' + label2);
+            this.block(label2);                 // <--
             this.match('e');
-            this.emitLn('BRA ' + label_1);
-            this.postLabel(label_2);
+            this.emitLn('BRA ' + label1);
+            this.postLabel(label2);
         },
 
-        // Parse and translate a LOOP statement
+        // Parse and translate a LOOP statement.
         doLoop: function () {
-            var label_1, label_2;   // <--
+            var label1,
+                label2;                         // <--
+
             this.match('p');
-            label_1 = this.newLabel();
-            label_2 = this.newLabel();  // <--
-            this.postLabel(label_1);
-            this.block(label_2);    // <--
+            label1 = this.newLabel();
+            label2 = this.newLabel();           // <--
+            this.postLabel(label1);
+            this.block(label2);                 // <--
             this.match('e');
-            this.emitLn('BRA ' + label_1);
-            this.postLabel(label_2);    // <--
+            this.emitLn('BRA ' + label1);
+            this.postLabel(label2);             // <--
         },
 
-        // Parse and translate a REPEAT statement
+        // Parse and translate a REPEAT statement.
         doRepeat: function () {
-            var label_1, label_2;   // <--
+            var label1,
+                label2;                         // <--
+
             this.match('r');
-            label_1 = this.newLabel();
-            label_2 = this.newLabel();  // <--
-            this.postLabel(label_1);
-            this.block(label_2);    // <--
+            label1 = this.newLabel();
+            label2 = this.newLabel();           // <--
+            this.postLabel(label1);
+            this.block(label2);                 // <--
             this.match('u');
             this.condition();
-            this.emitLn('BEQ ' + label_1);
-            this.postLabel(label_2);    // <--
+            this.emitLn('BEQ ' + label1);
+            this.postLabel(label2);             // <--
         },
 
-        // Parse and translate a FOR statement
+        // Parse and translate a FOR statement.
         doFor: function () {
-            var label_1,
-                label_2,
-                name;
+            var label1, label2, name;
 
             this.match('f');
-            label_1 = this.newLabel();
-            label_2 = this.newLabel();
+            label1 = this.newLabel();
+            label2 = this.newLabel();
             name = this.getName();
             this.match('=');
             this.expression();
@@ -863,55 +905,57 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.expression();
             this.emitLn('MOVE D0, -(SP)');
 
-            this.postLabel(label_1);
+            this.postLabel(label1);
             this.emitLn('LEA ' + name + '(PC), A0');
             this.emitLn('MOVE (A0), D0');
             this.emitLn('ADDQ #1, D0');
             this.emitLn('MOVE D0,(A0)');
             this.emitLn('CMP (SP), D0');
-            this.emitLn('BGT ' + label_2);
-            this.block(label_2);   // <--
+            this.emitLn('BGT ' + label2);
+            this.block(label2);                 // <--
             this.match('e');
-            this.emitLn('BRA ' + label_1);
-            this.postLabel(label_2);
+            this.emitLn('BRA ' + label1);
+            this.postLabel(label2);
             this.emitLn('ADDQ #2, SP');
         },
 
-        // Parse and translate a DO statement
+        // Parse and translate a DO statement.
         doDo: function () {
-            var label_1, label_2;   // <--
+            var label1,
+                label2;                         // <--
+
             this.match('d');
-            label_1 = this.newLabel();
-            label_2 = this.newLabel();
+            label1 = this.newLabel();
+            label2 = this.newLabel();           // <--
             this.expression();
             this.emitLn('SUBQ #1, D0');
-            this.postLabel(label_1);
+            this.postLabel(label1);
             this.emitLn('MOVE D0, -(SP)');
-            this.block(label_2);    // <--
+            this.block(label2);                 // <--
             this.emitLn('MOVE (SP)+, D0');
-            this.emitLn('DBRA D0, ' + label_1);
-            this.emitLn('SUBQ #2, SP');  // <--
-            this.postLabel(label_2);    // <--
-            this.emitLn('ADDQ #2, SP'); // <--
+            this.emitLn('DBRA D0, ' + label1);
+            this.emitLn('SUBQ #2, SP');         // <--
+            this.postLabel(label2);             // <--
+            this.emitLn('ADDQ #2, SP');         // <--
         },
 
-        // Recognize and translate a break
+        // Recognize and translate a break.
         doBreak: function (label) {
-            this.match('b');
-            if (label) {
-                this.emitLn('BRA ' + label);
-            } else {
+            if (!label) {
                 this.abort('No loop to break from');
             }
+
+            this.match('b');
+            this.emitLn('BRA ' + label);
         },
 
-        // Recognize and translate a statement block
-        block: function (label) {   // <--
+        // Recognize and translate a statement block.
+        block: function (label) {               // <--
             while (this.look !== 'e' && this.look !== 'l' &&
                     this.look !== 'u') {
                 switch (this.look) {
                 case 'i':
-                    this.doIf(label);   // <--
+                    this.doIf(label);           // <--
                     break;
                 case 'w':
                     this.doWhile();
@@ -928,8 +972,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 case 'd':
                     this.doDo();
                     break;
-                case 'b':   // <--
-                    this.doBreak(label);
+                case 'b':                       // <--
+                    this.doBreak(label);        // <--
                     break;
                 default:
                     this.other();
@@ -939,61 +983,76 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
 
+    /**
+     * 5.11 Conclusion
+     * ----------------
+     * Final results of this chapter in BNF
+     *
+     * **Program**
+     * ```
+     * <program>          ::= <block> END
+     * <block>            ::= [<statement>]*
+     * <statement>        ::= <if> | <while> | <loop> | <repeat> |
+     *                        <for> | <do> | <break> |
+     *                        <other>
+     * ```
+     * **Control statements**
+     * ```
+     * <if statement>     ::= IF <condition> <block> [ELSE <block>] ENDIF
+     * <while statement>  ::= WHILE <condition> <block> ENDWHILE
+     * <loop statement>   ::= LOOP <block> ENDLOOP
+     * <repeat statement> ::= REPEAT <block> UNTIL <conditon>
+     * <for statement>    ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
+     * <do statement>     ::= DO <expression> <block> ENDDO
+     * <break statement>  ::= BREAK
+     * ```
+     * Next we’ll address *Boolean expressions*, so we can get rid of
+     * the dummy version of `<condition>` that we’ve used here.
+     */
+
     return {
 
+        // 5.2.1
         // <program> ::= <statement>
         oneStatement: oneStatement,
 
+        // 5.2.2
         // <program> ::= <block> END
         // <block> ::= [<statement>]*
         moreThanOneStatement: moreThanOneStatement,
 
+        // 5.3
         someGroundwork: someGroundwork,
 
+        // 5.4
         // <if> ::= IF <condition> <block> ENDIF
         theIfStatement: theIfStatement,
 
+        // 5.4.2
         // <if> ::= IF <condition> <block> [ELSE <block>] ENDIF
         addTheElseClause: addTheElseClause,
 
+        // 5.5
         // <while> ::= WHILE <condition> <block> ENDWHILE
         theWhileStatement: theWhileStatement,
 
+        // 5.6
         // <loop> ::= LOOP <block> ENDLOOP
         theLoopStatement: theLoopStatement,
 
+        // 5.7
         // <repeat> ::= REPEAT <block> UNTIL <conditon>
         theRepeatUntilStatement: theRepeatUntilStatement,
 
+        // 5.8
         // <for> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
         theForLoop: theForLoop,
 
+        // 5.9
         // <do> ::= DO <expression> <block> ENDDO
         theDoStatement: theDoStatement,
 
+        // 5.10
         theBreakStatement: theBreakStatement
     };
-
-    /**
-     * Final results of this chapter in BNF
-     * ------------------------------------
-     * ### program ###
-     * ```
-     * <program> ::= <block> END
-     * <block> ::= [<statement>]*
-     * <statement> ::= <if> | <while> | <loop> | <repeat> |
-     *                 <for> | <do> | <break> |
-     *                 <other>
-     * ```
-     * ### control statements ###
-     * ```
-     * <if statement> ::= IF <condition> <block> [ELSE <block>] ENDIF
-     * <while statement> ::= WHILE <condition> <block> ENDWHILE
-     * <loop statement> ::= LOOP <block> ENDLOOP
-     * <repeat statement> ::= REPEAT <block> UNTIL <conditon>
-     * <for statement> ::= FOR <ident> = <expr1> TO <expr2> <block> ENDFOR
-     * <do statement> ::= DO <expression> <block> ENDDO
-     * <break statement> ::= BREAK
-     * ```
-     */
 });

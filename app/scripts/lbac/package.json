@@ -1,5 +1,5 @@
 {
    "name" : "lbac",
-   "version" : "0.0.12",
+   "version" : "0.2.12",
    "main" : "./lib/main"
 }

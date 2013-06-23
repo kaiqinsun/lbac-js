@@ -25,6 +25,10 @@ $consolePromptColor: darken($consoleBorder, 55%);
     overflow: auto;
 }
 
+.console-entry {
+    margin-top: 5px;
+}
+
 .entry-prompt, .entry-input, .entry-output {
     font-size: 1em;
     background-color: $consoleBackground;

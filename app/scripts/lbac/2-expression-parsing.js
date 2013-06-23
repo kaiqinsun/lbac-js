@@ -8,14 +8,6 @@
 define(['./1.2-cradle'], function (cradle) {
     'use strict';
 
-    var singleDigits,               // 2.2
-        binaryExpressions,          // 2.3
-        generalExpressions,         // 2.4
-        usingTheStack,              // 2.5
-        multiplicationAndDivision,  // 2.6
-        parentheses,                // 2.7
-        unaryMinus;                 // 2.8
-
     /**
      * 2.1 Getting started
      * -------------------
@@ -38,15 +30,16 @@ define(['./1.2-cradle'], function (cradle) {
      * <expression> ::= <number>
      * <number> ::= <digit>
      * ```
+     * Try any single-digit number, or any other character.
      */
-    singleDigits = cradle.extend({
+    var singleDigits = cradle.extend({
 
-        // Parse and translate a math expression
+        // Parse and translate a math expression.
         expression: function () {
             this.emitLn('MOVE #' + this.getNum() + ', D0');
         },
 
-        // Main function
+        // Main program.
         main: function () {
             this.init();
             this.expression();
@@ -65,22 +58,33 @@ define(['./1.2-cradle'], function (cradle) {
      * <expression> ::= <term> +/- <term>
      * <term> ::= <number>
      * ```
+     * We want to do is have procedure `term` do what `expression` was
+     * doing before. So just RENAME procedure `expression` as `term`,
+     * and make a new version of `expression`.
+     *
+     * Try any combination of two single digits, separated by a `+`
+     * or a `-`. Try some expressions with deliberate errors in them.
+     * Does the parser catch the errors?
+     *
+     * At this point we have a parser that can recognize the sum or
+     * difference of two digits. Howerver, run the program with
+     * the single input line `1`. Didn't work, did it?
      */
-    binaryExpressions = singleDigits.extend({
+    var binaryExpressions = singleDigits.extend({
 
-        // Parse and translate a math term
+        // Parse and translate a math term.
         term: function () {
             this.emitLn('MOVE #' + this.getNum() + ', D0');
         },
 
-        // Recognize and translate an add
+        // Recognize and translate an add.
         add: function () {
             this.match('+');
             this.term();
             this.emitLn('ADD D1, D0');
         },
 
-        // Recognize and translate a subtract
+        // Recognize and translate a subtract.
         subtract: function () {
             this.match('-');
             this.term();
@@ -88,7 +92,7 @@ define(['./1.2-cradle'], function (cradle) {
             this.emitLn('NEG D0');
         },
 
-        // Parse and translate an expression
+        // Parse and translate an expression.
         expression: function () {
             this.term();
             this.emitLn('MOVE D0, D1');
@@ -115,13 +119,15 @@ define(['./1.2-cradle'], function (cradle) {
      * ```
      * <expression> ::= <term> [<addop> <term>]*
      * ```
+     * This version handles any number of terms,
+     * and it only cost us two extra lines of code.
      */
-    generalExpressions = binaryExpressions.extend({
+    var generalExpressions = binaryExpressions.extend({
 
-        // Parse and translate an expression
+        // Parse and translate an expression.
         expression: function () {
             this.term();
-            while (this.look === '+' || this.look === '-') {
+            while (this.look === '+' || this.look === '-') {  // <--
                 this.emitLn('MOVE D0, D1');
                 switch (this.look) {
                 case '+':
@@ -131,30 +137,33 @@ define(['./1.2-cradle'], function (cradle) {
                     this.subtract();
                     break;
                 }
-            }
+            }                                                 // <--
         }
     });
 
     /**
      * 2.5 Using the stack
      * -------------------
-     * To deal with complexity, such as `1 + (2 - (3 + (4 - 5)))`,
+     * To deal with complexity, such as
+     * ```
+     * 1 + (2 - (3 + (4 - 5)))
+     * ```
      * we're going to run out of registers fast!
      * The solution is to use the stack instead.
      *
      * For M68000 assembler langugage, a push is written as `-(SP)`,
-     * and pop `(SP)+`
+     * and a pop, `(SP)+`.
      */
-    usingTheStack = binaryExpressions.extend({
+    var usingTheStack = binaryExpressions.extend({
 
-        // Recognize and translate an add
+        // Recognize and translate an add.
         add: function () {
             this.match('+');
             this.term();
             this.emitLn('ADD (SP)+, D0');    // <-- pop from stack
         },
 
-        // Recognize and translate a subtract
+        // Recognize and translate a subtract.
         subtract: function () {
             this.match('-');
             this.term();
@@ -162,7 +171,7 @@ define(['./1.2-cradle'], function (cradle) {
             this.emitLn('NEG D0');
         },
 
-        // Parse and translate an expression
+        // Parse and translate an expression.
         expression: function () {
             this.term();
             while (this.look === '+' || this.look === '-') {
@@ -190,28 +199,32 @@ define(['./1.2-cradle'], function (cradle) {
      * we know that we’re supposed to multiply FIRST, then add.
      * (See why we needed the stack?)
      *
+     * We can define a term as a PRODUCT of FACTORS.
+     * What is a factor? For now, it’s what a term used to be.
+     *
      * **In BNF**
      * ```
      * <term> ::= <factor> [<mulop> <factor>]*
      * <factor> ::= <number>
      * ```
+     * Notice the symmetry: a term has the same form as an expression.
      */
-    multiplicationAndDivision = usingTheStack.extend({
+    var multiplicationAndDivision = usingTheStack.extend({
 
-        // Parse and translate a math factor
-        // same as term() in 2.3 binary expressions
+        // Parse and translate a math factor.
+        // Same as term() in 2.3 binary expressions.
         factor: function () {
             this.emitLn('MOVE #' + this.getNum() + ', D0');
         },
 
-        // Recognize and translate a multiply
+        // Recognize and translate a multiply.
         multiply: function () {
             this.match('*');
             this.factor();
             this.emitLn('MULS (SP)+, D0');
         },
 
-        // Recognize and translate a divide
+        // Recognize and translate a divide.
         divide: function () {
             this.match('/');
             this.factor();
@@ -220,7 +233,7 @@ define(['./1.2-cradle'], function (cradle) {
             this.emitLn('DIVS D1, D0');
         },
 
-        // Parse and translate a math term
+        // Parse and translate a math term.
         term: function () {
             this.factor();
             while (this.look === '*' || this.look === '/') {
@@ -241,6 +254,7 @@ define(['./1.2-cradle'], function (cradle) {
      * 2.7 Parentheses
      * ---------------
      * Parentheses are a mechanism to force a desired operator precedence.
+     * For example:
      * ```
      * 2 * (3 + 4)
      * ```
@@ -254,10 +268,15 @@ define(['./1.2-cradle'], function (cradle) {
      * <factor> ::= <number> | (<expression>)
      * ```
      * This is where the recursion comes in.
+     * An expression can contain a factor which contains another
+     * expression which contains a factor, etc., ad infinitum.
+     *
+     * As usual, try and make sure that it correctly parses legal sentences,
+     * and flags illegal ones with an error message.
      */
-    parentheses = multiplicationAndDivision.extend({
+    var parentheses = multiplicationAndDivision.extend({
 
-        // Parse and translate a math factor
+        // Parse and translate a math factor.
         factor: function () {
             if (this.look === '(') {
                 this.match('(');
@@ -284,23 +303,25 @@ define(['./1.2-cradle'], function (cradle) {
      * ```
      * <expression> ::= [<unary op>] <term> [<addop> <term>]*
      * ```
+     * At this point we’re just about finished with the structure
+     * of our expression parser.
      */
-    unaryMinus = parentheses.extend({
+    var unaryMinus = parentheses.extend({
 
-        // Recognize an addop
+        // Recognize an addop.
         isAddop: function (c) {
             return c === '+' || c === '-';
         },
 
-        // Parse and translate an expression
+        // Parse and translate an expression.
         expression: function () {
-            if (this.isAddop(this.look)) {
-                this.emitLn('CLR D0');
+            if (this.isAddop(this.look)) {  // <--
+                this.emitLn('CLR D0');      // <--
             } else {
                 this.term();
             }
             while (this.look === '+' || this.look === '-') {
-                this.emitLn('MOVE D0, -(SP)');   // <-- push to stack
+                this.emitLn('MOVE D0, -(SP)');
                 switch (this.look) {
                 case '+':
                     this.add();
@@ -321,26 +342,33 @@ define(['./1.2-cradle'], function (cradle) {
 
     return {
 
+        // 2.2
         // <expression> ::= <number>
         singleDigits: singleDigits,
 
+        // 2.3
         // <term> ::= <number>
         // <expression> ::= <term> <addop> <term>
         binaryExpressions: binaryExpressions,
 
+        // 2.4
         // <expression> ::= <term> [<addop> <term>]*
         generalExpressions: generalExpressions,
 
+        // 2.5
         // Use the stack instead of registers to serve for complexity
         usingTheStack: usingTheStack,
 
+        // 2.6
         // <factor> ::= <number>
         // <term> ::= <factor> [<mulop> <factor>]*
         multiplicationAndDivision: multiplicationAndDivision,
 
+        // 2.7
         // <factor> ::= <number> | (<expression>)
         parentheses: parentheses,
 
+        // 2.8
         // <expression> ::= <unary op> <term> [<addop> <term>]*
         unaryMinus: unaryMinus
     };

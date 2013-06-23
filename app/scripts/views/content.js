@@ -81,8 +81,9 @@ define([
                 section;
 
             if (sec) {
-                hasConsole = this.consoleView.update(ch, sec);
                 section = _.find(toc[ch].sections, { sec: sec });
+                hasConsole = this.consoleView.update(ch, sec) &&
+                        (section.console === false ? false : true);
                 hasEditor = !!section.editor;
             }
 

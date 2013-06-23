@@ -8,20 +8,17 @@
 define(['./1.2-cradle', 'io'], function (cradle, io) {
     'use strict';
 
-    var enumerate = cradle.enumerate,
-        someExperimentsInScanning,          // 7.4
-        whiteSpace,                         // 7.5
-        newlines,                           // 7.7
-        operators,                          // 7.8
-        listsCommasAndCommandLines,         // 7.9
-        gettingFancy,                       // 7.10.1
-        returningCodes,                     // 7.10.2
-        cleanupWithGlobal,                  // 7.10.3
-        returningACharacter;                // 7.11
+    var enumerate = cradle.enumerate;
 
     /**
      * 7.1 Introduction
      * -----------------
+     * In the previous chapter we have a compiler that would ALMOST work,
+     * except that we were still limited to single-character tokens.
+     * To get rid of that restriction,
+     * we must deal with the concept of the *lexical scanner*.
+     *
+     * Why?
      */
 
     /**
@@ -29,32 +26,32 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ----------------------
      * **Compiler**
      * ```
-     * Text editor -> [stream of input characters]
+     *  - Text editor     -> [stream of input characters]
      * -> Lexical scanner -> [stream of input tokens]
      * -> Parser (could be in one module) -> [object code]
      * ```
      *
-     * **Chomsky Hierarchy of grammars**
+     * **Chomsky Hierarchy of grammars** (in 1956)
      * ```
      * Type 0: Unrestricted (e.g. English)
      * Type 1: Context-Sensitive (older, e.g. Fortran)
      * Type 2: Context-Free (modern)
      * Type 3: Regular (modern)
      * ```
-     * **Parser** for
+     *
+     * The neat part about these two types is that there are very specific ways
+     * to parse them.
      * ```
      * Type 3 - Regular grammar: an abstract machine called
      *          the state machine (finite automaton)
      * Type 2 - Context-free: push-down automaton
      *          (a state machine augmented by a stack)
      * ```
-     * **Regular expression** (lower-level of real, practical grammars)
-     *
-     * e.g.
+     * **Regular expression** is the lower-level parts of real, practical grammars,
+     * such as
      * ```
      * <identifier> ::= <letter> [<letter> | <digit>]*
      * ```
-     * Lexical scanning is lower-level parsing.
      */
 
     /**
@@ -74,24 +71,28 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 7.4 Some experiments in scanning
      * ---------------------------------
+     * Let’s begin with the two definitions most often seen in real programming
+     * languages:
      * ```
      * <identifier> ::= <letter> [<letter> | <digit>]*
      * <number> ::= [<digit>]+
      * ```
+     * Let’s begin (as usual) with a bare cradle.
      */
-    someExperimentsInScanning = cradle.extend({
+    var someExperimentsInScanning = cradle.extend({
 
-        // Recognize an alphanumeric character
+        // Recognize an alphanumeric character.
         isAlNum: function (c) {
             return this.isAlpha(c) || this.isDigit(c);
         },
 
-        // Get an identifier
+        // Get an identifier.
         getName: function () {
-            var name = '';
             if (!this.isAlpha(this.look)) {
                 this.expected('Name');
             }
+
+            var name = '';
             while (this.isAlNum(this.look)) {
                 name += this.look.toUpperCase();
                 this.getChar();
@@ -99,12 +100,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             return name;
         },
 
-        // Get a number
+        // Get a number.
         getNum: function () {
-            var num = '';
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
+
+            var num = '';
             while (this.isDigit(this.look)) {
                 num += this.look;
                 this.getChar();
@@ -112,62 +114,67 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             return num;
         },
 
-        // Main function
+        // Main program.
         main: function () {
             this.init();
-            io.writeLn(this.getName());
+            io.writeLn(this.getName());     // <-- for testing purposes
         }
     });
 
     /**
      * 7.5 White space
      * ----------------
+     * Run the program, and note how the input string is, indeed, separated
+     * into distinct tokens.
      */
-    whiteSpace = someExperimentsInScanning.extend({
+    var whiteSpace = someExperimentsInScanning.extend({
 
-        // Recognize white space
+        // Recognize white space.
         isWhite: function (c) {
             return c === ' ' || c === this.TAB;
         },
 
-        // Skip over leading white space
+        // Skip over leading white space.
         skipWhite: function () {
             while (this.isWhite(this.look)) {
                 this.getChar();
             }
         },
 
-        // Get an identifier
+        // Get an identifier.
         getName: function () {
-            var name = '';
             if (!this.isAlpha(this.look)) {
                 this.expected('Name');
             }
+
+            var name = '';
             while (this.isAlNum(this.look)) {
                 name += this.look.toUpperCase();
                 this.getChar();
             }
-            this.skipWhite();   // <--
+            this.skipWhite();                       // <--
             return name;
         },
 
-        // Get a number
+        // Get a number.
         getNum: function () {
-            var num = '';
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
+
+            var num = '';
             while (this.isDigit(this.look)) {
                 num += this.look;
                 this.getChar();
             }
-            this.skipWhite();   // <--
+            this.skipWhite();                       // <--
             return num;
         },
 
-        // Lexical scanner
+        // Lexical scanner.
         scan: function () {
             var result;
+
             if (this.isAlpha(this.look)) {
                 result = this.getName();
             } else if (this.isDigit(this.look)) {
@@ -180,22 +187,22 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             return result;
         },
 
-        // Main function
+        // Main program.
         main: function () {
             var token;
 
             this.init();
             do {
-                token = this.scan();
-                io.writeLn(token);
-            } while (token !== this.LF);
+                token = this.scan();                // <--
+                io.writeLn(token);                  // <
+            } while (token !== this.LF);            // <
         }
     });
 
     /**
      * 7.6 State machines
      * -------------------
-     * The `getName()` does indeed implement a state machine.
+     * A parse routine like `getName()` does indeed implement a state machine.
      *
      * **Syntax diagram (railroad-track diagram)**
      * ```
@@ -216,45 +223,69 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 7.7 Newlines
      * -------------
+     * Moving right along, let’s modify our scanner to handle more than one line.
+     *
+     * To do this, simply modify the single executable line of `isWhite`.
+     * We need to give the main program a new stop condition.
+     * Let’s just use until token = `.`.
+     *
+     * Try a couple of lines, terminated by the period.
      */
-    newlines = whiteSpace.extend({
+    var newlines = whiteSpace.extend({
 
-        // Recognize white space
-        isWhite: function (c) {
-            return c === ' ' || c === this.TAB ||
-                   c === this.CR || c === this.LF;
+        // Recognize white space.
+        // isWhite: function (c) {
+        //     return c === ' ' || c === this.TAB ||
+        //            c === this.CR || c === this.LF;      // <--
+        // },
+
+        // Skip a CRLF. (copy from sec. 6.8)
+        fin: function () {
+            if (this.look === this.CR) {
+                this.getChar();
+            }
+            if (this.look === this.LF) {
+                this.getChar();
+            }
         },
 
-        // Main function
+        // Main program.
         main: function () {
             var token;
 
             this.init();
             do {
+                while (this.look === this.LF) {         // <--
+                    this.fin();                         // <
+                }                                       // <
                 token = this.scan();
                 io.writeLn(token);
-            } while (token !== '.');
+            } while (token !== '.');                    // <--
         }
     });
 
     /**
      * 7.8 Operators
      * --------------
+     * We can handle operators very much the same way as the other tokens.
+     * Try the program now.
+     * Any code fragments will be neatly broken up into individual tokens.
      */
-    operators = newlines.extend({
+    var operators = newlines.extend({
 
-        // Recognize any operator
+        // Recognize any operator.
         isOp: function (c) {
             return c === '+' || c === '-' || c === '*' || c === '/' ||
                    c === '<' || c === '>' || c === ':' || c === '=';
         },
 
-        // Get an operator
+        // Get an operator.
         getOp: function () {
-            var op = '';
             if (!this.isOp(this.look)) {
                 this.expected('Operator');
             }
+
+            var op = '';
             while (this.isOp(this.look)) {
                 op += this.look;
                 this.getChar();
@@ -262,15 +293,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             return op;
         },
 
-        // Lexical scanner
+        // Lexical scanner.
         scan: function () {
             var result;
+
             if (this.isAlpha(this.look)) {
                 result = this.getName();
             } else if (this.isDigit(this.look)) {
                 result = this.getNum();
-            } else if (this.isOp(this.look)) {
-                result = this.getOp();
+            } else if (this.isOp(this.look)) {      // <--
+                result = this.getOp();              // <
             } else {
                 result = this.look;
                 this.getChar();
@@ -284,9 +316,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * 7.9 Lists, commas and command lines
      * ------------------------------------
      */
-    listsCommasAndCommandLines = operators.extend({
+    var listsCommasAndCommandLines = operators.extend({
 
-        // Skip over a comma
+        // Skip over a comma.
         skipComma: function () {
             this.skipWhite();
             if (this.look === ',') {
@@ -295,10 +327,11 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Lexical scanner
-        // change skipWhite() to skipComma() temporarily
+        // Lexical scanner.
+        // Change skipWhite() to skipComma() temporarily.
         scan: function () {
             var result;
+
             if (this.isAlpha(this.look)) {
                 result = this.getName();
             } else if (this.isDigit(this.look)) {
@@ -309,7 +342,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 result = this.look;
                 this.getChar();
             }
-            this.skipComma();   // <--
+            this.skipComma();                   // <-- change TEMPORARILY
             return result;
         }
     });
@@ -317,42 +350,62 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 7.10 Getting fancy
      * -------------------
+     * One of the first things we’re going to need is a way to identify keywords.
+     *
      * ### 7.10.1 ###
+     * Try `if`, `else`, `endif` `end` or anything else.
      */
-    gettingFancy = listsCommasAndCommandLines.extend({
+    var gettingFancy = listsCommasAndCommandLines.extend({
 
-        // Definition of keywords and token types
+        // Definition of keywords and token types.
+        // { IF: 0, ELSE: 1, ... }
         keywordType: enumerate(['IF', 'ELSE', 'ENDIF', 'END']),
 
-        // Main program
-        // temporarily changed.
+        // Main program.
         main: function () {
-            var token = io.readLn();
-            io.writeLn(this.keywordType[token]);
+            var token = io.readLn().toUpperCase();  // <-- temporarily changed
+            io.writeLn(this.keywordType[token]);    // <-- temp...
         }
     });
 
     /**
      * ### 7.10.2 Returning codes ###
+     * Now that we can recognize keywords, the next thing is to arrange to
+     * return codes for them.
+     *
+     * Try some arbitrary code finished with `end`, such as
+     * ```
+     * if test >= 25
+     *     ans1 = 35
+     * else
+     *     sum += 1
+     * endif
+     * end
+     * ```
      */
-    returningCodes = gettingFancy.extend({
+    var returningCodes = gettingFancy.extend({
 
-        // Type declarations
+        // Type declarations.
         symType: enumerate(['ifSym', 'elseSym', 'endifSym', 'endSym',
-                'identifier', 'number', 'operator']),
+                'ident', 'number', 'operator']),
 
-        // variable declarations
-        token: 0,   // Current token (symType)
-        value: '',  // String token of look
+        // variable declarations.
+        token: 0,   // current token (symType)
+        value: '',  // string token of look
 
-        // Lexical scanner
+        // Lexical scanner.
         scan: function () {
+            var k;
+
+            while (this.look === this.LF) {
+                this.fin();
+            }
+            this.skipWhite();
+
             if (this.isAlpha(this.look)) {
                 this.value = this.getName();
-                this.token = this.keywordType[this.value];
-                if (this.token === undefined) {
-                    this.token = this.symType.identifier;
-                }
+                k = this.keywordType[this.value];
+                this.token = k === undefined ? this.symType.ident : k;
             } else if (this.isDigit(this.look)) {
                 this.value = this.getNum();
                 this.token = this.symType.number;
@@ -361,32 +414,33 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 this.token = this.symType.operator;
             } else {
                 this.value = this.look;
+                this.token = this.symType.operator;
                 this.getChar();
             }
             this.skipWhite();
         },
 
-        // Main function
+        // Main program.
         main: function () {
             this.init();
             do {
                 this.scan();
 
                 switch (this.token) {
-                case this.symType.identifier:
-                    io.write('Ident ');
+                case this.symType.ident:
+                    io.write('Ident    : ');
                     break;
                 case this.symType.number:
-                    io.write('Number ');
+                    io.write('Number   : ');
                     break;
                 case this.symType.operator:
-                    io.write('Operator ');
+                    io.write('Operator : ');
                     break;
-                case this.symType.ifSym:    // fall through
-                case this.symType.elseSym:  // fall through
-                case this.symType.endifSym: // fall through
+                case this.symType.ifSym:        // fall through
+                case this.symType.elseSym:      // fall through
+                case this.symType.endifSym:     // fall through
                 case this.symType.endSym:
-                    io.write('Keyword ');
+                    io.write('Keyword  : ');
                     break;
                 }
                 io.writeLn(this.value);
@@ -396,33 +450,38 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * ### 7.10.3 Cleanup with global ###
+     * We can simplify things a bit by letting
      * `getName()`, `getNum()`, and `getOp()` becomes procedures,
-     * use globle variables (value and token) to eliminate the local copies.
+     * and use globle variables (value and token) to eliminate the local copies.
+     *
+     * This program should work the same as the previous version.
      */
-    cleanupWithGlobal = returningCodes.extend({
+    var cleanupWithGlobal = returningCodes.extend({
 
-        // Get an identifier
+        // Get an identifier.
         getName: function () {
-            this.value = '';
             if (!this.isAlpha(this.look)) {
                 this.expected('Name');
             }
+
+            var k;
+            this.value = '';
+
             while (this.isAlNum(this.look)) {
                 this.value += this.look.toUpperCase();
                 this.getChar();
             }
-            this.token = this.keywordType[this.value];  // copy
-            if (this.token === undefined) {    // from previous
-                this.token = this.symType.identifier;   // scan()
-            }
+            k = this.keywordType[this.value];  // copy from previous scan()
+            this.token = k === undefined ? this.symType.ident : k;  // copy
         },
 
-        // Get a number
+        // Get a number.
         getNum: function () {
-            this.value = '';
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
+
+            this.value = '';
             while (this.isDigit(this.look)) {
                 this.value += this.look;
                 this.getChar();
@@ -430,12 +489,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.token = this.symType.number;   // copy from previous scan()
         },
 
-        // Get an operator
+        // Get an operator.
         getOp: function () {
-            this.value = '';
             if (!this.isOp(this.look)) {
                 this.expected('Operator');
             }
+
+            this.value = '';
             while (this.isOp(this.look)) {
                 this.value += this.look;
                 this.getChar();
@@ -443,8 +503,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.token = this.symType.operator; // copy from previous scan()
         },
 
-        // Lexical scanner
+        // Lexical scanner.
         scan: function () {
+            while (this.look === this.LF) {
+                this.fin();
+            }
+            this.skipWhite();
+
             if (this.isAlpha(this.look)) {
                 this.getName();
             } else if (this.isDigit(this.look)) {
@@ -462,61 +527,73 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 7.11 Returning a character
      * ---------------------------
+     * There is another simple type that can be returned as a code: the character.
+     * A character is as good a variable for encoding the different token types.
+     *
+     * This program should work the same as the previous version.
      */
-    returningACharacter = cleanupWithGlobal.extend({
+    var returningACharacter = cleanupWithGlobal.extend({
 
-        // Instead of symType, use keywordCode
+        // Instead of symType, use keywordCode.
         keywordCode: 'xilee',
-        keywordType: enumerate(['IF', 'ELSE', 'ENDIF', 'END'], 1),
+        keywordType: enumerate(['IF', 'ELSE', 'ENDIF', 'END'], 1),  // <--
 
-        // Get an identifier
+        // Get an identifier.
         getName: function () {
-            var index;
-            this.value = '';
-
             if (!this.isAlpha(this.look)) {
                 this.expected('Name');
             }
+
+            var index;
+            this.value = '';
+
             while (this.isAlNum(this.look)) {
                 this.value += this.look.toUpperCase();
                 this.getChar();
             }
-            index = this.keywordType[this.value] || 0;   // <--
-            this.token = this.keywordCode.charAt(index); // <--
+            index = this.keywordType[this.value] || 0;      // <--
+            this.token = this.keywordCode.charAt(index);    // <--
         },
 
-        // Get a number
+        // Get a number.
         getNum: function () {
-            this.value = '';
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
+
+            this.value = '';
             while (this.isDigit(this.look)) {
                 this.value += this.look;
                 this.getChar();
             }
-            this.token = '#';   // <--
+            this.token = '#';                               // <--
         },
 
-        // Get an operator
+        // Get an operator.
         getOp: function () {
-            this.value = '';
             if (!this.isOp(this.look)) {
                 this.expected('Operator');
             }
+
+            this.value = '';
             while (this.isOp(this.look)) {
                 this.value += this.look;
                 this.getChar();
             }
-            if (this.value.length === 1) {  // <--
-                this.token = this.value;    // .
-            } else {                        // .
-                this.token = '?';           // .
+            if (this.value.length === 1) {                  // <--
+                this.token = this.value;                    // <
+            } else {                                        // <
+                this.token = '?';                           // <
             }
         },
 
-        // Lexical scanner
+        // Lexical scanner.
         scan: function () {
+            while (this.look === this.LF) {
+                this.fin();
+            }
+            this.skipWhite();
+
             if (this.isAlpha(this.look)) {
                 this.getName();
             } else if (this.isDigit(this.look)) {
@@ -525,13 +602,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 this.getOp();
             } else {
                 this.value = this.look;
-                this.token = '?';   // <--
+                this.token = '?';                           // <--
                 this.getChar();
             }
             this.skipWhite();
         },
 
-        // Main function
+        // Main program.
         main: function () {
             this.init();
             do {
@@ -560,24 +637,53 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 7.12 Distributed vs centralized scanners
      * -----------------------------------------
+     * The structure for the lexical scanner here is very conventional,
+     * and about 99% of all compilers use something very close to it.
+     * This is not, however, the only possible structure.
+     *
+     * The problem with the conventional approach is that the scanner has no
+     * knowledge of **context**. For example, it can’t distinguish between the
+     * assignment operator `=` and the relational operator `=`......
+     *
+     * The alternative is to seek some way to use the contextual information that
+     * comes from knowing where we are in the parser.
+     * This leads us back to the notion of a distributed scanner...
      */
 
-    /**
-     * 7.13 Merging scanner and parser
-     * --------------------------------
-     * In file: 7.13-kiss.js
-     */
+    // No code for 7.12
+
+    // 7.13 Merging scanner and parser
+    // --------------------------------
+    // In file: 7.13-kiss.js
 
 
     return {
+
+        // 7.4
         someExperimentsInScanning: someExperimentsInScanning,
+
+        // 7.5
         whiteSpace: whiteSpace,
+
+        // 7.7
         newlines: newlines,
+
+        // 7.8
         operators: operators,
+
+        // 7.9
         listsCommasAndCommandLines: listsCommasAndCommandLines,
+
+        // 7.10.1
         gettingFancy: gettingFancy,
+
+        // 7.10.2
         returningCodes: returningCodes,
+
+        // 7.10.3
         cleanupWithGlobal: cleanupWithGlobal,
+
+        // 7.11
         returningACharacter: returningACharacter
     };
 

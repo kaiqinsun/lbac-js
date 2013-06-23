@@ -8,24 +8,26 @@
 define(['./1.2-cradle', 'io'], function (cradle, io) {
     'use strict';
 
-    var singleDigits,                   // 4.2.1
-        binaryExpressions,              // 4.2.2
-        generalExpressions,             // 4.2.3
-        multiDigitsNumber,              // 4.2.4
-        factor,                         // 4.2.5
-        variables,                      // 4.3.1
-        assignmentStatements,           // 4.3.2
-        multipleStatements,             // 4.3.3
-        ioRoutines;                     // 4.3.4
-
     /**
      * 4.1 Introduction
      * ----------------
+     * The approach we’ve been taking in this whole series is called
+     * "syntax-driven translation."
+     *
+     * - In our *compiler* so far, every action involves
+     *   emitting object code, to be executed later at execution time.
+     * - In an *interpreter*, every action involves
+     *   something to be done immediately.
+     *
+     * the *layout* ... the *structure* ... of the parser doesn’t change.
+     * It’s only the **actions** that change.
      */
 
     /**
      * 4.2 The interpreters
      * --------------------
+     * We're going to start over with a bare cradle and build up
+     * the translator all over again.
      */
 
     /**
@@ -35,54 +37,53 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <expression> ::= <number>
      * <number> ::= <digit>
      * ```
+     * The first thing we need to do is to change function `getNum`,
+     * which up till now has always returned a character (or string).
+     * Now, it’s better for it to return an integer.
      */
-    singleDigits = cradle.extend({
+    var singleDigits = cradle.extend({
 
-        // Get a number
+        // Get a number.
         getNum: function () {
-            var num;
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
-            num = +this.look;   // convert string to number
+
+            var num = +this.look;   // <-- convert string to number
             this.getChar();
             return num;
         },
 
-        // Parse and translate an expression
+        // Parse and translate an expression.
         expression: function () {
-            return this.getNum();
+            return this.getNum();   // <--
         },
 
-        // Main function
+        // Main program.
         main: function () {
             this.init();
-            io.writeLn(this.expression());
+            io.writeLn(this.expression());  // <--
         }
     });
 
     /**
-     * ### 4.2.2 Binary expressions ###
+     * ### 4.2.2 Addition and subtraction ###
      * **In BNF notation**
      * ```
      * <expression> ::= <number> [<addop> <number>]*
      * ```
      */
-    binaryExpressions = singleDigits.extend({
+    var additionAndSubtraction = singleDigits.extend({
 
-        // Recognize an addop
+        // Recognize an addop.
         isAddop: function (c) {
             return c === '+' || c === '-';
         },
 
-        // Parse and translate an expression
+        // Parse and translate an expression.
         expression: function () {
-            var value;
-            if (this.isAddop(this.look)) {
-                value = 0;
-            } else {
-                value = this.getNum();
-            }
+            var value = this.isAddop(this.look) ? 0 : this.getNum();
+
             while (this.isAddop(this.look)) {
                 switch (this.look) {
                 case '+':
@@ -100,18 +101,19 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     });
 
     /**
-     * ### 4.2.3 General expressions ###
+     * ### 4.2.3 Multiplication and division ###
      * **In BNF notation**
      * ```
      * <expression> ::= <term> [<addop> <term>]*
      * <term> ::= <number> [<mulop> <number>]*
      * ```
      */
-    generalExpressions = binaryExpressions.extend({
+    var multiplicationAndDivision = additionAndSubtraction.extend({
 
-        // Parse and translate a math term
+        // Parse and translate a math term.
         term: function () {
             var value = this.getNum();
+
             while (this.look === '*' || this.look === '/') {
                 switch (this.look) {
                 case '*':
@@ -127,14 +129,10 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             return value;
         },
 
-        // Parse and translate an expression
+        // Parse and translate an expression.
         expression: function () {
-            var value;
-            if (this.isAddop(this.look)) {
-                value = 0;
-            } else {
-                value = this.term();    // <--
-            }
+            var value = this.isAddop(this.look) ? 0 : this.term(); // <--
+
             while (this.isAddop(this.look)) {
                 switch (this.look) {
                 case '+':
@@ -142,8 +140,8 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                     value += this.term();   // <--
                     break;
                 case '-':
-                    this.match('-');    // <--
-                    value -= this.term();
+                    this.match('-');
+                    value -= this.term();   // <--
                     break;
                 }
             }
@@ -155,15 +153,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ### 4.2.4 Multi-digits number ###
      * Extend `getNum` to support multi-digit number.
      */
-    multiDigitsNumber = generalExpressions.extend({
+    var multiDigitsNumber = multiplicationAndDivision.extend({
 
-        // Get a Number
+        // Get a Number.
         getNum: function () {
-            var value = 0;
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
-            while (this.isDigit(this.look)) {    // <--
+
+            var value = 0;
+            while (this.isDigit(this.look)) {       // <--
                 value = 10 * value + (+this.look);  // <--
                 this.getChar();
             }
@@ -173,32 +172,36 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * ### 4.2.5 Factor ###
-     * The next step is to install function `factor`.
+     * The next step is to install function `factor`,
+     * complete with parenthesized expressions.
      *
      * **In BNF notation**
      * ```
      * <factor> ::= <number> | (<expression>)
      * <term> ::= <factor> [<mulop> <factor>]*
      * ```
+     * We’re rapidly closing in on a useful interpreter.
      */
-    factor = multiDigitsNumber.extend({
+    var factor = multiDigitsNumber.extend({
 
-        // Parse and translate a math factor
+        // Parse and translate a math factor.
         factor: function () {
             var value;
+
             if (this.look === '(') {
                 this.match('(');
                 value = this.expression();  // <--
                 this.match(')');
             } else {
-                value = this.getNum();  // <--
+                value = this.getNum();      // <--
             }
             return value;
         },
 
-        // Parse and translate a math term
+        // Parse and translate a math term.
         term: function () {
-            var value = this.factor();  // <--
+            var value = this.factor();      // <--
+
             while (this.look === '*' || this.look === '/') {
                 switch (this.look) {
                 case '*':
@@ -218,20 +221,27 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 4.3 A little philosophy
      * -----------------------
+     * Where did the precedence stacks go?
+     *
+     * The *hierarchy levels* and the *parse trees* are there, but they’re
+     * hidden within the structure of the parser, and they’re taken
+     * care of by the order with which the various procedures are called.
      */
 
     /**
      * ### 4.3.1 Variables ###
+     * The next step is to add variable names.
      * **In BNF notation**
      * ```
      * <factor> ::= <number> | (<expression>) | <variable>
      * ```
+     * We need a storage mechanism for these variables.
      */
-    variables = factor.extend({
+    var variables = factor.extend({
 
         table: {},
 
-        // Initialize the variable Area
+        // Initialize the variable Area.
         initTable: function () {
             var charCodeOfA = 'A'.charCodeAt(0),
                 i,
@@ -243,13 +253,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Initialize
+        // Initialize.
         init: function () {
             this.initTable();   // <--
             this.getChar();
         },
 
-        // Parse and translate a math factor
+        // Parse and translate a math factor.
         factor: function () {
             var value;
             if (this.look === '(') {
@@ -257,7 +267,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 value = this.expression();
                 this.match(')');
             } else if (this.isAlpha(this.look)) {    // <--
-                value = this.table[this.getName()]; // <--
+                value = this.table[this.getName()];  // <--
             } else {
                 value = this.getNum();
             }
@@ -267,69 +277,89 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     /**
      * ### 4.3.2 Assignment statements ###
+     * We need to do an assignment statement so we can put something
+     * INTO the variables.
+     *
      * **In BNF notation**
      * ```
      * <assignment> ::= <identifier> = <expression>
      * ```
      */
-    assignmentStatements = variables.extend({
+    var assignmentStatements = variables.extend({
 
-        // Parse and translate an assignment statement
+        // Parse and translate an assignment statement.
         assignment: function () {
             var name = this.getName();
             this.match('=');
             this.table[name] = this.expression();
         },
 
-        // Main function
+        // Main program.
         main: function () {
             this.init();
             this.assignment();  // <--
-            io.writeLn(this.table.A);
+            io.writeLn('A = ' + this.table.A); // <-- for testing purposes
         }
     });
 
     /**
      * ### 4.3.3 Multiple statements ###
+     * We’re going to want to handle multiple statements.
+     * This merely means putting a loop around the call to Assignment.
+     * So let’s do that now. But what should be the loop exit criterion?
+     *
+     * Try nultiple statements in the editor, however,
+     * we have no way to read data in or write it out.
      */
-    multipleStatements = assignmentStatements.extend({
+    var multipleStatements = assignmentStatements.extend({
 
-        // Recognize and skip over a newline
+        // Recognize and skip over a newline.
         newLine: function () {
             if (this.look === this.LF) {
                 this.getChar();
             }
         },
 
-        // Main function
+        // Main program.
         main: function () {
             this.init();
-            do {
+            do {                            // <--
                 this.assignment();
-                this.newLine();
-            } while (this.look !== '.');
+                this.newLine();             // <--
+            } while (this.look !== '.');    // <--
         }
     });
 
     /**
      * ### 4.3.4 I/O routines ###
+     * Use `?` to stand for a read statement (not implemented here),
+     * and `!` for a write.
+     *
+     * We have now completed a real, working interpreter.
+     * Try the following code, for example, in the editor.
+     * ```
+     * a=10*5
+     * b=20-5*2
+     * c=2*a-a/b
+     * !c
+     * .
+     * ```
      */
-    ioRoutines = multipleStatements.extend({
+    var ioRoutines = multipleStatements.extend({
 
-        // Input routine
+        // Input routine.
         input: function () {
             this.match('?');
-
-            // not implemented
+            // Not implemented.
         },
 
-        // Output routine
+        // Output routine.
         output: function () {
             this.match('!');
             io.writeLn(this.table[this.getName()]);
         },
 
-        // Main function
+        // Main program.
         main: function () {
             this.init();
             do {
@@ -351,30 +381,39 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
     return {
 
+        // 4.2.1
         // <expression> ::= <number>
         singleDigits: singleDigits,
 
+        // 4.2.2
         // <expression> ::= <number> [<addop> <number>]*
-        binaryExpressions: binaryExpressions,
+        additionAndSubtraction: additionAndSubtraction,
 
+        // 4.2.3
         // <term> ::= <number> [<mulop> <number>]*
         // <expression> ::= <term> [<addop> <term>]*
-        generalExpressions: generalExpressions,
+        multiplicationAndDivision: multiplicationAndDivision,
 
+        // 4.2.4
         // Multi-digits number
         multiDigitsNumber: multiDigitsNumber,
 
+        // 4.2.5
         // <factor> ::= <number> | (<expression>)
         // <term> ::= <factor> [<mulop> <factor>]*
         factor: factor,
 
+        // 4.3.1
         // <factor> ::= <number> | (<expression>) | <variable>
         variables: variables,
 
+        // 4.3.2
         assignmentStatements: assignmentStatements,
 
+        // 4.3.3
         multipleStatements: multipleStatements,
 
+        // 4.3.4
         ioRoutines: ioRoutines
     };
 });

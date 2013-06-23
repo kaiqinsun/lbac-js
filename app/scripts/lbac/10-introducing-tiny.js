@@ -9,27 +9,23 @@
 define(['./1.2-cradle', 'io'], function (cradle, io) {
     'use strict';
 
-    var firstStep,                      // 10.2.1
-        theMainProgram,                 // 10.2.2
-        declarations,                   // 10.3
-        declarationsAndSymbols,         // 10.4.1
-        variableList,                   // 10.4.2
-        initializers,                   // 10.5.1
-        multiDigitInteger,              // 10.5.2
-        theSymbolTable,                 // 10.6
-        executableStatements,           // 10.7.1
-        codeGenerationRoutines,         // 10.7.2
-        assignmentStatement,            // 10.7.3
-        moreCodeGenerationRoutines,     // 10.8.1
-        booleanExpressions,             // 10.8.2
-        controlStructures,              // 10.9
-        lexicalScanning,                // 10.10
-        moreRelops,                     // 10.12
-        inputOutput;                    // 10.13
-
     /**
      * 10.1 Introduction
      * ------------------
+     * We’re going to do is call TINY, a subset of KISS.
+     * We’ll be doing a top-down development of BOTH the **language**
+     * and its **compiler**.
+     * The BNF description will grow along with the compiler.
+     *
+     * Why bother starting over from scratch?
+     *
+     * We had a working subset of KISS in chapter 7 lexical scanning.
+     * Why not just extend it as needed? The answer is threefold.
+     *
+     * - changes like encapsulating the code generation procedures,
+     *   so that we can convert to a different target machine more easily.
+     * - development from the top down as outlined in the last installment.
+     * - We both need the practice to get it better.
      */
 
     /**
@@ -39,18 +35,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ```
      * <program> ::= PROGRAM <top-level decl> <main> '.'
      * ```
-     */
-
-    /**
+     *
      * ### 10.2.1 First step ###
+     * We start with the cradle again.
      * ```
      * <program> ::= PROGRAM .
      * ```
-     * At this point TINY will only accept code: `p.`, a null program.
+     * At this point TINY will only accept code: `p.`, a null program
+     * ```
+     * PROGRAM.
+     * ```
+     * Note that the compiler DOES generate correct code for this program.
      */
-    firstStep = cradle.extend({
+    var firstStep = cradle.extend({
 
-        // Parse and translate a program
+        // Parse and translate a program.
         prog: function () {
             this.match('p');
             this.header();
@@ -59,28 +58,28 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.epilog();
         },
 
-        // Write header info
+        // Write header info.
         header: function () {
             io.writeLn('WARMST', this.TAB, 'EQU $A01E');
         },
 
-        // Write the prolog
+        // Write the prolog.
         prolog: function () {
             this.postLabel('MAIN');
         },
 
-        // Post a label to output (ch 5.3)
+        // Post a label to output (ch 5.3).
         postLabel: function (label) {
             io.writeLn(label + ':');
         },
 
-        // Write the epilog
+        // Write the epilog.
         epilog: function () {
             this.emitLn('DC WARMST');
             this.emitLn('END MAIN');
         },
 
-        // Main program
+        // Main program.
         main: function () {
             this.init();
             this.prog();
@@ -106,10 +105,13 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * END                      e
      * .                        .
      * ```
+     * You might try some deliberate errors, like omitting the `b` or the
+     * `e`, and see what happens.
+     * As always, the compiler should flag all illegal inputs.
      */
-    theMainProgram = firstStep.extend({
+    var theMainProgram = firstStep.extend({
 
-        // Parse and translate a program
+        // Parse and translate a program.
         prog: function () {
             this.match('p');
             this.header();
@@ -117,7 +119,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.match('.');
         },
 
-        // Main program
+        // Main program.
         doMain: function () {
             this.match('b');
             this.prolog();
@@ -129,13 +131,18 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 10.3 Declarations
      * ------------------
+     * The next step is to decide what we mean by a declaration.
+     * At the top level, only global declarations are allowed, as in C.
+     *
+     * For now, there can only be variable declarations, identified by
+     * the keyword **VAR** (abbreviated `v`):
      * ```
-     * <program> ::= PROGRAM <top-level decls> BEGIN END '.'
-     * <top-level decls> ::= (<data declaration>)*
+     * <program>          ::= PROGRAM <top-level decls> BEGIN END '.'
+     * <top-level decls>  ::= (<data declaration>)*
      * <data declaration> ::= VAR <var-list>
      * ```
-     * code example: `pbe.` or `pvxvybe.`
      *
+     * Code example: `pbe.` or `pvxvybe.`
      * which, the later, stands for
      * ```
      * PROGRAM                  p
@@ -145,18 +152,18 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * END                      e
      * .                        .
      * ```
-     * At this point, Decl is just a stub.
-     * It generates no code, and it doesn’t process a list.
+     * Try a few cases and see what happens.
      */
-    declarations = theMainProgram.extend({
+    var declarations = theMainProgram.extend({
 
-        // Process a data declaration
+        // Process a data declaration.
+        // A stub, it generates no code, and it doesn’t process a list.
         decl: function () {
             this.match('v');
             this.getChar();
         },
 
-        // Parse and translate global declarations
+        // Parse and translate global declarations.
         topDecls: function () {
             while (this.look !== 'b') {
                 switch (this.look) {
@@ -169,7 +176,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Parse and translate a program
+        // Parse and translate a program.
         prog: function () {
             this.match('p');
             this.header();
@@ -191,8 +198,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * <data declaration> ::= VAR <var-list>
      * <var-list> ::= <ident>
      * ```
-     * try the code example: `pvxvyvzbe.`
-     *
+     * Try again the code example: `pvxvyvzbe.`
      * which stands for
      * ```
      * PROGRAM                  p
@@ -203,16 +209,17 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * END                      e
      * .                        .
      * ```
+     * See how the storage is allocated? Simple, huh?
      */
-    declarationsAndSymbols = declarations.extend({
+    var declarationsAndSymbols = declarations.extend({
 
-        // Parse and translate a data declaration
+        // Parse and translate a data declaration.
         decl: function () {
             this.match('v');
             this.alloc(this.getName());
         },
 
-        // Allocate storage for a variable
+        // Allocate storage for a variable.
         alloc: function (name) {
             io.writeLn(name, ':', this.TAB, 'DC 0');
         }
@@ -226,8 +233,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ```
      * <var-list> ::= <indent> (, <ident>)*
      * ```
-     * code example: `pvx,y,zbe.`
-     *
+     * Code example: `pvx,y,zbe.`
      * which stands for
      * ```
      * PROGRAM                  p
@@ -236,14 +242,16 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * END                      e
      * .                        .
      * ```
+     * Try a number of VAR declarations, try a list of several
+     * variables, and try combinations of the two. Does it work?
      */
-    variableList = declarationsAndSymbols.extend({
+    var variableList = declarationsAndSymbols.extend({
 
-        // Parse and translate a data declaration
+        // Parse and translate a data declaration.
         decl: function () {
             this.match('v');
             this.alloc(this.getName());
-            while (this.look === ',') {     // <--
+            while (this.look === ',') {         // <--
                 this.getChar();
                 this.alloc(this.getName());
             }
@@ -253,13 +261,14 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 10.5 Initializers
      * ------------------
+     * The feature allows initializing data items in the declaration.
      * ```
      * <var-list> ::= <var> (, <var>)*
-     * <var> ::= <ident> [= <integer>]
+     * <var>      ::= <ident> [= <integer>]
      * ```
-     * ### 10.5.1 ###
-     * code example: `pva=1vx=5,y=3,zbe.`
      *
+     * ### 10.5.1 ###
+     * Code example: `pva=1vx=5,y=3,zbe.`
      * which stands for
      * ```
      * PROGRAM                  p
@@ -271,10 +280,12 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * END                      e
      * .                        .
      * ```
+     * Try this version of TINY and verify that you can.
+     * By golly, this thing is starting to look real!
      */
-    initializers = variableList.extend({
+    var initializers = variableList.extend({
 
-        // Allocate storage for a variable
+        // Allocate storage for a variable.
         alloc: function (name) {
             io.write(name, ':', this.TAB, 'DC ');
             if (this.look === '=') {
@@ -292,8 +303,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * now we should be able to initialize variables
      * with negative and/or multi-digit values.
      *
-     * Code example: `pvx=15,y,z=-23be.`
-     *
+     * Try some code for example: `pvx=15,y,z=-23be.`
      * which stands for
      * ```
      * PROGRAM                  p
@@ -302,15 +312,27 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * END                      e
      * .                        .
      * ```
+     * We should be able to initialize variables with negative and/or
+     * multi-digit values.
+     *
+     * There’s one problem: the compiler doesn’t record a variable
+     * when we declare it. So it is perfectly content to allocate storage
+     * for several variables with the same name.
+     *
+     * Verify this with an input like `pvavavabe.`
+     * Here we’ve declared the variable A three times.
+     * As you can see, the compiler accept that, and generate three
+     * identical labels. Not good.
      */
-    multiDigitInteger = initializers.extend({
+    var multiDigitInteger = initializers.extend({
 
-        // Get a Number
+        // Get a Number.
         getNum: function () {
-            var value = 0;
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
+
+            var value = 0;
             while (this.isDigit(this.look)) {
                 value = +this.look + 10 * value;
                 this.getChar();
@@ -318,7 +340,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             return value;
         },
 
-        // Allocate storage for a variable
+        // Allocate storage for a variable.
         alloc: function (name) {
             io.write(name, ':', this.TAB, 'DC ');
             if (this.look === '=') {
@@ -337,22 +359,30 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * 10.6 The symbol table
      * ----------------------
+     * The compiler will now catch duplicate declarations. Later, we can
+     * also use InTable when generating references to the variables.
+     *
+     * Verify again this with the input `pvavavabe.`
+     * The compiler will now catch duplicate declarations.
+     * Later, we can also use `inTable` when generating references to
+     * the variables.
      */
-    theSymbolTable = multiDigitInteger.extend({
+    var theSymbolTable = multiDigitInteger.extend({
 
         symbolTable: null,
 
-        // look for symbol in table
+        // look for symbol in table.
         inTable: function (name) {
             return !!this.symbolTable[name];
         },
 
-        // Allocate storage for a variable
+        // Allocate storage for a variable.
         alloc: function (name) {
-            if (this.inTable(name)) {   // <-...
-                this.abort('Duplicate Variable Name ' + name);
+            if (this.inTable(name)) {                          // <--
+                this.abort('Duplicate Variable Name ' + name); // <
             }
-            this.symbolTable[name] = 'v';   // <--
+
+            this.symbolTable[name] = 'v';                      // <--
 
             io.write(name, ':', this.TAB, 'DC ');
             if (this.look === '=') {
@@ -367,9 +397,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Initialize
+        // Initialize.
         init: function () {
-            this.symbolTable = {};  // <--
+            this.symbolTable = {};              // <--
             this.getChar();
         }
     });
@@ -402,21 +432,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * .                        .
      * ```
      */
-    executableStatements = theSymbolTable.extend({
+    var executableStatements = theSymbolTable.extend({
 
-        // Parse and translate an assignment statement
+        // Parse and translate an assignment statement.
         assignment: function () {
             this.getChar();
         },
 
-        // Parse and translate a block of statement
+        // Parse and translate a block of statement.
         block: function () {
             while (this.look !== 'e') {
                 this.assignment();
             }
         },
 
-        // Main program
+        // Main program.
         doMain: function () {
             this.match('b');
             this.prolog();
@@ -429,24 +459,24 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * ### 10.7.2 Code generation routines ###
      */
-    codeGenerationRoutines = executableStatements.extend({
+    var codeGenerationRoutines = executableStatements.extend({
 
-        // Clear the primary register
+        // Clear the primary register.
         clear: function () {
             this.emitLn('CLR D0');
         },
 
-        // Negate the primary register
+        // Negate the primary register.
         negate: function () {
             this.emitLn('NEG D0');
         },
 
-        // Load a constant value to primary register
+        // Load a constant value to primary register.
         loadConst: function (number) {
             this.emitLn('MOVE #' + number + ', D0');
         },
 
-        // Load a variable to primary register
+        // Load a variable to primary register.
         loadVar: function (name) {
             if (!this.inTable(name)) {
                 this.undefinedd(name);
@@ -454,35 +484,35 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.emitLn('MOVE ' + name + '(PC), D0');
         },
 
-        // Push primary onto stack
+        // Push primary onto stack.
         push: function () {
             this.emitLn('MOVE D0, -(SP)');
         },
 
-        // Add top of stack to primary
+        // Add top of stack to primary.
         popAdd: function () {
             this.emitLn('ADD (SP)+, D0');
         },
 
-        // Subtract primary from top of stack
+        // Subtract primary from top of stack.
         popSub: function () {
             this.emitLn('SUB (SP)+, D0');
             this.emitLn('NEG D0');
         },
 
-        // Multiply top of stack to primary
+        // Multiply top of stack to primary.
         popMul: function () {
             this.emitLn('MULS (SP)+, D0');
         },
 
-        // Divide top of stack by primary
+        // Divide top of stack by primary.
         popDiv: function () {
             this.emitLn('MOVE (SP)+, D1');
             this.emitLn('EXG  D0, D1');
             this.emitLn('DIVS D1, D0');
         },
 
-        // Store primary to variable
+        // Store primary to variable.
         store: function (name) {
             if (!this.inTable(name)) {
                 this.undefinedd(name);
@@ -491,7 +521,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.emitLn('MOVE D0, (A0)');
         },
 
-        // Report an undefined identifier
+        // Report an undefined identifier.
         undefinedd: function (name) {
             this.abort('Undefined Identifier ' + name);
         }
@@ -523,9 +553,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * .                        .
      * ```
      */
-    assignmentStatement = codeGenerationRoutines.extend({
+    var assignmentStatement = codeGenerationRoutines.extend({
 
-        // Parse and translate a math factor
+        // Parse and translate a math factor.
         factor: function () {
             if (this.look === '(') {
                 this.match('(');
@@ -538,7 +568,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Parse and translate a negative factor
+        // Parse and translate a negative factor.
         negFactor: function () {
             this.match('-');
             if (this.isDigit(this.look)) {
@@ -549,7 +579,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Parse and translate a leading factor
+        // Parse and translate a leading factor.
         firstFactor: function () {
             switch (this.look) {
             case '+':
@@ -564,26 +594,26 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Recognize and translate a multiply
+        // Recognize and translate a multiply.
         multiply: function () {
             this.match('*');
             this.factor();
             this.popMul();
         },
 
-        // Recognize and translate a divide
+        // Recognize and translate a divide.
         divide: function () {
             this.match('/');
             this.factor();
             this.popDiv();
         },
 
-        // Recognize an addop
+        // Recognize an addop.
         isMulop: function (c) {
             return c === '*' || c === '/';
         },
 
-        // Common code used by term() and firstTerm()
+        // Common code used by term() and firstTerm().
         term1: function () {
             while (this.isMulop(this.look)) {
                 this.push();
@@ -598,38 +628,38 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Parse and translate a math term
+        // Parse and translate a math term.
         term: function () {
             this.factor();
             this.term1();
         },
 
-        // Parse and translate a math term with possible leading sing
+        // Parse and translate a math term with possible leading sing.
         firstTerm: function () {
             this.firstFactor();
             this.term1();
         },
 
-        // Recognize and translate an add
+        // Recognize and translate an add.
         add: function () {
             this.match('+');
             this.term();
             this.popAdd();
         },
 
-        // Recognize and translate a subtract
+        // Recognize and translate a subtract.
         subtract: function () {
             this.match('-');
             this.term();
             this.popSub();
         },
 
-        // Recognize an addop
+        // Recognize an addop.
         isAddop: function (c) {
             return c === '+' || c === '-';
         },
 
-        // parse and translate an expression
+        // parse and translate an expression.
         expression: function () {
             this.firstTerm();
             while (this.isAddop(this.look)) {
@@ -645,7 +675,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Parse and translate an assignment statement
+        // Parse and translate an assignment statement.
         assignment: function () {
             var name = this.getName();
             this.match('=');
@@ -662,52 +692,52 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     /**
      * ### 10.8.1 More code generation routines ###
      */
-    moreCodeGenerationRoutines = assignmentStatement.extend({
+    var moreCodeGenerationRoutines = assignmentStatement.extend({
 
-        // Complement the primary register
+        // Complement the primary register.
         notIt: function () {
             this.emitLn('NOT D0');
         },
 
-        // AND top of stack with primary
+        // AND top of stack with primary.
         popAnd: function () {
             this.emitLn('AND (SP)+, D0');
         },
 
-        // OR top of stack with primary
+        // OR top of stack with primary.
         popOr: function () {
             this.emitLn('OR (SP)+, D0');
         },
 
-        // XOR top of stack with primary
+        // XOR top of stack with primary.
         popXor: function () {
             this.emitLn('EOR (SP)+, D0');
         },
 
-        // Compare top of stack with primary
+        // Compare top of stack with primary.
         popCompare: function () {
             this.emitLn('CMP (SP)+, D0');
         },
 
-        // Set D0 If compare was =
+        // Set D0 If compare was `=`.
         setEqual: function () {
             this.emitLn('SEQ D0');
             this.emitLn('EXT D0');
         },
 
-        // Set D0 If compare was !=
+        // Set D0 If compare was `!=`.
         setNEqual: function () {
             this.emitLn('SNE D0');
             this.emitLn('EXT D0');
         },
 
-        // Set D0 If compare was >
+        // Set D0 If compare was `>`.
         setGreater: function () {
             this.emitLn('SLT D0');
             this.emitLn('EXT D0');
         },
 
-        // Set D0 If compare was <
+        // Set D0 If compare was `<`.
         setLess: function () {
             this.emitLn('SGT D0');
             this.emitLn('EXT D0');
@@ -735,19 +765,19 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * .                        .
      * ```
      */
-    booleanExpressions = moreCodeGenerationRoutines.extend({
+    var booleanExpressions = moreCodeGenerationRoutines.extend({
 
-        // Recognize a boolean orop
+        // Recognize a boolean orop.
         isOrop: function (c) {
             return c === '|' || c === '~';
         },
 
-        // Recognize a relop
+        // Recognize a relop.
         isRelop: function (c) {
             return c === '=' || c === '#' || c === '<' || c === '>';
         },
 
-        // Recognize and translate a relational "equals"
+        // Recognize and translate a relational "equals".
         equals: function () {
             this.match('=');
             this.expression();
@@ -755,7 +785,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.setEqual();
         },
 
-        // Recognize and translate a relational "not equals"
+        // Recognize and translate a relational "not equals".
         notEquals: function () {
             this.match('#');
             this.expression();
@@ -763,7 +793,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.setNEqual();
         },
 
-        // Recognize and translate a relational "less than"
+        // Recognize and translate a relational "less than".
         less: function () {
             this.match('<');
             this.expression();
@@ -771,7 +801,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.setLess();
         },
 
-        // Recognize and translate a relational "greater than"
+        // Recognize and translate a relational "greater than".
         greater: function () {
             this.match('>');
             this.expression();
@@ -779,7 +809,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.setGreater();
         },
 
-        // Parse and translate a relation
+        // Parse and translate a relation.
         relation: function () {
             this.expression();
             if (this.isRelop(this.look)) {
@@ -801,7 +831,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Parse and translate a boolean factor with leading NOT
+        // Parse and translate a boolean factor with leading NOT.
         notFactor: function () {
             if (this.look === '!') {
                 this.match('!');
@@ -812,7 +842,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Parse and translate a boolean term
+        // Parse and translate a boolean term.
         boolTerm: function () {
             this.notFactor();
             while (this.look === '&') {
@@ -823,21 +853,21 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Recognize and translate a boolean OR
+        // Recognize and translate a boolean OR.
         boolOr: function () {
             this.match('|');
             this.boolTerm();
             this.popOr();
         },
 
-        // Recognize and translate an exclusive or (XOR)
+        // Recognize and translate an exclusive or (XOR).
         boolXor: function () {
             this.match('~');
             this.boolTerm();
             this.popXor();
         },
 
-        // Parse and translate a boolean expression
+        // Parse and translate a boolean expression.
         boolExpression: function () {
             this.boolTerm();
             while (this.isOrop(this.look)) {
@@ -853,7 +883,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Parse and translate a math factor
+        // Parse and translate a math factor.
         factor: function () {
             if (this.look === '(') {
                 this.match('(');
@@ -866,7 +896,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Parse and translate an assignment statement
+        // Parse and translate an assignment statement.
         assignment: function () {
             var name = this.getName();
             this.match('=');
@@ -900,27 +930,27 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * END.                     e.
      * ```
      */
-    controlStructures = booleanExpressions.extend({
+    var controlStructures = booleanExpressions.extend({
 
-        // Branch uncoditional
+        // Branch uncoditional.
         branch: function (label) {
             this.emitLn('BRA ' + label);
         },
 
-        // Branch false
+        // Branch false.
         branchFalse: function (label) {
             this.emitLn('TST D0');
             this.emitLn('BEQ ' + label);
         },
 
-        // Generate a unique lable
+        // Generate a unique label.
         newLabel: function () {
             var label = 'L' + this.lCount;
             this.lCount += 1;
             return label;
         },
 
-        // Recognize and translate an IF constructor
+        // Recognize and translate an IF constructor.
         doIf: function () {
             var label_1, label_2;
 
@@ -943,7 +973,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.match('e');
         },
 
-        // Parse and translate a WHILE statement
+        // Parse and translate a WHILE statement.
         doWhile: function () {
             var label_1, label_2;
             this.match('w');
@@ -958,7 +988,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.postLabel(label_2);
         },
 
-        // Recognize and translate a statement block
+        // Recognize and translate a statement block.
         block: function () {
             while (this.look !== 'e' && this.look !== 'l') {
                 switch (this.look) {
@@ -974,7 +1004,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Initialize
+        // Initialize.
         init: function () {
             this.symbolTable = {};
             this.lCount = 0;
@@ -986,9 +1016,9 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * 10.10 Lexical scanning
      * -----------------------
      */
-    lexicalScanning = controlStructures.extend({
+    var lexicalScanning = controlStructures.extend({
 
-        // Variable declarations
+        // Variable declarations.
         token: '',      // encoded token
         value: '',      // unencoded token
 
@@ -1008,30 +1038,30 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             return this.keywordCodeTable[val] || 'x';
         },
 
-        // Get an identifier and scan it for keywords
+        // Get an identifier and scan it for keywords.
         scan: function () {
             this.getName();
             this.token = this.keywordCode(this.value);
         },
 
-        // Recognize an alphanumeric character
+        // Recognize an alphanumeric character.
         isAlNum: function (c) {
             return this.isAlpha(c) || this.isDigit(c);
         },
 
-        // Recognize white space
+        // Recognize white space.
         isWhite: function (c) {
             return c === ' ' || c === this.TAB;
         },
 
-        // Skip over leading white space
+        // Skip over leading white space.
         skipWhite: function () {
             while (this.isWhite(this.look)) {
                 this.getChar();
             }
         },
 
-        // Skip over an end-of-line
+        // Skip over an end-of-line.
         newLine: function () {
             while (this.look === this.CR || this.look === this.LF) {
                 this.getChar();
@@ -1039,7 +1069,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Match a specific input character
+        // Match a specific input character.
         match: function (x) {
             this.newLine();     // <--
             if (this.look !== x) {
@@ -1049,14 +1079,14 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.skipWhite();   // <--
         },
 
-        // Match a specific input string
+        // Match a specific input string.
         matchString: function (str) {
             if (this.value !== str) {
                 this.expected('"' + str + '"');
             }
         },
 
-        // Get an identifier
+        // Get an identifier.
         getName: function () {
             this.newLine();     // <--
             if (!this.isAlpha(this.look)) {
@@ -1070,7 +1100,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.skipWhite();   // <--
         },
 
-        // Get a Number
+        // Get a Number.
         getNum: function () {
             var value = 0;
             this.newLine();     // <--
@@ -1085,7 +1115,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             return value;
         },
 
-        // Parse and translate a math factor
+        // Parse and translate a math factor.
         factor: function () {
             if (this.look === '(') {
                 this.match('(');
@@ -1099,7 +1129,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Parse and translate a data declaration
+        // Parse and translate a data declaration.
         decl: function () {
             this.getName();
             this.alloc(this.value);
@@ -1110,7 +1140,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Parse and translate an assignment statement
+        // Parse and translate an assignment statement.
         assignment: function () {
             var name = this.value;
             this.match('=');
@@ -1118,7 +1148,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.store(name);
         },
 
-        // Recognize and translate an IF constructor
+        // Recognize and translate an IF constructor.
         doIf: function () {
             var label_1, label_2;
 
@@ -1139,7 +1169,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.matchString('ENDIF');
         },
 
-        // Parse and translate a WHILE statement
+        // Parse and translate a WHILE statement.
         doWhile: function () {
             var label_1 = this.newLabel(),
                 label_2 = this.newLabel();
@@ -1153,7 +1183,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.postLabel(label_2);
         },
 
-        // Recognize and translate a statement block
+        // Recognize and translate a statement block.
         block: function () {
             this.scan();
             while (this.token !== 'e' && this.token !== 'l') {
@@ -1171,7 +1201,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Parse and translate global declarations
+        // Parse and translate global declarations.
         topDecls: function () {
             this.scan();
             while (this.token !== 'b') {
@@ -1186,7 +1216,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Main program
+        // Main program.
         doMain: function () {
             this.matchString('BEGIN');
             this.prolog();
@@ -1195,7 +1225,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.epilog();
         },
 
-        // Parse and translate a program
+        // Parse and translate a program.
         prog: function () {
             this.matchString('PROGRAM');
             this.header();
@@ -1204,7 +1234,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.match('.');
         },
 
-        // Initialize
+        // Initialize.
         init: function () {
             this.symbolTable = {};
             this.lCount = 0;
@@ -1228,23 +1258,23 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * We extend the relop set to include
      * `<`, `<=`, `=`, `<>`, `#`, `>`, and `>=`.
      */
-    moreRelops = lexicalScanning.extend({
+    var moreRelops = lexicalScanning.extend({
 
         // TODO: double check the Scc command!
 
-        // Set D0 if compare was <=
+        // Set D0 if compare was `<=`.
         setLessOrEqual: function () {
             this.emitLn('SGE D0');
             this.emitLn('EXT D0');
         },
 
-        // Set D0 if compare was >=
+        // Set D0 if compare was `>=`.
         setGreaterOrEqual: function () {
             this.emitLn('SLE D0');
             this.emitLn('EXT D0');
         },
 
-        // Recognize and translate a relational "less than or equal"
+        // Recognize and translate a relational "less than or equal".
         lessOrEqual: function () {
             this.match('=');
             this.expression();
@@ -1252,7 +1282,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.setLessOrEqual();
         },
 
-        // Recognize and translate a relational "not equals"
+        // Recognize and translate a relational "not equals".
         notEqual: function () {
             this.match('>');
             this.expression();
@@ -1260,7 +1290,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.setNEqual();
         },
 
-        // Recognize and translate a relational "less than"
+        // Recognize and translate a relational "less than".
         less: function () {
             this.match('<');
             switch (this.look) {
@@ -1277,7 +1307,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             }
         },
 
-        // Recognize and translate a relational "greater than"
+        // Recognize and translate a relational "greater than".
         greater: function () {
             this.match('>');
             if (this.look === '=') {   // >=  greater or equal
@@ -1298,7 +1328,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * ---------------------
      * Assuming a library call `TINYLIB.LIB` exists
      */
-    inputOutput = moreRelops.extend({
+    var inputOutput = moreRelops.extend({
 
         keywordCodeTable: {
             IF: 'i',
@@ -1314,24 +1344,24 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             PROGRAM: 'p'
         },
 
-        // Write header info
+        // Write header info.
         header: function () {
             io.writeLn('WARMST', this.TAB, 'EQU $A01E');
             this.emitLn('LIB TINYLIB');
         },
 
-        // Read variable to primary register
+        // Read variable to primary register.
         readVar: function () {
             this.emitLn('BSR READ');
             this.store(this.value);
         },
 
-        // Write variable from primary register
+        // Write variable from primary register.
         writeVar: function () {
             this.emitLn('BSR WRITE');
         },
 
-        // Process a read statement
+        // Process a read statement.
         doRead: function () {
             this.match('(');
             this.getName();
@@ -1344,7 +1374,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.match(')');
         },
 
-        // Process a write statement
+        // Process a write statement.
         doWrite: function () {
             this.match('(');
             this.expression();
@@ -1357,7 +1387,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
             this.match(')');
         },
 
-        // Recognize and translate a statement block
+        // Recognize and translate a statement block.
         block: function () {
             this.scan();
             while (this.token !== 'e' && this.token !== 'l') {
@@ -1391,37 +1421,63 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     return {
 
         // 10.2.1
+        // <program> ::= PROGRAM .
         firstStep: firstStep,
+
         // 10.2.2
+        // <program> ::= PROGRAM BEGIN END '.'
         theMainProgram: theMainProgram,
+
         // 10.3
+        // <program>          ::= PROGRAM <top-level decls> BEGIN END '.'
+        // <top-level decls>  ::= (<data declaration>)*
+        // <data declaration> ::= VAR <var-list>
         declarations: declarations,
+
         // 10.4.1
+        // <data declaration> ::= VAR <var-list>
+        // <var-list> ::= <ident>
         declarationsAndSymbols: declarationsAndSymbols,
+
         // 10.4.2
+        // <var-list> ::= <indent> (, <ident>)*
         variableList: variableList,
+
         // 10.5.1
+        // <var-list> ::= <var> (, <var>)*
+        // <var>      ::= <ident> [= <integer>]
         initializers: initializers,
+
         // 10.5.2
         multiDigitInteger: multiDigitInteger,
+
         // 10.6
         theSymbolTable: theSymbolTable,
+
         // 10.7.1
         executableStatements: executableStatements,
+
         // 10.7.2
         codeGenerationRoutines: codeGenerationRoutines,
+
         // 10.7.3
         assignmentStatement: assignmentStatement,
+
         // 10.8.1
         moreCodeGenerationRoutines: moreCodeGenerationRoutines,
+
         // 10.8.2
         booleanExpressions: booleanExpressions,
+
         // 10.9
         controlStructures: controlStructures,
+
         //10.10
         lexicalScanning: lexicalScanning,
+
         // 10.12
         moreRelops: moreRelops,
+
         // 10.13
         inputOutput: inputOutput
     };

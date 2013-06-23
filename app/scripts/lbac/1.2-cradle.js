@@ -31,93 +31,93 @@ define(['./object', 'io'], function (object, io) {
 
     var cradle = object.extend({
 
-        // Constant declarations
+        // Constant declarations.
         TAB: '\t',
         CR: '\r',
         LF: '\n',
 
-        // Variable declarations
+        // Variable declarations.
         look: '',   // lookahead character
 
-        // Read new character from input
+        // Read new character from input.
         getChar: function () {
             this.look = io.read();
         },
 
-        // Report an error
+        // Report an error.
         error: function (str) {
             io.writeLn('Error: ', str, '.');
         },
 
-        // Report error and halt
+        // Report error and halt.
         abort: function (str) {
             this.error(str);
             io.halt();
         },
 
-        // Report what was expected
+        // Report what was expected.
         expected: function (str) {
             this.abort(str + ' Expected');
         },
 
-        // Match a specific input character
+        // Match a specific input character.
         match: function (x) {
-            if (this.look === x) {
-                this.getChar();
-            } else {
+            if (this.look !== x) {
                 this.expected('"' + x + '"');
             }
+
+            this.getChar();
         },
 
-        // Recognize an alpha character
+        // Recognize an alpha character.
         isAlpha: function (c) {
             return (/[A-Z]/i).test(c);
         },
 
-        // Recognize a decimal digit
+        // Recognize a decimal digit.
         isDigit: function (c) {
             return (/\d/).test(c);
         },
 
-        // Get an identifier
+        // Get an identifier.
         getName: function () {
-            var name;
             if (!this.isAlpha(this.look)) {
                 this.expected('Name');
             }
-            name = this.look.toUpperCase();
+
+            var name = this.look.toUpperCase();
             this.getChar();
             return name;
         },
 
-        // Get a number
+        // Get a number.
         getNum: function () {
-            var num;
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
-            num = this.look;
+
+            var num = this.look;
             this.getChar();
             return num;
         },
 
-        // Output a string with tab
+        // Output a string with tab.
         emit: function (str) {
             io.write(this.TAB, str);
         },
 
-        // Output a string with tab and newline
+        // Output a string with tab and newline.
         emitLn: function (str) {
             this.emit(str);
             io.writeLn();
         },
 
-        // Initialize
+        // Initialize.
         init: function () {
             this.getChar();
         },
 
-        // Main function
+        // Main program.
         main: function () {
             this.init();
         }

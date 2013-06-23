@@ -8,13 +8,6 @@
 define(['./2-expression-parsing'], function (expressionParsing) {
     'use strict';
 
-    var variables,              // 3.2
-        functions,              // 3.3
-        moreOnErrorHandling,    // 3.4
-        assignmentStatements,   // 3.5
-        multiCharacterTokens,   // 3.6
-        whiteSpace;             // 3.7
-
     /**
      * 3.1 Introduction
      * ----------------
@@ -47,15 +40,15 @@ define(['./2-expression-parsing'], function (expressionParsing) {
      * ```
      * where `X` is the variable name.
      */
-    variables = expressionParsing.unaryMinus.extend({
+    var variables = expressionParsing.unaryMinus.extend({
 
-        // Parse and translate a math factor
+        // Parse and translate a math factor.
         factor: function () {
             if (this.look === '(') {
                 this.match('(');
                 this.expression();
                 this.match(')');
-            } else if (this.isAlpha(this.look)) {
+            } else if (this.isAlpha(this.look)) {   // <--
                 this.emitLn('MOVE ' + this.getName() + '(PC), D0');
             } else {
                 this.emitLn('MOVE #' + this.getNum() + ' ,D0');
@@ -76,29 +69,37 @@ define(['./2-expression-parsing'], function (expressionParsing) {
      * <identifier> ::= <variable> | <function>
      * <factor> ::= <number> | (<expression>) | <identifier>
      * ```
+     * Test this version. Does it parse all legal expressions?
+     * Does it correctly flag badly formed ones?
+     *
+     * Before going to the next section, try the input line
+     * ```
+     * 1 + 2 <space> 3 + 4
+     * ```
+     * See how the space was treated as a terminator?
      */
-    functions = variables.extend({
+    var functions = variables.extend({
 
-        // Parse and translate an identifier
+        // Parse and translate an identifier.
         identifier: function () {
             var name = this.getName();
-            if (this.look === '(') {
+            if (this.look === '(') {    // <-- <function>
                 this.match('(');
                 this.match(')');
                 this.emitLn('BSR ' + name);
-            } else {
+            } else {                    // <-- <variable>
                 this.emitLn('MOVE ' + name + '(PC), D0');
             }
         },
 
-        // Parse and translate a math factor
+        // Parse and translate a math factor.
         factor: function () {
             if (this.look === '(') {
                 this.match('(');
                 this.expression();
                 this.match(')');
             } else if (this.isAlpha(this.look)) {
-                this.identifier();
+                this.identifier();  // <--
             } else {
                 this.emitLn('MOVE #' + this.getNum() + ', D0');
             }
@@ -108,11 +109,16 @@ define(['./2-expression-parsing'], function (expressionParsing) {
     /**
      * 3.4 More on error handling
      * --------------------------
-     * Assert that the expression should end with an end-of-line.
+     * *Assert that the expression should end with an end-of-line.*
+     * Try again
+     * ```
+     * 1 + 2 <space> 3 + 4
+     * ```
+     * Verify that it does what it’s supposed to.
      */
-    moreOnErrorHandling = functions.extend({
+    var moreOnErrorHandling = functions.extend({
 
-        // Main function
+        // Main program.
         main: function () {
             this.init();
             this.expression();
@@ -131,10 +137,13 @@ define(['./2-expression-parsing'], function (expressionParsing) {
      * ```
      * <assignment> ::= <ident> = <expression>
      * ```
+     * Note again that the code below exactly parallels the BNF.
+     * And notice further that the error checking was
+     * painless, handled by `getName` and `match`.
      */
-    assignmentStatements = moreOnErrorHandling.extend({
+    var assignmentStatements = moreOnErrorHandling.extend({
 
-        // Parse and translate an assignment statement
+        // Parse and translate an assignment statement.
         assignment: function () {
             var name = this.getName();
             this.match('=');
@@ -143,7 +152,7 @@ define(['./2-expression-parsing'], function (expressionParsing) {
             this.emitLn('MOVE D0, (A0)');
         },
 
-        // Main function
+        // Main program.
         main: function () {
             this.init();
             this.assignment();  // <--
@@ -159,77 +168,84 @@ define(['./2-expression-parsing'], function (expressionParsing) {
      * We can handle the multi-character tokens that we need by
      * very slight and very local modifications to `getName`  and `getNum`.
      */
-    multiCharacterTokens = assignmentStatements.extend({
+    var multiCharacterTokens = assignmentStatements.extend({
 
-        // Recognize and alphanumeric
+        // Recognize and alphanumeric.
         isAlNum: function (c) {
             return this.isAlpha(c) || this.isDigit(c);
         },
 
-        // Get an identifier
+        // Get an identifier.
         getName: function () {
-            var token = ''; // <--
             if (!this.isAlpha(this.look)) {
                 this.expected('Name');
             }
-            while (this.isAlNum(this.look)) { // <--
+
+            var token = '';                     // <--
+            while (this.isAlNum(this.look)) {   // <--
                 token += this.look.toUpperCase(); // <--
                 this.getChar();
             }
-            return token;   // <--
+            return token;                       // <--
         },
 
-        // Get a number
+        // Get a number.
         getNum: function () {
-            var value = ''; // <--
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
-            while (this.isDigit(this.look)) { // <--
-                value += this.look; // <--
+
+            var value = '';                     // <--
+            while (this.isDigit(this.look)) {   // <--
+                value += this.look;             // <--
                 this.getChar();
             }
-            return value;   // <--
+            return value;                       // <--
         }
     });
 
     /**
      * 3.7 White space
      * ----------------
-     * Because we’ve been careful to use `getName`, `getNum`, and `match`
-     * for most of our input processing, it is only those three routines
-     * (plus `Init`) that we need to modify.
+     * The key to easy handling of white space is to come up with a simple
+     * rule for how the parser should treat the input stream,
+     * and to enforce that rule everywhere.
+     *
+     * Fortunately, because we’ve been careful to use `getName`, `getNum`,
+     * and `match` for most of our input processing, it is only those
+     * three routines (plus `Init`) that we need to modify.
      */
-    whiteSpace = multiCharacterTokens.extend({
+    var whiteSpace = multiCharacterTokens.extend({
 
-        // Recognize white space
+        // Recognize white space.
         isWhite: function (c) {
             return c === ' ' || c === this.TAB;
         },
 
-        // Skip over leading white space
+        // Skip over leading white space.
         skipWhite: function () {
             while (this.isWhite(this.look)) {
                 this.getChar();
             }
         },
 
-        // Match a specific input character
+        // Match a specific input character.
         match: function (x) {
-            if (this.look === x) {
-                this.getChar();
-                this.skipWhite();   // <--
-            } else {
+            if (this.look !== x) {
                 this.expected('"' + x + '"');
             }
+
+            this.getChar();
+            this.skipWhite();   // <--
         },
 
-        // Get an identifier
+        // Get an identifier.
         getName: function () {
-            var token = '';
             if (!this.isAlpha(this.look)) {
                 this.expected('Name');
             }
+
+            var token = '';
             while (this.isAlNum(this.look)) {
                 token += this.look.toUpperCase();
                 this.getChar();
@@ -238,12 +254,13 @@ define(['./2-expression-parsing'], function (expressionParsing) {
             return token;
         },
 
-        // Get a number
+        // Get a number.
         getNum: function () {
-            var value = '';
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
+
+            var value = '';
             while (this.isDigit(this.look)) {
                 value += this.look;
                 this.getChar();
@@ -252,7 +269,7 @@ define(['./2-expression-parsing'], function (expressionParsing) {
             return value;
         },
 
-        // Initialize
+        // Initialize.
         init: function () {
             this.getChar();
             this.skipWhite();   // <--
@@ -262,21 +279,27 @@ define(['./2-expression-parsing'], function (expressionParsing) {
 
     return {
 
+        // 3.2
         // <factor> ::= <number> | (<expression>) | <variable>
         variables: variables,
 
+        // 3.3
         // <identifier> ::= <variable> | <function>
         // <factor> ::= <number> | (<expression>) | <identifier>
         functions: functions,
 
+        // 3.4
         // Assert that the expression should end with an end-of-line
         moreOnErrorHandling: moreOnErrorHandling,
 
-        // <identifier> = <expression>
+        // 3.5
+        // <assignment> ::= <ident> = <expression>
         assignmentStatements: assignmentStatements,
 
+        // 3.6
         multiCharacterTokens: multiCharacterTokens,
 
+        // 3.7
         whiteSpace: whiteSpace
     };
 });

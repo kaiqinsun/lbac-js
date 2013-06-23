@@ -1,5 +1,4 @@
 /*global define*/
-/*jshint camelcase: false*/
 
 /**
  * Chapter 7.13 Merging Scanner and Parser
@@ -18,9 +17,17 @@ define(['./object', 'io'], function (object, io) {
     /**
      * 7.13 Merging scanner and parser
      * --------------------------------
+     * Now that we’ve covered all of the theory and general aspects of lexical
+     * scanning that we’ll be needing. We can accomodate multi-character tokens
+     * with minimal change to our previous work.
+     *
+     * To keep things short and simple here we allowing only one control construct
+     * (the `IF`) and no Boolean expressions. That’s enough to demonstrate the
+     * parsing of both keywords and expressions.
+     *
      * ### 7.13.1 Judicious copying ###
      * All the elements of the program to parse this subset, using
-     * single-character tokens, exist already in our previous programs.
+     * **single-character** tokens, exist already in our previous programs.
      *
      * **A short list of the program KISS**
      * ```
@@ -36,6 +43,57 @@ define(['./object', 'io'], function (object, io) {
      *           doIf, assignment, block, doProgram,
      *           init, main
      * ```
+     *
+     * Some improvement of the arithmetic expressions is included:
+     *
+     * **in 2.8** we have
+     * ```
+     * <expression> ::= [<unary op>] <term> [<addop> <term>]*
+     * <term> ::= <factor> |<mulop> <factor>|*
+     * <factor> ::= <number> | (<expression>)
+     * ```
+     * ** in 6.6.9** we have
+     * ```
+     * <expression>   ::= <term> [<addop> <term>]*
+     * <term>         ::= <signed factor> [<mulop> factor]*
+     * <signed factor> ::= [<addop>] <factor>
+     * <factor>       ::= <number> | (<b-expression>) | <identifier>
+     * <identifier>   ::= <variable> | <function>
+     * ```
+     * and the **improved version** here (only first term allows `<signed factor>`)
+     * ```
+     * <expression>      ::= <first term> [<addop> <term>]*
+     * <first term>      ::= <signed factor> <term 1>
+     * <term>            ::= <factor> <term 1>
+     * <term 1>          ::= [<mulop> <factor>]*
+     * <signed factor>   ::= [<addop>] <factor>
+     * <factor>          ::= <number> | (<expression>) | <identifier>
+     * <identifier>      ::= <variable> | <function>
+     * ```
+     *
+     * The structure of program looks like
+     * ```
+     * <program>         ::= <block> END
+     * <block>           ::= [<statement>]*
+     * <statement>       ::= <if> | <assignment>
+     * <if statement>    ::= IF <condition> <block> [ELSE <block>] ENDIF
+     * <assignment stmt> ::= <identifier> = <expression>
+     * ```
+     * where `<condition>` is a dummy version here.
+     *
+     * Before we proceed to adding the scanner, verify that it does indeed
+     * parse things correctly. For example
+     * ```
+     * a = 5
+     * i
+     *     b = a + 1
+     * l
+     *     b = -2 * a
+     * e
+     * e
+     * ```
+     * Don’t forget the "codes": `i` for IF, `l` for ELSE,
+     * and `e` for END or ENDIF.
      */
     judiciousCopying = object.extend({
 
@@ -108,12 +166,12 @@ define(['./object', 'io'], function (object, io) {
 
         // Match a specific input character
         match: function (x) {
-            if (this.look === x) {
-                this.getChar();
-                this.skipWhite();   // <--
-            } else {
+            if (this.look !== x) {
                 this.expected('"' + x + '"');
             }
+
+            this.getChar();
+            this.skipWhite();                   // <--
         },
 
         // Skip a CRLF
@@ -124,20 +182,19 @@ define(['./object', 'io'], function (object, io) {
             if (this.look === this.LF) {
                 this.getChar();
             }
-            this.skipWhite();   // <--
+            this.skipWhite();                   // <--
         },
 
         // Get an identifier
         getName: function () {
-            var name;
-
-            while (this.look === this.LF) {
-                this.fin();
-            }
+            while (this.look === this.LF) {     // <--
+                this.fin();                     // <
+            }                                   // <
             if (!this.isAlpha(this.look)) {
                 this.expected('Name');
             }
-            name = this.look.toUpperCase();
+
+            var name = this.look.toUpperCase();
             this.getChar();
             this.skipWhite();   // <--
             return name;
@@ -145,17 +202,17 @@ define(['./object', 'io'], function (object, io) {
 
         // Get a number
         getNum: function () {
-            var num;
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
-            num = this.look;
+
+            var num = this.look;
             this.getChar();
-            this.skipWhite();   // <--
+            this.skipWhite();                   // <--
             return num;
         },
 
-        // Generate a unique lable
+        // Generate a unique label
         newLabel: function () {
             var label = 'L' + this.lCount;
             this.lCount += 1;
@@ -178,38 +235,10 @@ define(['./object', 'io'], function (object, io) {
             io.writeLn();
         },
 
-        /**
-         * Improving arithmetic expressions:
-         * ----------------------------------
-         * **in 2.8**
-         * ```
-         * <expression> ::= [<unary op>] <term> [<addop> <term>]*
-         * <term> ::= <factor> |<mulop> <factor>|*
-         * <factor> ::= <number> | (<expression>)
-         * ```
-         * ** in 6.6.9**
-         * ```
-         * <expression>   ::= <term> [<addop> <term>]*
-         * <term>         ::= <signed factor> [<mulop> factor]*
-         * <signed factor> ::= [<addop>] <factor>
-         * <factor>       ::= <number> | (<b-expression>) | <identifier>
-         * <identifier>   ::= <variable> | <function>
-         * ```
-         * this version (only first term allows <signed factor>)
-         * ```
-         * <expression> ::= <first term> [<addop> <term>]*
-         * <first term> ::= <signed factor> <term 1>
-         * <term> ::= <factor> <term 1>
-         * <term 1> ::= [<mulop> <factor>]*
-         * <signed factor> ::= [<addop>] <factor>
-         * <factor>       ::= <number> | (<expression>) | <identifier>
-         * <identifier>   ::= <variable> | <function>
-         * ```
-         */
-
         // Parse and translate an identifier
         identifier: function () {
             var name = this.getName();
+
             if (this.look === '(') {
                 this.match('(');
                 this.match(')');
@@ -286,34 +315,34 @@ define(['./object', 'io'], function (object, io) {
 
         // Parse and translate a math term
         term: function () {
-            this.factor();    // <--
-            this.term1();
+            this.factor();                  // <--
+            this.term1();                   // <
         },
 
         // Parse and translate a math term with possible leading sing
         firstTerm: function () {
-            this.signedFactor();    // <--
-            this.term1();
+            this.signedFactor();            // <--
+            this.term1();                   // <
         },
 
         // Recognize and translate an add
         add: function () {
             this.match('+');
             this.term();
-            this.emitLn('ADD (SP)+, D0');    // <-- pop from stack
+            this.emitLn('ADD (SP)+, D0');
         },
 
         // Recognize and translate a subtract
         subtract: function () {
             this.match('-');
             this.term();
-            this.emitLn('SUB (SP)+, D0');    // <-- pop from stack
+            this.emitLn('SUB (SP)+, D0');
             this.emitLn('NEG D0');
         },
 
         // parse and translate an expression
         expression: function () {
-            this.firstTerm();   // <--
+            this.firstTerm();               // <--
             while (this.look === '+' || this.look === '-') {
                 this.emitLn('MOVE D0, -(SP)');
                 switch (this.look) {
@@ -327,16 +356,6 @@ define(['./object', 'io'], function (object, io) {
             }
         },
 
-        /**
-         * ```
-         * <program> ::= <block> END
-         * <block> ::= [<statement>]*
-         * <statement> ::= <if> | <assignment>
-         * <if stmt> ::= IF <condition> <block> [ELSE <block>] ENDIF
-         * <assignment> ::= <identifier> = <expression>
-         * ```
-         */
-
         // Parse and translate a boolean condition
         // This version is a dummy
         condition: function () {
@@ -345,29 +364,30 @@ define(['./object', 'io'], function (object, io) {
 
         // Recognize and translate an IF constructor
         doIf: function () {
-            var label_1, label_2;
+            var label1, label2;
+
             this.match('i');
             this.condition();
-            label_1 = this.newLabel();
-            label_2 = label_1;
-            this.emitLn('BEQ ' + label_1);
+            label1 = label2 = this.newLabel();
+            this.emitLn('BEQ ' + label1);
             this.block();
 
             if (this.look === 'l') {
                 this.match('l');
-                label_2 = this.newLabel();
-                this.emitLn('BRA ' + label_2);
-                this.postLabel(label_1);
+                label2 = this.newLabel();
+                this.emitLn('BRA ' + label2);
+                this.postLabel(label1);
                 this.block();
             }
 
             this.match('e');
-            this.postLabel(label_2);
+            this.postLabel(label2);
         },
 
         // Parse and translate an assignment statement
         assignment: function () {
             var name = this.getName();
+
             this.match('=');
             this.expression();
             this.emitLn('LEA ' + name + '(PC), A0');
@@ -407,7 +427,7 @@ define(['./object', 'io'], function (object, io) {
             this.getChar();
         },
 
-        // Main function
+        // Main program
         main: function () {
             this.init();
             this.doProgram();
@@ -416,6 +436,22 @@ define(['./object', 'io'], function (object, io) {
 
     /**
      * ### 7.13.2 Merging scanner and parser ###
+     * Compare this program with its single-character counterpart.
+     *
+     * Now we have a compiler that can deal with code such as
+     * ```
+     * foo = 50
+     * if
+     *     bar = foo + 16
+     * else
+     *     bar = -25 * foo
+     * endif
+     * foo = foo + 10
+     * end
+     * ```
+     * We are very close to having all the elements that we need to build a real,
+     * functional compiler. There are still a few things missing, notably
+     * procedure calls and type definitions.
      */
     mergingScannerAndParser = judiciousCopying.extend({
 
@@ -435,9 +471,10 @@ define(['./object', 'io'], function (object, io) {
             if (!this.isAlpha(this.look)) {
                 this.expected('Name');
             }
+
             this.value = '';
-            while (this.isAlNum(this.look)) {
-                this.value += this.look.toUpperCase();
+            while (this.isAlNum(this.look)) {           // <--
+                this.value += this.look.toUpperCase();  // <
                 this.getChar();
             }
             this.skipWhite();
@@ -448,19 +485,21 @@ define(['./object', 'io'], function (object, io) {
             if (!this.isDigit(this.look)) {
                 this.expected('Integer');
             }
+
             this.value = '';
-            while (this.isDigit(this.look)) {
-                this.value += this.look;
+            while (this.isDigit(this.look)) {           // <--
+                this.value += this.look;                // <
                 this.getChar();
             }
-            this.token = '#';
+            this.token = '#';                           // <
             this.skipWhite();
         },
 
         // Get an identifier and scan it for keywords
         scan: function () {
             this.getName();
-            this.token = this.keywordCode.charAt(this.keywordType[this.value]);
+            var index = this.keywordType[this.value] || 0;
+            this.token = this.keywordCode.charAt(index);
         },
 
         // Match a specific input string
@@ -472,11 +511,11 @@ define(['./object', 'io'], function (object, io) {
 
         // Parse and translate an identifier
         identifier: function () {
-            this.getName();     // <--
+            this.getName();                             // <--
             if (this.look === '(') {
                 this.match('(');
                 this.match(')');
-                this.emitLn('BSR ' + this.value);   // <--
+                this.emitLn('BSR ' + this.value);       // <--
             } else {
                 this.emitLn('MOVE ' + this.value + '(PC), D0');   // <--
             }
@@ -493,8 +532,8 @@ define(['./object', 'io'], function (object, io) {
 
             if (signed) {
                 if (this.isDigit(this.look)) {
-                    this.getNum();  // <--
-                    this.emitLn('MOVE #-' + this.value + ', D0');   // <--
+                    this.getNum();                                // <--
+                    this.emitLn('MOVE #-' + this.value + ', D0'); // <
                 } else {
                     this.factor();
                     this.emitLn('NEG D0');
@@ -520,28 +559,27 @@ define(['./object', 'io'], function (object, io) {
 
         // Recognize and translate an IF constructor
         doIf: function () {
-            var label_1, label_2;
+            var label1, label2;
 
             this.condition();
-            label_1 = this.newLabel();
-            label_2 = label_1;
-            this.emitLn('BEQ ' + label_1);
+            label1 = label2 = this.newLabel();
+            this.emitLn('BEQ ' + label1);
             this.block();
 
-            if (this.token === 'l') {   // <--
-                label_2 = this.newLabel();
-                this.emitLn('BRA ' + label_2);
-                this.postLabel(label_1);
+            if (this.token === 'l') {                   // <--
+                label2 = this.newLabel();
+                this.emitLn('BRA ' + label2);
+                this.postLabel(label1);
                 this.block();
             }
 
-            this.postLabel(label_2);
-            this.matchString('ENDIF');  // <--
+            this.postLabel(label2);
+            this.matchString('ENDIF');                  // <--
         },
 
         // Parse and translate an assignment statement
         assignment: function () {
-            var name = this.value;  // <--
+            var name = this.value;                      // <--
             this.match('=');
             this.expression();
             this.emitLn('LEA ' + name + '(PC), A0');    // <--
@@ -550,23 +588,23 @@ define(['./object', 'io'], function (object, io) {
 
         // Recognize and translate a statement block
         block: function () {
-            this.scan();    // <--
+            this.scan();                                // <--
             while (this.token !== 'e' && this.token !== 'l') {  // <--
-                switch (this.token) {   // <--
+                switch (this.token) {                   // <--
                 case 'i':
                     this.doIf();
                     break;
                 default:
                     this.assignment();
                 }
-                this.scan();    // <--
+                this.scan();                            // <--
             }
         },
 
         // Parse and translate a program
         doProgram: function () {
             this.block();
-            this.matchString('END');    // <--
+            this.matchString('END');                    // <--
             this.emitLn('END');
         }
     });

@@ -83,7 +83,7 @@ define(['./11.6-tiny-1.1'], function (tiny11) {
             }
         },
 
-        // Main function
+        // Main program
         main: function () {
             this.init();
             this.matchString('PROGRAM');

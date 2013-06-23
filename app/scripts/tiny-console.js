@@ -421,9 +421,17 @@
                             },
 
                             readLn: function () {
-                                this.offset = 1;
-                                return this.content.substring(1,
-                                        this.content.length - 1);
+                                var result = '',
+                                    ch;
+
+                                while (true) {
+                                    ch = consoleData.stream.read();
+                                    if (ch === LF) {
+                                        break;
+                                    }
+                                    result += ch;
+                                }
+                                return result;
                             }
                         },
 
@@ -512,6 +520,7 @@
         read: function () {
             var data = this.data('tinyConsole'),
                 result;
+
             try {
                 result = data.stream.read();
             } catch (err) {
@@ -526,7 +535,12 @@
         },
 
         write: function () {
-            var str = Array.prototype.slice.call(arguments).join('');
+            var args = Array.prototype.slice.call(arguments),
+                str = '';
+
+            $.each(args, function (i, arg) {
+                str += arg === undefined ? 'undefined' : arg;
+            });
             return this.each(function () {
                 var data = $(this).data('tinyConsole');
                 data.$output.append(escape(str));

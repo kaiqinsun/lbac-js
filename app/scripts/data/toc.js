@@ -4,6 +4,8 @@ define(['lodash'], function (_) {
     'use strict';
 
     // Table of Content
+    // Note that for each item in sections, default
+    // console = true, editor = false.
     var toc = [
         {
             ch: 0,
@@ -130,8 +132,12 @@ define(['lodash'], function (_) {
                     title: 'Single digits'
                 },
                 {
+                    sec: '4.2.2',
+                    title: 'Addition and subtraction'
+                },
+                {
                     sec: '4.2.3',
-                    title: 'General expressions'
+                    title: 'Multiplication and division'
                 },
                 {
                     sec: '4.2.4',
@@ -156,11 +162,13 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '4.3.3',
-                    title: 'Multiple statements'
+                    title: 'Multiple statements',
+                    editor: true
                 },
                 {
                     sec: '4.3.4',
-                    title: 'I/O routines'
+                    title: 'I/O routines',
+                    editor: true
                 }
             ]
         },
@@ -188,7 +196,8 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '5.3',
-                    title: 'Some groundwork'
+                    title: 'Some groundwork',
+                    console: false
                 },
                 {
                     sec: '5.4',
@@ -221,6 +230,10 @@ define(['lodash'], function (_) {
                 {
                     sec: '5.10',
                     title: 'The BREAK statement'
+                },
+                {
+                    sec: '5.11',
+                    title: 'Conclusion'
                 }
             ]
         },
@@ -255,15 +268,20 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '6.6',
-                    title: 'The parser'
+                    title: 'The parser',
+                    disabled: true
+                },
+                {
+                    sec: '6.6.1',
+                    title: 'Boolean literal 1'
                 },
                 {
                     sec: '6.6.2',
-                    title: 'Boolean literal'
+                    title: 'Boolean literal 2'
                 },
                 {
                     sec: '6.6.3',
-                    title: 'General expressions'
+                    title: 'OR operation'
                 },
                 {
                     sec: '6.6.4',
@@ -295,7 +313,12 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '6.8',
-                    title: 'Adding assignments'
+                    title: 'Adding assignments',
+                    editor: true
+                },
+                {
+                    sec: '6.9',
+                    title: 'Conclusion'
                 }
             ]
         },
@@ -333,15 +356,18 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '7.7',
-                    title: 'Newlines'
+                    title: 'Newlines',
+                    editor: true
                 },
                 {
                     sec: '7.8',
-                    title: 'Operators'
+                    title: 'Operators',
+                    editor: true
                 },
                 {
                     sec: '7.9',
-                    title: 'Lists, commas and command lines'
+                    title: 'Lists, commas and command lines',
+                    editor: true
                 },
                 {
                     sec: '7.10',
@@ -349,20 +375,23 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '7.10.2',
-                    title: 'Returning codes'
+                    title: 'Returning codes',
+                    editor: true
                 },
                 {
                     sec: '7.10.3',
-                    title: 'Cleanup with global'
+                    title: 'Cleanup with global',
+                    editor: true
                 },
                 {
                     sec: '7.11',
-                    title: 'Returning a character'
+                    title: 'Returning a character',
+                    editor: true
                 },
                 {
                     sec: '7.12',
                     title: 'Distributed vs centralized scanners',
-                    disabled: true
+                    console: false
                 },
                 {
                     sec: '7.13',
@@ -371,11 +400,13 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '7.13.1',
-                    title: 'Judicious copying'
+                    title: 'Judicious copying',
+                    editor: true
                 },
                 {
                     sec: '7.13.2',
-                    title: 'Merging scanner and parser'
+                    title: 'Merging scanner and parser',
+                    editor: true
                 },
                 {
                     sec: '7.14',
@@ -537,7 +568,7 @@ define(['lodash'], function (_) {
                 {
                     sec: '10.14',
                     title: 'Conclusion',
-                    disabled: true
+                    console: false
                 }
             ]
         },

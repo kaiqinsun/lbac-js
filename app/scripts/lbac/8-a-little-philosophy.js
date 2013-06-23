@@ -4,10 +4,22 @@
  *
  * 8.1 Introduction
  * -----------------
- * Some general thoughts concerning the usefulness of what we’ve been doing.
+ * About where we’re going with this series and some general thoughts
+ * concerning the usefulness of what we’ve been doing.
  *
  * 8.2 The road home
  * -----------------
+ * We have covered the parsing and translation of
+ *
+ * - arithmetic expressions
+ * - Boolean expressions
+ * - combinations connected by relational operators
+ * - control constructs.
+ *
+ * We’ve leaned heavily on the use of **top-down, recursive descent**
+ * parsing, **BNF** definitions of the syntax, and direct generation of
+ * assembly-language code.
+ *
  * To round out the series, we still have a few items to cover.
  * These include:
  *
@@ -27,20 +39,18 @@
  *   but it will have enough power to let you write and run real programs
  *   that do something worthwhile.
  *
- * - **KISS** The language I’m building for my own use.
- *   KISS is intended to be a systems programming language.
+ * - **KISS** intended to be a systems programming language.
  *   It won’t have strong typing or fancy data structures,
  *   but it will support most of the things to do with
  *   a higher order language (HOL).
  *
  * 8.3 Why is it so simple?
  * ------------------------
- * Just to make sure you get the message here, let me state it flat out:
- * > USING THE TECHNIQUES WE’VE USED HERE, IT IS POSSIBLE TO BUILD
- * > A PRODUCTION QUALITY, WORKING COMPILER WITHOUT ADDING A LOT OF
- * > COMPLEXITY TO WHAT WE’VE ALREADY DONE.
+ * > Using the techniques we’ve used here, it is possible to build a
+ * > production quality, working compiler without adding a lot of
+ * > complexity to what we’ve already done.
  *
- * The areas that I think have led to complexity in the past:
+ * The areas that may have led to complexity in the past:
  *
  * - Limited RAM forcing multiple passes
  * - Batch processing
@@ -58,6 +68,4 @@
  * Then we’ll press on into the new subjects listed at section 8.2.
  */
 
-//{
-//    'No code in this chapter'
-//}
+// { No code in this chapter }
