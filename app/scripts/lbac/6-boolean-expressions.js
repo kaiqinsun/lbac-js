@@ -341,7 +341,7 @@ define([
      * <b-factor> ::= <b-literal>
      * ```
      * The `NOT` operator is encoded with `!`.
-     * 
+     *
      * Try some combinations as well, such as `!t`, `t&!f`, etc.
      */
     var notOperation = andOperation.extend({

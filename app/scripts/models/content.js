@@ -43,7 +43,7 @@ define([
         var lines = _.rest(codeLines, docBegin);
 
         return docBegin + _.findIndex(lines, function (line) {
-            return _.contains(line, '*/');
+            return _.contains(line, ' */');
         });
     });
 

@@ -14,7 +14,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
      * Most people regard the top-down design approach as being better than
      * the bottom-up one. The incremental approach that we’ve been using in
      * all these tutorials is inherently bottom-up.
-     * 
+     *
      * We’ll consider languages such as C and Pascal, and see how complete
      * compilers can be built starting from the top.
      */

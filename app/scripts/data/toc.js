@@ -525,7 +525,8 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '10.7.2',
-                    title: 'Code generation routines'
+                    title: 'Code generation routines',
+                    console: false
                 },
                 {
                     sec: '10.7.3',
@@ -538,7 +539,8 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '10.8.1',
-                    title: 'More code generation routines'
+                    title: 'More code generation routines',
+                    console: false
                 },
                 {
                     sec: '10.8.2',
@@ -550,7 +552,8 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '10.10',
-                    title: 'Lexical scanning'
+                    title: 'Lexical scanning',
+                    editor: true
                 },
                 {
                     sec: '10.11',
@@ -559,11 +562,13 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '10.12',
-                    title: 'More relops'
+                    title: 'More relops',
+                    editor: true
                 },
                 {
                     sec: '10.13',
-                    title: 'Input / Output'
+                    title: 'Input / Output',
+                    editor: true
                 },
                 {
                     sec: '10.14',
@@ -593,11 +598,13 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '11.4',
-                    title: 'The solution'
+                    title: 'The solution',
+                    editor: true
                 },
                 {
                     sec: '11.4.2',
-                    title: 'Single-character operators'
+                    title: 'Single-character operators',
+                    console: false
                 },
                 {
                     sec: '11.5',
@@ -606,7 +613,8 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '11.6',
-                    title: 'Conclusion'
+                    title: 'Conclusion',
+                    editor: true
                 }
             ]
         },
@@ -631,23 +639,63 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '12.4',
-                    title: 'Dealing with semicolons'
+                    title: 'Dealing with semicolons',
+                    disabled: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '12.4.1',
+                    title: 'The C version',
+                    editor: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '12.4.2',
+                    title: 'The Pascal version',
+                    editor: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '12.5',
+                    title: 'A compromise',
+                    editor: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '12.6',
+                    title: 'Comments',
+                    disabled: true
+                },
+                {
+                    sec: '12.7',
+                    title: 'Single character delimiters',
+                    disabled: true
+                },
+                {
+                    sec: '12.7.1',
+                    title: 'Strip the comments out',
+                    editor: true
+                },
+                {
+                    sec: '12.7.2',
+                    title: 'The conventional treatment',
+                    editor: true
+                },
+                {
+                    sec: '12.7.3',
+                    title: 'Nested comments',
+                    editor: true
+                },
+                {
+                    sec: '12.8',
+                    title: 'Multi character delimiters',
+                    editor: true
+                },
+                {
+                    sec: '12.9',
+                    title: 'One sided comments',
+                    editor: true
+                },
+                {
+                    sec: '12.10',
+                    title: 'Conclusion',
+                    console: false
                 },
             ]
         },
@@ -656,24 +704,27 @@ define(['lodash'], function (_) {
             title: 'Procedures',
             sections: [
                 {
-                    sec: '',
-                    title: ''
+                    sec: '13.1',
+                    title: 'Introduction',
+                    disabled: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '13.2',
+                    title: 'One last digression',
+                    disabled: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '13.3',
+                    title: 'The basics',
+                    disabled: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '13.4',
+                    title: 'A basis for experimentation'
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '13.5',
+                    title: 'Declarating a procedure'
                 },
                 {
                     sec: '',
