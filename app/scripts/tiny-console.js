@@ -164,13 +164,18 @@
 
     function M68kHighlighter($element) {
         var keywordPatterns = [
-                /\bEND\b/, /\bMOVE\b/, /\bADD\w?\b/, /\bSUB\w?\b/, /\bNEG\b/,
-                /\bEXG\b/,
-                /\bMUL\w?\b/, /\bDIV\w?\b/, /\bBSR\b/, /\bLEA\b/, /\bCMP\b/,
-                /\bCLR\b/, /\b\w?OR\b/, /\bAND\b/,
+                /\bEND\b/,
+                /\bMOVE(\.[BWL])?\b/, /\bADD(\.[BWL])?\w?\b/,
+                /\bSUB(\.[BWL])?\w?\b/, /\bNEG(\.[BWL])?\b/,
+                /\bEXG\b/, /\bEXT\.L\b/,
+                /\bMUL\w?\b/, /\bDIV\w?\b/, /\bLEA\b/, /\bCMP\b/,
+                /\bCLR(\.L)?\b/, /\b\w?OR\b/, /\bAND(\.W)?\b/,
                 /\bSEQ\b/, /\bSNE\b/, /\bSGE\b/, /\bSLE\b/, /\bTST\b/
             ],
-            branchPatterns = [/\bBEQ\b/, /\b\w?BRA\b/, /\bBGT\b/],
+            branchPatterns = [
+                /\bBEQ\b/, /\b\w?BRA\b/, /\bBGT\b/,
+                /\bRTS\b/, /\bBSR\b/
+            ],
             keywordClass = 'm68k-keyword',
             branchClass = 'm68k-branch',
             labelRule = {

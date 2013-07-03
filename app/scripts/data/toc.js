@@ -412,7 +412,7 @@ define(['lodash'], function (_) {
                     sec: '7.14',
                     title: 'Conclusion',
                     disabled: true
-                },
+                }
             ]
         },
         {
@@ -696,7 +696,7 @@ define(['lodash'], function (_) {
                     sec: '12.10',
                     title: 'Conclusion',
                     console: false
-                },
+                }
             ]
         },
         {
@@ -720,24 +720,64 @@ define(['lodash'], function (_) {
                 },
                 {
                     sec: '13.4',
-                    title: 'A basis for experimentation'
+                    title: 'A basis for experimentation',
+                    editor: true
                 },
                 {
                     sec: '13.5',
-                    title: 'Declarating a procedure'
+                    title: 'Declarating a procedure',
+                    editor: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '13.5.2',
+                    title: 'The main program',
+                    editor: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '13.6',
+                    title: 'Calling the procedure',
+                    editor: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '13.7',
+                    title: 'Passing parameters',
+                    editor: true
                 },
+                {
+                    sec: '13.8',
+                    title: 'The semantics of parameters',
+                    disabled: true
+                },
+                {
+                    sec: '13.9',
+                    title: 'Pass by value',
+                    editor: true
+                },
+                {
+                    sec: '13.10',
+                    title: 'What\'s wrong?',
+                    editor: true
+                },
+                {
+                    sec: '13.10.2',
+                    title: 'The next problem',
+                    editor: true
+                },
+                {
+                    sec: '13.11',
+                    title: 'Call by reference',
+                    editor: true
+                },
+                {
+                    sec: '13.12',
+                    title: 'Local variables',
+                    editor: true
+                },
+                {
+                    sec: '13.13',
+                    title: 'Conclusion',
+                    console: false
+                }
             ]
         },
         {
@@ -745,37 +785,93 @@ define(['lodash'], function (_) {
             title: 'Types',
             sections: [
                 {
-                    sec: '',
-                    title: ''
+                    sec: '14.1',
+                    title: 'Introduction',
+                    disabled: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '14.2',
+                    title: 'What\'s coming next?',
+                    disabled: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '14.3',
+                    title: 'The symbol table'
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '14.4',
+                    title: 'Adding entries'
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '14.5',
+                    title: 'Allocating storage',
+                    editor: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '14.6',
+                    title: 'Declaring types',
+                    editor: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '14.7',
+                    title: 'Assignments',
+                    editor: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '14.8',
+                    title: 'The coward\'s way out',
+                    editor: true
                 },
+                {
+                    sec: '14.9',
+                    title: 'A more reasonable solution',
+                    editor: true
+                },
+                {
+                    sec: '14.10',
+                    title: 'Literal arguments',
+                    editor: true
+                },
+                {
+                    sec: '14.11',
+                    title: 'Additive expressions',
+                    editor: true
+                },
+                {
+                    sec: '14.12',
+                    title: 'Why so many procedures?',
+                    disabled: true
+                },
+                {
+                    sec: '14.13',
+                    title: 'Multiplicative expressions',
+                    editor: true
+                },
+                {
+                    sec: '14.14',
+                    title: 'Multiplication',
+                    editor: true
+                },
+                {
+                    sec: '14.15',
+                    title: 'Division',
+                    editor: true
+                },
+                {
+                    sec: '14.16',
+                    title: 'Beginning to wind down',
+                    disabled: true
+                },
+                {
+                    sec: '14.17',
+                    title: 'To coerce or not coerce',
+                    disabled: true
+                },
+                {
+                    sec: '14.18',
+                    title: 'Conclusion',
+                    console: false
+                }
             ]
         },
         {
@@ -783,37 +879,53 @@ define(['lodash'], function (_) {
             title: 'Back to The Future',
             sections: [
                 {
-                    sec: '',
-                    title: ''
+                    sec: '15.1',
+                    title: 'Introduction',
+                    disabled: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '15.2',
+                    title: 'New starts, old directions',
+                    disabled: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '15.3',
+                    title: 'Starting over?',
+                    disabled: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '15.4',
+                    title: 'The input unit'
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '15.5',
+                    title: 'The output unit'
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '15.6',
+                    title: 'The error unit'
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '15.7',
+                    title: 'Scanning and parsing'
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '15.8',
+                    title: 'The scanner unit'
                 },
+                {
+                    sec: '15.9',
+                    title: 'Decisions, decisions'
+                },
+                {
+                    sec: '15.10',
+                    title: 'Parsing'
+                },
+                {
+                    sec: '15.11',
+                    title: 'References',
+                    console: false
+                }
             ]
         },
         {
@@ -821,32 +933,34 @@ define(['lodash'], function (_) {
             title: 'Unit Construction',
             sections: [
                 {
-                    sec: '',
-                    title: ''
+                    sec: '16.1',
+                    title: 'Introduction',
+                    disabled: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '16.2',
+                    title: 'Just like classical',
+                    disabled: true
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '16.3',
+                    title: 'Fleshing out the parser'
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '16.4',
+                    title: 'Terms and expressions'
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '16.5',
+                    title: 'Assignments'
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '16.6',
+                    title: 'Booleans'
                 },
                 {
-                    sec: '',
-                    title: ''
+                    sec: '16.7',
+                    title: 'Boolean "AND"'
                 },
                 {
                     sec: '',

@@ -100,7 +100,15 @@ define([
 
         // Render the code
         renderCode: function (content) {
-            this.$code.html(content.get('code'));
+            var code = content.get('code');
+
+            // A hack to hide code-area if length of code is short (no code).
+            if (code.length < 50) {
+                this.$codeArea.hide();
+            } else {
+                this.$codeArea.show();
+                this.$code.html(content.get('code'));
+            }
         },
 
         // Toggle the editor

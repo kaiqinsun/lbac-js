@@ -8,8 +8,6 @@
 define(['./1.2-cradle', 'io'], function (cradle, io) {
     'use strict';
 
-    var enumerate = cradle.enumerate;
-
     /**
      * 7.1 Introduction
      * -----------------
@@ -359,7 +357,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
         // Definition of keywords and token types.
         // { IF: 0, ELSE: 1, ... }
-        keywordType: enumerate(['IF', 'ELSE', 'ENDIF', 'END']),
+        keywordType: { IF: 0, ELSE: 1, ENDIF: 2, END: 3 },
 
         // Main program.
         main: function () {
@@ -386,8 +384,15 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
     var returningCodes = gettingFancy.extend({
 
         // Type declarations.
-        symType: enumerate(['ifSym', 'elseSym', 'endifSym', 'endSym',
-                'ident', 'number', 'operator']),
+        symType: {
+            ifSym: 0,
+            elseSym: 1,
+            endifSym: 2,
+            endSym: 3,
+            ident: 4,
+            number: 5,
+            operator: 6
+        },
 
         // variable declarations.
         token: 0,   // current token (symType)
@@ -536,7 +541,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
 
         // Instead of symType, use keywordCode.
         keywordCode: 'xilee',
-        keywordType: enumerate(['IF', 'ELSE', 'ENDIF', 'END'], 1),  // <--
+        keywordType: { IF: 1, ELSE: 2, ENDIF: 3, END: 4 },  // <--
 
         // Get an identifier.
         getName: function () {
@@ -552,7 +557,7 @@ define(['./1.2-cradle', 'io'], function (cradle, io) {
                 this.getChar();
             }
             index = this.keywordType[this.value] || 0;      // <--
-            this.token = this.keywordCode.charAt(index);    // <--
+            this.token = this.keywordCode.charAt(index);    // <
         },
 
         // Get a number.

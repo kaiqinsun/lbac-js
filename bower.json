@@ -1,6 +1,6 @@
 {
   "name": "lbac-js",
-  "version": "0.2.12",
+  "version": "0.2.16",
   "dependencies": {
     "sass-bootstrap": "git://github.com/jlong/sass-twitter-bootstrap.git#2.3.1",
     "requirejs": "git://github.com/jrburke/requirejs#2.1.5",

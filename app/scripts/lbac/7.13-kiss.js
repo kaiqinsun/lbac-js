@@ -9,11 +9,6 @@
 define(['./object', 'io'], function (object, io) {
     'use strict';
 
-    var enumerate = object.enumerate,
-        judiciousCopying,           // 7.13.1
-        mergingScannerAndParser;    // 7.13.2
-
-
     /**
      * 7.13 Merging scanner and parser
      * --------------------------------
@@ -95,7 +90,7 @@ define(['./object', 'io'], function (object, io) {
      * Don’t forget the "codes": `i` for IF, `l` for ELSE,
      * and `e` for END or ENDIF.
      */
-    judiciousCopying = object.extend({
+    var judiciousCopying = object.extend({
 
         // Constant declarations
         TAB: '\t',
@@ -453,7 +448,7 @@ define(['./object', 'io'], function (object, io) {
      * functional compiler. There are still a few things missing, notably
      * procedure calls and type definitions.
      */
-    mergingScannerAndParser = judiciousCopying.extend({
+    var mergingScannerAndParser = judiciousCopying.extend({
 
         // Variable declarations
         token: '',      // encoded token
@@ -461,7 +456,7 @@ define(['./object', 'io'], function (object, io) {
 
         //
         keywordCode: 'xilee',
-        keywordType: enumerate(['IF', 'ELSE', 'ENDIF', 'END'], 1),
+        keywordType: { IF: 1, ELSE: 2, ENDIF: 3, END: 4 },
 
         // Get an identifier
         getName: function () {
@@ -611,7 +606,11 @@ define(['./object', 'io'], function (object, io) {
 
 
     return {
+
+        // 7.13.1
         judiciousCopying: judiciousCopying,
+
+        // 7.13.2
         mergingScannerAndParser: mergingScannerAndParser
     };
 });

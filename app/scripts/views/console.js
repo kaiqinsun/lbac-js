@@ -18,7 +18,7 @@ define([
         title = title.replace(/Chapter\s*\d*\s*/, '');
         title = title.replace(/\d+\.\d+\.?\d?\s*/, '');
         title = title.replace(/-/g, ' ');
-        title = title.replace(/[,\/"]/g, '');
+        title = title.replace(/[,\/\?"']/g, '');
 
         // Convert title words to camelcase identifier
         return _.reduce(title.split(' '), function (ident, word, i) {

@@ -12,7 +12,11 @@ define([
     './10-introducing-tiny',
     './11-lexical-scan-revisited',
     './11.6-tiny-1.1',
-    './12-miscellany'
+    './12-miscellany',
+    './13-procedures',
+    './14-types',
+    './15-back-to-the-future',
+    './16-unit-construction'
 ], function (
     expressionParsing,      // 2
     moreExpressions,        // 3
@@ -25,7 +29,11 @@ define([
     introducingTiny,        // 10
     lexicalScanRevisited,   // 11
     tiny11,                 // 11.6
-    miscellany              // 12
+    miscellany,             // 12
+    procedures,             // 13
+    types,                  // 14
+    backToTheFuture,        // 15
+    unitConstruction
 ) {
     'use strict';
 
@@ -41,7 +49,10 @@ define([
         introducingTiny: introducingTiny,
         lexicalScanRevisited: lexicalScanRevisited,
         tiny11: tiny11,
-        miscellany: miscellany
+        miscellany: miscellany,
+        procedures: procedures,
+        types: types,
+        backToTheFuture: backToTheFuture,
+        unitConstruction: unitConstruction
     };
-
 });

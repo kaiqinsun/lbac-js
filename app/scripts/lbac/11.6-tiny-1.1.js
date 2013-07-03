@@ -16,16 +16,17 @@
  * 2. Delete keywords *PROGRAM* and *BEGIN* from the keyword list.
  * 3. Replace the fancy handling of unary minus with the dumbest one.
  * 4. Added some error-checking routines such as `checkTable` and `checkDup`,
- * and replaced in-line code by calls to them.
+ *    and replaced in-line code by calls to them.
  * 5. Take the error checking out of code generation routines like `store`,
- * and put it in the parser where it belongs. See `assignment`, for example.
+ *    and put it in the parser where it belongs. See `assignment`, for
+ *    example.
  * 6. Skipped.
  * 7. Procedure `addEntry` now has two arguments, which helps to make things
- * a bit more modular.
+ *    a bit more modular.
  * 8. Clean up the code for the relational operators by the addition of
- * the new procedures `compareExpression` and `nextExpression`.
+ *    the new procedures `compareExpression` and `nextExpression`.
  * 9. Fix an error in the Read routine ... the earlier value did not check
- * for a valid variable name.
+ *    for a valid variable name.
  */
 
 
@@ -111,7 +112,7 @@ define(['./object', 'io'], function (object, io) {
         },
 
         // Report an undefined identifier.
-        undef: function (name) {
+        undefined: function (name) {
             this.abort('Undefined Identifier ' + name);
         },
 
@@ -184,7 +185,7 @@ define(['./object', 'io'], function (object, io) {
         // Report an error if it's not.
         checkTable: function (name) {
             if (!this.inTable(name)) {
-                this.undef(name);
+                this.undefined(name);
             }
         },
 
@@ -317,7 +318,7 @@ define(['./object', 'io'], function (object, io) {
         // Load a variable to primary register.
         loadVar: function (name) {
             if (!this.inTable(name)) {
-                this.undef(name);
+                this.undefined(name);
             }
             this.emitLn('MOVE ' + name + '(PC), D0');
         },
