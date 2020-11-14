@@ -15,7 +15,7 @@ Application page
 This project is a web application. A console is provided for user interactions.
 [Check out the app][webapp] and learn by doing.
 
-[webapp]: http://malcomwu.github.com/lbac-js/
+[webapp]: http://malcomwu.github.io/lbac-js/
 
 Build
 --------
